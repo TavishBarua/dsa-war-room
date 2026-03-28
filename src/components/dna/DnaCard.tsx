@@ -12,9 +12,15 @@ interface Props {
   index: number;
   isActive: boolean;
   onToggle: () => void;
+  scheduledDate?: string;
 }
 
-export default function DnaCard({ pattern, index, isActive, onToggle }: Props) {
+function formatShort(iso: string): string {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+export default function DnaCard({ pattern, index, isActive, onToggle, scheduledDate }: Props) {
   const { memorized, toggleMemorized } = useMemorizedContext();
   const isMemorized = !!memorized[String(index)];
 
@@ -27,7 +33,10 @@ export default function DnaCard({ pattern, index, isActive, onToggle }: Props) {
         <div className="dna-accent-bar" />
         <div className="dna-icon">{pattern.icon}</div>
         <div className="dna-header-info">
-          <div className="dna-card-name">{pattern.name}</div>
+          <div className="dna-card-name">
+            {pattern.name}
+            {scheduledDate && <span className="date-badge dna-date">{formatShort(scheduledDate)}</span>}
+          </div>
           <div className="dna-card-tagline">{pattern.tagline}</div>
         </div>
         <button

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { getTodayStr } from '../../hooks/useSchedule';
 
 interface Props {
   name: string;
@@ -9,11 +10,25 @@ interface Props {
   url: string;
   diagram?: string;
   description?: { desc: string; examples: string };
+  scheduledDate?: string;
 }
 
-export default function ProblemItem({ name, diff, isDone, onToggle, accentColor, url, diagram, description }: Props) {
+function formatShort(iso: string): string {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+export default function ProblemItem({ name, diff, isDone, onToggle, accentColor, url, diagram, description, scheduledDate }: Props) {
   const [expanded, setExpanded] = useState(false);
   const hasExtra = !!(diagram || description);
+
+  const dateBadgeClass = useMemo(() => {
+    if (!scheduledDate) return '';
+    const today = getTodayStr();
+    if (scheduledDate === today) return 'date-badge today';
+    if (scheduledDate < today && !isDone) return 'date-badge overdue';
+    return 'date-badge';
+  }, [scheduledDate, isDone]);
 
   return (
     <div className={`problem-item-wrap${isDone ? ' done' : ''}`}>
@@ -23,6 +38,9 @@ export default function ProblemItem({ name, diff, isDone, onToggle, accentColor,
         onClick={onToggle}
       >
         <div className="p-check">{isDone ? '✓' : ''}</div>
+        {scheduledDate && (
+          <span className={dateBadgeClass}>{formatShort(scheduledDate)}</span>
+        )}
         <a className="p-name" href={url} target="_blank" rel="noopener noreferrer"
            onClick={(e) => e.stopPropagation()}>
           {name}

@@ -1,3 +1,4 @@
+import { ScheduleProvider } from './context/ScheduleContext';
 import { ProgressProvider } from './context/ProgressContext';
 import { MemorizedProvider } from './context/MemorizedContext';
 import Nav from './components/layout/Nav';
@@ -12,18 +13,20 @@ import Footer from './components/layout/Footer';
 
 export default function App() {
   return (
-    <ProgressProvider>
-      <MemorizedProvider>
-        <Nav />
-        <Hero />
-        <ProgressBar />
-        <PatternsSection />
-        <DnaSection />
-        <PlanSection />
-        <SimulatorSection />
-        <RulesSection />
-        <Footer />
-      </MemorizedProvider>
-    </ProgressProvider>
+    <ScheduleProvider>
+      <ProgressProvider>
+        <MemorizedProvider>
+          <Nav />
+          <Hero />
+          <ProgressBar />
+          <PatternsSection />
+          <DnaSection />
+          <PlanSection />
+          <SimulatorSection />
+          <RulesSection />
+          <Footer />
+        </MemorizedProvider>
+      </ProgressProvider>
+    </ScheduleProvider>
   );
 }

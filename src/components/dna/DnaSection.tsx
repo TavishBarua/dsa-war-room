@@ -1,11 +1,33 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ALL_DNA_PATTERNS } from '../../data/dnaAll';
 import { useMemorizedContext } from '../../context/MemorizedContext';
+import { useScheduleContext } from '../../context/ScheduleContext';
 import DnaCard from './DnaCard';
+
+function addDaysToISO(dateStr: string, days: number): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
 
 export default function DnaSection() {
   const [activeCard, setActiveCard] = useState<number | null>(null);
   const { memorizedCount, percentage } = useMemorizedContext();
+  const { schedule } = useScheduleContext();
+
+  // Build a map: dnaPatternIndex → scheduled date (first day of its phase)
+  const dnaDates = useMemo(() => {
+    if (!schedule) return {};
+    const map: Record<number, string> = {};
+    schedule.forEach(phase => {
+      phase.dnaPatternIndices.forEach((dnaIdx, i) => {
+        // Spread DNA patterns across first few days of the phase
+        const dayOff = Math.min(i, phase.daysAllocated - 1);
+        map[dnaIdx] = addDaysToISO(phase.startDate, dayOff);
+      });
+    });
+    return map;
+  }, [schedule]);
 
   const toggleCard = (index: number) => {
     setActiveCard(prev => prev === index ? null : index);
@@ -32,6 +54,7 @@ export default function DnaSection() {
             index={i}
             isActive={activeCard === i}
             onToggle={() => toggleCard(i)}
+            scheduledDate={dnaDates[i]}
           />
         ))}
       </div>

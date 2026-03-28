@@ -102,6 +102,24 @@ export interface CheatStrip {
   snippet?: string;
 }
 
+// Schedule types
+export interface ScheduleConfig {
+  startDate: string;   // ISO "2026-04-01"
+  endDate: string;     // ISO "2026-06-15"
+  totalDays: number;
+}
+
+export interface PhaseSchedule {
+  weekIndex: number;
+  startDay: number;
+  endDay: number;
+  startDate: string;
+  endDate: string;
+  daysAllocated: number;
+  problemDays: number[];       // problemDays[pi] = day offset within phase
+  dnaPatternIndices: number[];
+}
+
 export interface DnaPattern {
   icon: string;
   name: string;
