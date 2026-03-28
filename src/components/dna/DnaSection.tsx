@@ -2,12 +2,13 @@ import { useState, useMemo } from 'react';
 import { ALL_DNA_PATTERNS } from '../../data/dnaAll';
 import { useMemorizedContext } from '../../context/MemorizedContext';
 import { useScheduleContext } from '../../context/ScheduleContext';
+import { toLocalISO } from '../../hooks/useSchedule';
 import DnaCard from './DnaCard';
 
 function addDaysToISO(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T00:00:00');
   d.setDate(d.getDate() + days);
-  return d.toISOString().split('T')[0];
+  return toLocalISO(d);
 }
 
 export default function DnaSection() {

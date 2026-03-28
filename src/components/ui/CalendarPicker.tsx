@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { toLocalISO } from '../../hooks/useSchedule';
 
 interface Props {
   initialStart?: string;
@@ -26,7 +27,7 @@ function daysBetween(a: string, b: string): number {
 function addMonths(dateStr: string, months: number): string {
   const d = new Date(dateStr + 'T00:00:00');
   d.setMonth(d.getMonth() + months);
-  return d.toISOString().split('T')[0];
+  return toLocalISO(d);
 }
 
 const DAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];

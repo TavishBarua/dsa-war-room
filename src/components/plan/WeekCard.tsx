@@ -2,13 +2,13 @@ import { Week, PhaseSchedule } from '../../data/types';
 import { useProgressContext } from '../../context/ProgressContext';
 import { PROBLEM_DIAGRAMS } from '../../data/diagrams';
 import { ALL_PROBLEM_DESCRIPTIONS } from '../../data/problemDescriptionsAll';
-import { formatDateShort } from '../../hooks/useSchedule';
+import { formatDateShort, toLocalISO } from '../../hooks/useSchedule';
 import ProblemItem from './ProblemItem';
 
 function addDaysToISO(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T00:00:00');
   d.setDate(d.getDate() + days);
-  return d.toISOString().split('T')[0];
+  return toLocalISO(d);
 }
 
 interface Props {
