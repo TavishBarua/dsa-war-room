@@ -1,0 +1,16 @@
+:root {
+  --bg: #08090d;
+  --bg2: #0e1018;
+  --bg3: #141720;
+  --neon: #00ff88;
+  --neon2: #00cfff;
+  --neon3: #ff4d6d;
+  --neon4: #ffd600;
+  --text: #e8eaf0;
+  --muted: #5a5f70;
+  --card: #111318;
+  --border: #1e2230;
+  --easy: #00ff88;
+  --medium: #ffd600;
+  --hard: #ff4d6d;
+}

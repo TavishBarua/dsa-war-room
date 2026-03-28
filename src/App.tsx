@@ -1,0 +1,29 @@
+import { ProgressProvider } from './context/ProgressContext';
+import { MemorizedProvider } from './context/MemorizedContext';
+import Nav from './components/layout/Nav';
+import Hero from './components/hero/Hero';
+import ProgressBar from './components/progress/ProgressBar';
+import PatternsSection from './components/patterns/PatternsSection';
+import DnaSection from './components/dna/DnaSection';
+import PlanSection from './components/plan/PlanSection';
+import SimulatorSection from './components/simulator/SimulatorSection';
+import RulesSection from './components/rules/RulesSection';
+import Footer from './components/layout/Footer';
+
+export default function App() {
+  return (
+    <ProgressProvider>
+      <MemorizedProvider>
+        <Nav />
+        <Hero />
+        <ProgressBar />
+        <PatternsSection />
+        <DnaSection />
+        <PlanSection />
+        <SimulatorSection />
+        <RulesSection />
+        <Footer />
+      </MemorizedProvider>
+    </ProgressProvider>
+  );
+}
