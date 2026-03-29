@@ -4,10 +4,10 @@ export const WEEKS: Week[] = [
   {
     num: '01', title: 'BOOT CAMP', color: '#00ff88',
     topics: ['Arrays & Hashing', 'Two Pointers'],
-    problems: 14, perDay: '2/day',
+    problems: 13, perDay: '2/day',
     schedule: [
       {day:'MON', task:'Arrays & Hashing\n#1–4'},
-      {day:'TUE', task:'Arrays & Hashing\n#5–9'},
+      {day:'TUE', task:'Arrays & Hashing\n#5–8'},
       {day:'WED', task:'Two Pointers\n#1–3'},
       {day:'THU', task:'Two Pointers\n#4–5'},
       {day:'FRI', task:'Revise Week\n+LeetCode'},
@@ -20,7 +20,6 @@ export const WEEKS: Week[] = [
       {name:'Valid Anagram', diff:'Easy', url:'https://leetcode.com/problems/valid-anagram/'},
       {name:'Two Sum', diff:'Easy', url:'https://leetcode.com/problems/two-sum/'},
       {name:'Group Anagrams', diff:'Medium', url:'https://leetcode.com/problems/group-anagrams/'},
-      {name:'Top K Frequent Elements', diff:'Medium', url:'https://leetcode.com/problems/top-k-frequent-elements/'},
       {name:'Product of Array Except Self', diff:'Medium', url:'https://leetcode.com/problems/product-of-array-except-self/'},
       {name:'Valid Sudoku', diff:'Medium', url:'https://leetcode.com/problems/valid-sudoku/'},
       {name:'Encode and Decode Strings', diff:'Medium', url:'https://leetcode.com/problems/encode-and-decode-strings/'},
@@ -65,13 +64,13 @@ export const WEEKS: Week[] = [
   {
     num: '03', title: 'SEARCH & LINKS', color: '#a78bfa',
     topics: ['Binary Search', 'Linked List'],
-    problems: 18, perDay: '3/day',
+    problems: 17, perDay: '3/day',
     schedule: [
       {day:'MON', task:'Binary Search\n#1–3'},
       {day:'TUE', task:'Binary Search\n#4–7'},
       {day:'WED', task:'Linked List\n#1–4'},
       {day:'THU', task:'Linked List\n#5–8'},
-      {day:'FRI', task:'Linked List\n#9–11'},
+      {day:'FRI', task:'Linked List\n#9–10'},
       {day:'SAT', task:'Mock: Binary Search\n+ Linked List'},
       {day:'SUN', task:'REST 💤', rest: true}
     ],
@@ -93,7 +92,6 @@ export const WEEKS: Week[] = [
       {name:'Linked List Cycle', diff:'Easy', url:'https://leetcode.com/problems/linked-list-cycle/'},
       {name:'Find the Duplicate Number', diff:'Medium', url:'https://leetcode.com/problems/find-the-duplicate-number/'},
       {name:'LRU Cache', diff:'Medium', url:'https://leetcode.com/problems/lru-cache/'},
-      {name:'Merge K Sorted Lists', diff:'Hard', url:'https://leetcode.com/problems/merge-k-sorted-lists/'},
       {name:'Reverse Nodes in K-Group', diff:'Hard', url:'https://leetcode.com/problems/reverse-nodes-in-k-group/'}
     ]
   },
@@ -132,13 +130,13 @@ export const WEEKS: Week[] = [
   {
     num: '05', title: 'HEAP & HUNT', color: '#fbbf24',
     topics: ['Heap / Priority Queue', 'Backtracking'],
-    problems: 17, perDay: '2-3/day',
+    problems: 19, perDay: '2-3/day',
     schedule: [
-      {day:'MON', task:'Heap\n#1–4'},
-      {day:'TUE', task:'Heap\n#5–7'},
-      {day:'WED', task:'Backtracking\n#1–4'},
-      {day:'THU', task:'Backtracking\n#5–7'},
-      {day:'FRI', task:'Backtracking\n#8–10'},
+      {day:'MON', task:'Heap\n#1–3'},
+      {day:'TUE', task:'Heap\n#4–6'},
+      {day:'WED', task:'Heap\n#7–9'},
+      {day:'THU', task:'Backtracking\n#1–4'},
+      {day:'FRI', task:'Backtracking\n#5–10'},
       {day:'SAT', task:'Full mock interview\n(random category)'},
       {day:'SUN', task:'REST 💤', rest: true}
     ],
@@ -148,8 +146,10 @@ export const WEEKS: Week[] = [
       {name:'Last Stone Weight', diff:'Easy', url:'https://leetcode.com/problems/last-stone-weight/'},
       {name:'K Closest Points to Origin', diff:'Medium', url:'https://leetcode.com/problems/k-closest-points-to-origin/'},
       {name:'Kth Largest Element in Array', diff:'Medium', url:'https://leetcode.com/problems/kth-largest-element-in-an-array/'},
+      {name:'Top K Frequent Elements', diff:'Medium', url:'https://leetcode.com/problems/top-k-frequent-elements/'},
       {name:'Task Scheduler', diff:'Medium', url:'https://leetcode.com/problems/task-scheduler/'},
       {name:'Design Twitter', diff:'Medium', url:'https://leetcode.com/problems/design-twitter/'},
+      {name:'Merge K Sorted Lists', diff:'Hard', url:'https://leetcode.com/problems/merge-k-sorted-lists/'},
       {name:'Find Median from Data Stream', diff:'Hard', url:'https://leetcode.com/problems/find-median-from-data-stream/'},
       {name:'Subsets', diff:'Medium', url:'https://leetcode.com/problems/subsets/'},
       {name:'Combination Sum', diff:'Medium', url:'https://leetcode.com/problems/combination-sum/'},

@@ -2,7 +2,7 @@ import { PatternCard } from './types';
 
 export const PATTERNS: PatternCard[] = [
   {
-    icon: '🗂️', name: 'Arrays & Hashing', count: 9,
+    icon: '🗂️', name: 'Arrays & Hashing', count: 8,
     accent: '#00ff88',
     tagline: 'When you need O(1) lookup or counting',
     intuition: 'As a senior dev, you already use HashMaps daily. In DSA, they\'re your first weapon. When brute force is O(n²) and you need to make it O(n) — a HashMap is probably involved.',
@@ -10,7 +10,7 @@ export const PATTERNS: PatternCard[] = [
     problems: [
       {name:'Contains Duplicate', diff:'Easy'}, {name:'Valid Anagram', diff:'Easy'},
       {name:'Two Sum', diff:'Easy'}, {name:'Group Anagrams', diff:'Medium'},
-      {name:'Top K Frequent Elements', diff:'Medium'}, {name:'Product of Array Except Self', diff:'Medium'},
+      {name:'Product of Array Except Self', diff:'Medium'},
       {name:'Valid Sudoku', diff:'Medium'}, {name:'Encode and Decode Strings', diff:'Medium'},
       {name:'Longest Consecutive Sequence', diff:'Medium'}
     ]
@@ -69,7 +69,7 @@ export const PATTERNS: PatternCard[] = [
     ]
   },
   {
-    icon: '🔗', name: 'Linked List', count: 11,
+    icon: '🔗', name: 'Linked List', count: 10,
     accent: '#f472b6',
     tagline: 'Pointer manipulation — think before you move',
     intuition: 'Draw it on paper every time. Literally draw the boxes and arrows. The fast/slow pointer (Floyd\'s cycle detection) solves half these problems. Dummy head node prevents edge case hell.',
@@ -79,8 +79,7 @@ export const PATTERNS: PatternCard[] = [
       {name:'Reorder List', diff:'Medium'}, {name:'Remove Nth Node From End of List', diff:'Medium'},
       {name:'Copy List with Random Pointer', diff:'Medium'}, {name:'Add Two Numbers', diff:'Medium'},
       {name:'Linked List Cycle', diff:'Easy'}, {name:'Find the Duplicate Number', diff:'Medium'},
-      {name:'LRU Cache', diff:'Medium'}, {name:'Merge K Sorted Lists', diff:'Hard'},
-      {name:'Reverse Nodes in K-Group', diff:'Hard'}
+      {name:'LRU Cache', diff:'Medium'}, {name:'Reverse Nodes in K-Group', diff:'Hard'}
     ]
   },
   {
@@ -101,7 +100,7 @@ export const PATTERNS: PatternCard[] = [
     ]
   },
   {
-    icon: '⛏️', name: 'Heap / Priority Queue', count: 7,
+    icon: '⛏️', name: 'Heap / Priority Queue', count: 9,
     accent: '#fbbf24',
     tagline: 'Always get the min or max in O(log n)',
     intuition: 'Heap = priority queue. Use it whenever you need "the k largest/smallest" or "stream of numbers, get median". Python has heapq (min-heap). For max-heap, negate the values.',
@@ -109,7 +108,8 @@ export const PATTERNS: PatternCard[] = [
     problems: [
       {name:'Kth Largest Element in a Stream', diff:'Easy'}, {name:'Last Stone Weight', diff:'Easy'},
       {name:'K Closest Points to Origin', diff:'Medium'}, {name:'Kth Largest Element in an Array', diff:'Medium'},
-      {name:'Task Scheduler', diff:'Medium'}, {name:'Design Twitter', diff:'Medium'},
+      {name:'Top K Frequent Elements', diff:'Medium'}, {name:'Task Scheduler', diff:'Medium'},
+      {name:'Design Twitter', diff:'Medium'}, {name:'Merge K Sorted Lists', diff:'Hard'},
       {name:'Find Median from Data Stream', diff:'Hard'}
     ]
   },
