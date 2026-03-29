@@ -183,6 +183,193 @@ export const DNA_PATTERNS: DnaPattern[] = [
     }
   },
   {
+    icon: '🔤', name: 'Frequency Count / Anagrams', accent: '#f472b6',
+    tagline: 'When you need to compare character fingerprints',
+    hook: "Imagine you have two bags of Scrabble tiles. You want to know if they contain the exact same letters. You COULD sort both bags and compare — that works! But there's a faster trick: count every tile in the first bag, then for each tile in the second bag, subtract one. If every count hits zero, they're the same bag rearranged. That's the frequency count pattern — turn letters into numbers and just compare the numbers!",
+    svg: `<svg viewBox="0 0 600 370" style="max-height:370px;width:100%"><style>@keyframes fc-pulse{0%,100%{opacity:1}50%{opacity:.5}} @keyframes fc-fill{0%{width:0}100%{width:100%}} .fc-p{animation:fc-pulse 2s ease-in-out infinite}</style><rect width="600" height="370" fill="#0e1018" rx="8"/><text x="300" y="28" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Frequency Count: Are these Anagrams?</text><text x="150" y="55" fill="#f472b6" text-anchor="middle" font-size="13" font-family="monospace">"listen"</text><text x="450" y="55" fill="#a78bfa" text-anchor="middle" font-size="13" font-family="monospace">"silent"</text><rect x="50" y="65" width="200" height="35" fill="#1a1d2e" stroke="#f472b6" rx="4"/><text x="70" y="88" fill="#f472b6" font-size="14" font-family="monospace">l:1 i:1 s:1 t:1 e:1 n:1</text><text x="300" y="88" fill="#4a5268" font-size="18">=</text><rect x="350" y="65" width="200" height="35" fill="#1a1d2e" stroke="#a78bfa" rx="4"/><text x="370" y="88" fill="#a78bfa" font-size="14" font-family="monospace">s:1 i:1 l:1 e:1 n:1 t:1</text><text x="300" y="125" fill="#00ff88" font-size="13" font-weight="bold" font-family="monospace">Same fingerprint = Anagram!</text><rect x="50" y="145" width="500" height="210" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="300" y="170" fill="#fff" text-anchor="middle" font-size="13" font-weight="bold" font-family="monospace">Two Approaches</text><text x="70" y="195" fill="#ffd600" font-size="12" font-weight="bold" font-family="monospace">1. Sort &amp; Compare (Simple)</text><text x="70" y="215" fill="#e8eaf0" font-size="11" font-family="monospace">sort("listen") → "eilnst"</text><text x="70" y="232" fill="#e8eaf0" font-size="11" font-family="monospace">sort("silent") → "eilnst"  → Equal!</text><text x="70" y="260" fill="#f472b6" font-size="12" font-weight="bold" font-family="monospace">2. Frequency Array (Optimal)</text><text x="70" y="280" fill="#e8eaf0" font-size="11" font-family="monospace">count[26] for 'a'-'z'</text><text x="70" y="297" fill="#00ff88" font-size="11" font-family="monospace">+1 for each char in s1</text><text x="70" y="314" fill="#ff4d6d" font-size="11" font-family="monospace">-1 for each char in s2</text><text x="70" y="335" fill="#ffd600" font-size="11" font-family="monospace" class="fc-p">All zeros? → Anagram!</text></svg>`,
+    complexity: [
+      {badge:'red', big:'O(n²)', label:'BRUTE FORCE', desc:'Check every permutation of characters'},
+      {badge:'yellow', big:'O(n log n)', label:'SORT & COMPARE', desc:'Sort both strings, compare directly'},
+      {badge:'green', big:'O(n)', label:'FREQ COUNT', desc:'Count chars with array[26] or HashMap'}
+    ],
+    meterWidth: '90%',
+    code: {
+      python: `<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># FREQUENCY COUNT / ANAGRAMS — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Compare char composition, group by fingerprint</span>
+<span class="cm"># TIME: O(n) | SPACE: O(1) for fixed alphabet</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="cm"># ─── Pattern 1: Valid Anagram ───</span>
+<span class="cm"># Are two strings rearrangements of each other?</span>
+<span class="kw">def</span> <span class="fn">isAnagram</span>(s, t):
+    <span class="kw">if</span> <span class="fn">len</span>(s) != <span class="fn">len</span>(t):
+        <span class="kw">return</span> <span class="nm">False</span>
+    count = [<span class="nm">0</span>] * <span class="nm">26</span>  <span class="cm"># fixed-size for a-z</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s)):
+        count[<span class="fn">ord</span>(s[i]) - <span class="fn">ord</span>(<span class="st">'a'</span>)] += <span class="nm">1</span>  <span class="cm"># +1 for s</span>
+        count[<span class="fn">ord</span>(t[i]) - <span class="fn">ord</span>(<span class="st">'a'</span>)] -= <span class="nm">1</span>  <span class="cm"># -1 for t</span>
+    <span class="kw">return</span> <span class="fn">all</span>(c == <span class="nm">0</span> <span class="kw">for</span> c <span class="kw">in</span> count)
+
+<span class="cm"># ─── Pattern 2: Group Anagrams ───</span>
+<span class="cm"># Group strings that are anagrams of each other</span>
+<span class="kw">def</span> <span class="fn">groupAnagrams</span>(strs):
+    groups = {}  <span class="cm"># canonical_key → list of anagrams</span>
+    <span class="kw">for</span> s <span class="kw">in</span> strs:
+        <span class="cm"># KEY INSIGHT: sorted string = canonical form</span>
+        key = <span class="fn">tuple</span>(<span class="fn">sorted</span>(s))
+        groups.setdefault(key, []).append(s)
+    <span class="kw">return</span> <span class="fn">list</span>(groups.values())
+
+<span class="cm"># ─── Alt key: frequency tuple (avoids sort) ───</span>
+<span class="kw">def</span> <span class="fn">groupAnagramsFreq</span>(strs):
+    groups = {}
+    <span class="kw">for</span> s <span class="kw">in</span> strs:
+        count = [<span class="nm">0</span>] * <span class="nm">26</span>
+        <span class="kw">for</span> c <span class="kw">in</span> s:
+            count[<span class="fn">ord</span>(c) - <span class="fn">ord</span>(<span class="st">'a'</span>)] += <span class="nm">1</span>
+        key = <span class="fn">tuple</span>(count)  <span class="cm"># (0,0,0,...1,0,...) as key</span>
+        groups.setdefault(key, []).append(s)
+    <span class="kw">return</span> <span class="fn">list</span>(groups.values())`,
+      csharp: `<span class="cm">// ═══════════════════════════════════════</span>
+<span class="cm">// FREQUENCY COUNT / ANAGRAMS — THE TEMPLATE</span>
+<span class="cm">// ═══════════════════════════════════════</span>
+<span class="cm">// WHEN TO USE: Compare char composition, group by fingerprint</span>
+<span class="cm">// TIME: O(n) | SPACE: O(1) for fixed alphabet</span>
+<span class="cm">// ═══════════════════════════════════════</span>
+
+<span class="cm">// ─── Pattern 1: Valid Anagram ───</span>
+<span class="kw">public</span> <span class="tp">bool</span> <span class="fn">IsAnagram</span>(<span class="tp">string</span> s, <span class="tp">string</span> t) {
+    <span class="kw">if</span> (s.Length != t.Length) <span class="kw">return</span> <span class="nm">false</span>;
+    <span class="tp">int</span>[] count = <span class="kw">new</span> <span class="tp">int</span>[<span class="nm">26</span>];
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; s.Length; i++) {
+        count[s[i] - <span class="st">'a'</span>]++;  <span class="cm">// +1 for s</span>
+        count[t[i] - <span class="st">'a'</span>]--;  <span class="cm">// -1 for t</span>
+    }
+    <span class="kw">return</span> count.All(c =&gt; c == <span class="nm">0</span>);
+}
+
+<span class="cm">// ─── Pattern 2: Group Anagrams ───</span>
+<span class="kw">public</span> <span class="tp">IList</span>&lt;<span class="tp">IList</span>&lt;<span class="tp">string</span>&gt;&gt; <span class="fn">GroupAnagrams</span>(<span class="tp">string</span>[] strs) {
+    <span class="kw">var</span> groups = <span class="kw">new</span> <span class="tp">Dictionary</span>&lt;<span class="tp">string</span>, <span class="tp">List</span>&lt;<span class="tp">string</span>&gt;&gt;();
+    <span class="kw">foreach</span> (<span class="kw">var</span> s <span class="kw">in</span> strs) {
+        <span class="cm">// Sorted string as canonical key</span>
+        <span class="kw">var</span> key = <span class="kw">new</span> <span class="tp">string</span>(s.OrderBy(c =&gt; c).ToArray());
+        <span class="kw">if</span> (!groups.ContainsKey(key))
+            groups[key] = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">string</span>&gt;();
+        groups[key].Add(s);
+    }
+    <span class="kw">return new</span> <span class="tp">List</span>&lt;<span class="tp">IList</span>&lt;<span class="tp">string</span>&gt;&gt;(groups.Values);
+}`,
+      java: `<span class="cm">// ═══════════════════════════════════════</span>
+<span class="cm">// FREQUENCY COUNT / ANAGRAMS — THE TEMPLATE</span>
+<span class="cm">// ═══════════════════════════════════════</span>
+<span class="cm">// WHEN TO USE: Compare char composition, group by fingerprint</span>
+<span class="cm">// TIME: O(n) | SPACE: O(1) for fixed alphabet</span>
+<span class="cm">// ═══════════════════════════════════════</span>
+
+<span class="cm">// ─── Pattern 1: Valid Anagram ───</span>
+<span class="cm">// +1 for each char in s, -1 for each char in t</span>
+<span class="cm">// If all zeros → same letters = anagram</span>
+<span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">isAnagram</span>(<span class="tp">String</span> s, <span class="tp">String</span> t) {
+    <span class="kw">if</span> (s.length() != t.length()) <span class="kw">return</span> <span class="nm">false</span>;
+    <span class="tp">int</span>[] count = <span class="kw">new</span> <span class="tp">int</span>[<span class="nm">26</span>];
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; s.length(); i++) {
+        count[s.charAt(i) - <span class="st">'a'</span>]++;  <span class="cm">// +1 for s</span>
+        count[t.charAt(i) - <span class="st">'a'</span>]--;  <span class="cm">// -1 for t</span>
+    }
+    <span class="kw">for</span> (<span class="tp">int</span> c : count)
+        <span class="kw">if</span> (c != <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">false</span>;
+    <span class="kw">return</span> <span class="nm">true</span>;
+}
+
+<span class="cm">// ─── Pattern 2: Group Anagrams ───</span>
+<span class="cm">// KEY INSIGHT: All anagrams share the same sorted form</span>
+<span class="cm">// "eat","tea","ate" → sorted = "aet" → same group!</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">String</span>&gt;&gt; <span class="fn">groupAnagrams</span>(<span class="tp">String</span>[] strs) {
+    <span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">List</span>&lt;<span class="tp">String</span>&gt;&gt; groups = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">String</span> s : strs) {
+        <span class="tp">char</span>[] chars = s.toCharArray();
+        <span class="tp">Arrays</span>.sort(chars);
+        <span class="tp">String</span> key = <span class="kw">new</span> <span class="tp">String</span>(chars);
+        groups.computeIfAbsent(key, k -&gt; <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).add(s);
+    }
+    <span class="kw">return new</span> <span class="tp">ArrayList</span>&lt;&gt;(groups.values());
+}`
+    },
+    memoryHack: {
+      oneSentence: 'Turn strings into a character fingerprint (count array or sorted form) — same fingerprint means anagram.',
+      flowchart: {
+        nodes: [
+          { id: 'start', label: 'Input strings', type: 'start', x: 290, y: 20 },
+          { id: 'len', label: 'Same length?', type: 'decision', x: 290, y: 75 },
+          { id: 'no', label: 'Return false', type: 'end', x: 100, y: 75 },
+          { id: 'init', label: 'count[26] = {0}', type: 'action', x: 290, y: 130 },
+          { id: 'loop', label: 'For each i', type: 'action', x: 290, y: 180 },
+          { id: 'inc', label: '+1 for s[i]', type: 'action', x: 180, y: 230 },
+          { id: 'dec', label: '-1 for t[i]', type: 'action', x: 400, y: 230 },
+          { id: 'check', label: 'All zeros?', type: 'decision', x: 290, y: 285 },
+          { id: 'yes', label: 'Anagram!', type: 'end', x: 100, y: 285 },
+          { id: 'nope', label: 'Not anagram', type: 'end', x: 480, y: 285 }
+        ],
+        edges: [
+          { from: 'start', to: 'len', label: '' },
+          { from: 'len', to: 'no', label: 'NO' },
+          { from: 'len', to: 'init', label: 'YES' },
+          { from: 'init', to: 'loop', label: '' },
+          { from: 'loop', to: 'inc', label: '' },
+          { from: 'inc', to: 'dec', label: '' },
+          { from: 'dec', to: 'loop', label: 'next i' },
+          { from: 'loop', to: 'check', label: 'done' },
+          { from: 'check', to: 'yes', label: 'YES' },
+          { from: 'check', to: 'nope', label: 'NO' }
+        ]
+      },
+      annotatedCode: [
+        { line: 'boolean isAnagram(String s, String t) {', stepId: 'start', note: 'Entry — two strings to compare', color: '#5a5f70' },
+        { line: '    if (s.length() != t.length()) return false;', stepId: 'len', note: 'Quick exit — different lengths can\'t be anagrams', color: '#ff4d6d' },
+        { line: '    int[] count = new int[26];', stepId: 'init', note: 'Fixed-size array for a-z (only 26 slots!)', color: '#f472b6' },
+        { line: '    for (int i = 0; i < s.length(); i++) {', stepId: 'loop', note: 'Single pass through both strings simultaneously', color: '#00cfff' },
+        { line: '        count[s.charAt(i) - \'a\']++;', stepId: 'inc', note: '+1 for every char in s', color: '#00ff88' },
+        { line: '        count[t.charAt(i) - \'a\']--;', stepId: 'dec', note: '-1 for every char in t — cancels out if same', color: '#ffd600' },
+        { line: '    }', stepId: 'loop', note: 'End of single pass', color: '#5a5f70' },
+        { line: '    for (int c : count) if (c != 0) return false;', stepId: 'check', note: 'Any non-zero means mismatch!', color: '#ff4d6d' },
+        { line: '    return true;', stepId: 'yes', note: 'All zeros = perfect match = anagram!', color: '#00ff88' }
+      ],
+      stateSnapshots: [
+        { label: 'Step 1', art: 's="anagram" t="nagaram"  count=[0]*26  len=7=7 ✓', annotation: 'Same length — proceed with counting' },
+        { label: 'Step 2', art: 'i=0: s[0]=a(+1) t[0]=n(-1)  count: a=1, n=-1', annotation: 'a goes up, n goes down' },
+        { label: 'Step 3', art: 'i=1: s[1]=n(+1) t[1]=a(-1)  count: a=0, n=0', annotation: 'n cancels out, a cancels out!' },
+        { label: 'Step 4', art: '...after all 7 chars: count = [0,0,0,...,0]', annotation: 'Every letter appeared same # of times' },
+        { label: 'Result', art: 'All zeros → return true → They ARE anagrams!', annotation: '+1/-1 cancellation = frequency match' }
+      ],
+      variations: [
+        { name: 'Valid Anagram', desc: 'count[26]: +1 for s, -1 for t, check all zeros', problem: 'Valid Anagram (#242)' },
+        { name: 'Group Anagrams', desc: 'Use sorted(s) or count-tuple as HashMap key to group', problem: 'Group Anagrams (#49)' },
+        { name: 'Valid Anagram (Unicode)', desc: 'Use HashMap<Character,Integer> instead of int[26] for any charset', problem: 'Valid Anagram (#242 follow-up)' },
+        { name: 'Find All Anagrams in a String', desc: 'Sliding window + frequency count on window of size p.length', problem: 'Find Anagrams (#438)' }
+      ],
+      title: 'FINGERPRINT & MATCH',
+      mnemonic: 'FINGERPRINT & MATCH — same fingerprint means same letters, just rearranged',
+      steps: ['Check lengths (quick exit if different)', 'Build count[26] frequency array', '+1 for each char in string s', '-1 for each char in string t', 'If all counts are zero → anagram!', 'For grouping: use sorted string or count-tuple as HashMap key'],
+      why: 'Two strings are anagrams iff they have identical character frequencies. A count array captures this fingerprint in O(n) time with O(1) space.'
+    },
+    cheat: {
+      trigger: 'anagram, character frequency, group by letters, same characters, rearrange string',
+      firstLine: 'int[] count = new int[26];',
+      gotcha: 'Forgetting to check length equality first — different lengths are never anagrams',
+      pitch: "I'll use a frequency count array where +1 for each char in s and -1 for each char in t. If all zeros, they're anagrams. For grouping, sorted string becomes the HashMap key.",
+      snippet: `<span class="cm">// WHY count[26]? Fixed-size fingerprint for a-z in O(n) time</span>
+<span class="kw">int</span>[] count = <span class="kw">new int</span>[<span class="nm">26</span>];
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; s.<span class="fn">length</span>(); i++) {
+    count[s.<span class="fn">charAt</span>(i) - <span class="st">'a'</span>]++;  <span class="cm">// +1 for s</span>
+    count[t.<span class="fn">charAt</span>(i) - <span class="st">'a'</span>]--;  <span class="cm">// -1 for t</span>
+}
+<span class="cm">// All zeros? → Anagram!</span>`
+    }
+  },
+  {
     icon: '👉👈', name: 'Two Pointers', accent: '#00cfff',
     tagline: 'Two variables converging from both ends',
     hook: "Two friends stand at opposite ends of a long hallway. They walk toward each other. If the sum of their house numbers is too big, the friend on the right takes a step left (smaller number). Too small? The friend on the left steps right (bigger number). They meet exactly at the answer. Way faster than one person checking every pair of spots alone!",

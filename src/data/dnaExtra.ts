@@ -1598,5 +1598,1744 @@ merged.<span class="fn">add</span>(intervals[<span class="nm">0</span>]);
       steps:['Init result=0','XOR each element','Duplicates cancel: a^a=0','Return lone survivor'],
       why:'XOR is self-inverse and commutative — pairs cancel, loner remains. O(n) time O(1) space.'
     }
+  },
+  {
+    icon:'📊', name:'Prefix / Suffix Arrays', accent:'#fb923c',
+    tagline:'Pre-compute cumulative answers from both directions',
+    hook:"Imagine you're in a line of kids and each kid holds a number. The teacher asks: 'What's the product of everyone EXCEPT you?' You could multiply everyone each time — slow! OR, before anyone asks, compute the running product from the LEFT and from the RIGHT. Then for each kid, just multiply left-product × right-product. That pre-computation trick is Prefix/Suffix!",
+    svg:`<svg viewBox="0 0 600 320" style="max-height:320px;width:100%"><rect width="600" height="320" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Prefix / Suffix: Product Except Self</text><text x="300" y="48" fill="#4a5268" text-anchor="middle" font-size="11" font-family="monospace">nums = [1, 2, 3, 4]</text><text x="60" y="80" fill="#fb923c" font-size="12" font-weight="bold" font-family="monospace">→ Prefix products (left to right)</text><rect x="80" y="90" width="50" height="35" fill="#1a1d2e" stroke="#fb923c" rx="4"/><text x="105" y="113" fill="#fb923c" text-anchor="middle" font-size="13">1</text><rect x="180" y="90" width="50" height="35" fill="#1a1d2e" stroke="#fb923c" rx="4"/><text x="205" y="113" fill="#fb923c" text-anchor="middle" font-size="13">1</text><rect x="280" y="90" width="50" height="35" fill="#1a1d2e" stroke="#fb923c" rx="4"/><text x="305" y="113" fill="#fb923c" text-anchor="middle" font-size="13">2</text><rect x="380" y="90" width="50" height="35" fill="#1a1d2e" stroke="#fb923c" rx="4"/><text x="405" y="113" fill="#fb923c" text-anchor="middle" font-size="13">6</text><text x="60" y="155" fill="#a78bfa" font-size="12" font-weight="bold" font-family="monospace">← Suffix products (right to left)</text><rect x="80" y="165" width="50" height="35" fill="#1a1d2e" stroke="#a78bfa" rx="4"/><text x="105" y="188" fill="#a78bfa" text-anchor="middle" font-size="13">24</text><rect x="180" y="165" width="50" height="35" fill="#1a1d2e" stroke="#a78bfa" rx="4"/><text x="205" y="188" fill="#a78bfa" text-anchor="middle" font-size="13">12</text><rect x="280" y="165" width="50" height="35" fill="#1a1d2e" stroke="#a78bfa" rx="4"/><text x="305" y="188" fill="#a78bfa" text-anchor="middle" font-size="13">4</text><rect x="380" y="165" width="50" height="35" fill="#1a1d2e" stroke="#a78bfa" rx="4"/><text x="405" y="188" fill="#a78bfa" text-anchor="middle" font-size="13">1</text><text x="60" y="230" fill="#00ff88" font-size="12" font-weight="bold" font-family="monospace">= prefix[i] × suffix[i]</text><rect x="80" y="240" width="50" height="35" fill="rgba(0,255,136,.15)" stroke="#00ff88" rx="4"/><text x="105" y="263" fill="#00ff88" text-anchor="middle" font-size="13">24</text><rect x="180" y="240" width="50" height="35" fill="rgba(0,255,136,.15)" stroke="#00ff88" rx="4"/><text x="205" y="263" fill="#00ff88" text-anchor="middle" font-size="13">12</text><rect x="280" y="240" width="50" height="35" fill="rgba(0,255,136,.15)" stroke="#00ff88" rx="4"/><text x="305" y="263" fill="#00ff88" text-anchor="middle" font-size="13">8</text><rect x="380" y="240" width="50" height="35" fill="rgba(0,255,136,.15)" stroke="#00ff88" rx="4"/><text x="405" y="263" fill="#00ff88" text-anchor="middle" font-size="13">6</text><text x="300" y="300" fill="#ffd600" text-anchor="middle" font-size="11" font-family="monospace">Result: [24, 12, 8, 6] — no division needed!</text></svg>`,
+    complexity:[
+      {badge:'red',big:'O(n²)',label:'BRUTE FORCE',desc:'For each element, multiply all others'},
+      {badge:'green',big:'O(n)',label:'PREFIX+SUFFIX',desc:'Two passes: build left[], build right[], multiply'}
+    ],
+    meterWidth:'90%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># PREFIX / SUFFIX ARRAYS — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: "product/sum except self", "rain water", "left-right scan"</span>
+<span class="cm"># TIME: O(n) | SPACE: O(n) or O(1) with in-place trick</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="cm"># ─── Product of Array Except Self ───</span>
+<span class="kw">def</span> <span class="fn">productExceptSelf</span>(nums):
+    n = <span class="fn">len</span>(nums)
+    result = [<span class="nm">1</span>] * n
+
+    <span class="cm"># Pass 1: prefix products (left → right)</span>
+    prefix = <span class="nm">1</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):
+        result[i] = prefix
+        prefix *= nums[i]
+
+    <span class="cm"># Pass 2: suffix products (right → left)</span>
+    suffix = <span class="nm">1</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n - <span class="nm">1</span>, -<span class="nm">1</span>, -<span class="nm">1</span>):
+        result[i] *= suffix
+        suffix *= nums[i]
+
+    <span class="kw">return</span> result
+
+<span class="cm"># ─── Trapping Rain Water ───</span>
+<span class="kw">def</span> <span class="fn">trap</span>(height):
+    n = <span class="fn">len</span>(height)
+    left_max = [<span class="nm">0</span>] * n
+    right_max = [<span class="nm">0</span>] * n
+    left_max[<span class="nm">0</span>] = height[<span class="nm">0</span>]
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, n):
+        left_max[i] = <span class="fn">max</span>(left_max[i-<span class="nm">1</span>], height[i])
+    right_max[n-<span class="nm">1</span>] = height[n-<span class="nm">1</span>]
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n-<span class="nm">2</span>, -<span class="nm">1</span>, -<span class="nm">1</span>):
+        right_max[i] = <span class="fn">max</span>(right_max[i+<span class="nm">1</span>], height[i])
+    <span class="kw">return</span> <span class="fn">sum</span>(<span class="fn">min</span>(left_max[i], right_max[i]) - height[i] <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n))`,
+      java:`<span class="cm">// ═══════════════════════════════════════</span>
+<span class="cm">// PREFIX / SUFFIX ARRAYS — THE TEMPLATE</span>
+<span class="cm">// TIME: O(n) | SPACE: O(n) or O(1)</span>
+<span class="cm">// ═══════════════════════════════════════</span>
+
+<span class="cm">// ─── Product of Array Except Self ───</span>
+<span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">productExceptSelf</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">int</span> n = nums.length;
+    <span class="tp">int</span>[] result = <span class="kw">new</span> <span class="tp">int</span>[n];
+    result[<span class="nm">0</span>] = <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">1</span>; i &lt; n; i++)
+        result[i] = result[i-<span class="nm">1</span>] * nums[i-<span class="nm">1</span>];  <span class="cm">// prefix</span>
+    <span class="tp">int</span> suffix = <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> i = n-<span class="nm">1</span>; i &gt;= <span class="nm">0</span>; i--) {
+        result[i] *= suffix;  <span class="cm">// multiply by suffix</span>
+        suffix *= nums[i];
+    }
+    <span class="kw">return</span> result;
+}
+
+<span class="cm">// ─── Trapping Rain Water ───</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">trap</span>(<span class="tp">int</span>[] height) {
+    <span class="tp">int</span> n = height.length;
+    <span class="tp">int</span>[] leftMax = <span class="kw">new</span> <span class="tp">int</span>[n], rightMax = <span class="kw">new</span> <span class="tp">int</span>[n];
+    leftMax[<span class="nm">0</span>] = height[<span class="nm">0</span>];
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">1</span>; i &lt; n; i++)
+        leftMax[i] = Math.max(leftMax[i-<span class="nm">1</span>], height[i]);
+    rightMax[n-<span class="nm">1</span>] = height[n-<span class="nm">1</span>];
+    <span class="kw">for</span> (<span class="tp">int</span> i = n-<span class="nm">2</span>; i &gt;= <span class="nm">0</span>; i--)
+        rightMax[i] = Math.max(rightMax[i+<span class="nm">1</span>], height[i]);
+    <span class="tp">int</span> water = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++)
+        water += Math.min(leftMax[i], rightMax[i]) - height[i];
+    <span class="kw">return</span> water;
+}`,
+      csharp:`<span class="cm">// ═══════════════════════════════════════</span>
+<span class="cm">// PREFIX / SUFFIX ARRAYS — THE TEMPLATE</span>
+<span class="cm">// TIME: O(n) | SPACE: O(n) or O(1)</span>
+<span class="cm">// ═══════════════════════════════════════</span>
+
+<span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">ProductExceptSelf</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">int</span> n = nums.Length;
+    <span class="tp">int</span>[] result = <span class="kw">new</span> <span class="tp">int</span>[n];
+    result[<span class="nm">0</span>] = <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">1</span>; i &lt; n; i++)
+        result[i] = result[i-<span class="nm">1</span>] * nums[i-<span class="nm">1</span>];
+    <span class="tp">int</span> suffix = <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> i = n-<span class="nm">1</span>; i &gt;= <span class="nm">0</span>; i--) {
+        result[i] *= suffix;
+        suffix *= nums[i];
+    }
+    <span class="kw">return</span> result;
+}`
+    },
+    memoryHack:{
+      oneSentence:'Build cumulative products from the left and right, then multiply them — each position gets everything except itself.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'Init result[]=1s',type:'start',x:290,y:20},
+          {id:'left',label:'Left → Right pass',type:'action',x:290,y:75},
+          {id:'pfx',label:'result[i]=prefix',type:'action',x:290,y:130},
+          {id:'right',label:'Right → Left pass',type:'action',x:290,y:185},
+          {id:'sfx',label:'result[i]*=suffix',type:'action',x:290,y:240},
+          {id:'done',label:'Return result',type:'end',x:290,y:295}
+        ],
+        edges:[
+          {from:'start',to:'left',label:''},
+          {from:'left',to:'pfx',label:'prefix *= nums[i]'},
+          {from:'pfx',to:'right',label:''},
+          {from:'right',to:'sfx',label:'suffix *= nums[i]'},
+          {from:'sfx',to:'done',label:''}
+        ]
+      },
+      annotatedCode:[
+        {line:'int[] productExceptSelf(int[] nums) {',stepId:'start',note:'No division allowed!',color:'#5a5f70'},
+        {line:'    int[] result = new int[n]; result[0]=1;',stepId:'start',note:'Seed with 1 (identity for multiplication)',color:'#fb923c'},
+        {line:'    for (i=1..n) result[i] = result[i-1]*nums[i-1];',stepId:'pfx',note:'Left pass: each slot = product of everything LEFT',color:'#00ff88'},
+        {line:'    int suffix = 1;',stepId:'right',note:'Now sweep from right',color:'#a78bfa'},
+        {line:'    for (i=n-1..0) result[i] *= suffix; suffix *= nums[i];',stepId:'sfx',note:'Multiply by product of everything RIGHT',color:'#ffd600'},
+        {line:'    return result;',stepId:'done',note:'prefix × suffix = everything except self!',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'Input',art:'nums = [1, 2, 3, 4]',annotation:'Goal: result[i] = product of all except nums[i]'},
+        {label:'Left pass',art:'prefix: 1→1→2→6  result=[1,1,2,6]',annotation:'Each slot stores product of everything to its LEFT'},
+        {label:'Right pass',art:'suffix: 1→4→12→24  result=[24,12,8,6]',annotation:'Multiply each slot by product of everything to its RIGHT'},
+        {label:'Result',art:'[24, 12, 8, 6] — no division used!',annotation:'prefix[i] × suffix[i] = product except self'}
+      ],
+      variations:[
+        {name:'Product of Array Except Self',desc:'Prefix product from left, suffix product from right, multiply',problem:'Product of Array Except Self (#238)'},
+        {name:'Trapping Rain Water',desc:'leftMax[] from left, rightMax[] from right, water = min(L,R) - height',problem:'Trapping Rain Water (#42)'},
+        {name:'Running Sum / Prefix Sum',desc:'prefix[i] = prefix[i-1] + nums[i] for range sum queries',problem:'Range Sum Query (#303)'}
+      ],
+      title:'LEFT PASS → RIGHT PASS',
+      mnemonic:'LEFT PASS → RIGHT PASS — scan both directions, combine at each index',
+      steps:['Init result array with 1s','Left→Right: result[i] = running prefix product','Right→Left: result[i] *= running suffix product','Each index now has product of everything except itself'],
+      why:'By pre-computing cumulative values from both directions, each position can answer "everything except me" in O(1) without division.'
+    },
+    cheat:{
+      trigger:'product except self, trapping rain water, left-right scan, prefix sum, range query',
+      firstLine:'int[] result = new int[n]; result[0] = 1;',
+      gotcha:'Forgetting to initialize prefix/suffix to 1 (identity for multiplication) or 0 (identity for addition)',
+      pitch:"I'll do two passes — left-to-right building prefix products, then right-to-left multiplying by suffix products. Each index gets the product of everything except itself without division.",
+      snippet:`<span class="cm">// Two-pass: prefix from left, suffix from right</span>
+<span class="tp">int</span>[] res = <span class="kw">new int</span>[n]; res[<span class="nm">0</span>]=<span class="nm">1</span>;
+<span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">1</span>;i&lt;n;i++) res[i]=res[i-<span class="nm">1</span>]*nums[i-<span class="nm">1</span>]; <span class="cm">// prefix</span>
+<span class="kw">int</span> suf=<span class="nm">1</span>;
+<span class="kw">for</span>(<span class="kw">int</span> i=n-<span class="nm">1</span>;i&gt;=<span class="nm">0</span>;i--){res[i]*=suf; suf*=nums[i];} <span class="cm">// suffix</span>`
+    }
+  },
+  {
+    icon:'📈', name:'Monotonic Stack', accent:'#ef4444',
+    tagline:'Stack that stays sorted — find next greater/smaller in O(n)',
+    hook:"Imagine you're standing in a line of people of different heights. You want to know: 'Who is the next taller person after me?' You could look ahead one by one — slow! OR imagine people standing on a shrinking staircase. When a tall person arrives, everyone shorter gets popped off — they just found their 'next greater'. The tall person stays, waiting for someone even taller. That's a monotonic stack!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><style>@keyframes ms-pop{0%,70%{opacity:1}80%,100%{opacity:0}}</style><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Monotonic Stack: Next Greater Element</text><text x="300" y="48" fill="#4a5268" text-anchor="middle" font-size="11" font-family="monospace">temps = [73, 74, 75, 71, 69, 72, 76, 73]</text><rect x="50" y="65" width="200" height="210" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="150" y="90" fill="#ef4444" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Stack (decreasing)</text><rect x="75" y="220" width="150" height="28" fill="#0e1018" stroke="#ef4444" rx="4"/><text x="150" y="239" fill="#ef4444" text-anchor="middle" font-size="11">73 (idx:0)</text><rect x="75" y="188" width="150" height="28" fill="#0e1018" stroke="#ef4444" rx="4" style="animation:ms-pop 3s ease 1s infinite"/><text x="150" y="207" fill="#ef4444" text-anchor="middle" font-size="11">popped by 74!</text><rect x="300" y="65" width="260" height="210" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="430" y="90" fill="#00ff88" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">How it works</text><text x="320" y="115" fill="#e8eaf0" font-size="11" font-family="monospace">Push 73 → stack=[73]</text><text x="320" y="138" fill="#ffd600" font-size="11" font-family="monospace">74 &gt; 73 → pop 73, ans[0]=1</text><text x="320" y="161" fill="#ffd600" font-size="11" font-family="monospace">75 &gt; 74 → pop 74, ans[1]=1</text><text x="320" y="184" fill="#e8eaf0" font-size="11" font-family="monospace">Push 71, 69 (decreasing)</text><text x="320" y="207" fill="#ffd600" font-size="11" font-family="monospace">72 &gt; 69,71 → pop both!</text><text x="320" y="230" fill="#ffd600" font-size="11" font-family="monospace">76 &gt; all → clears stack!</text><text x="320" y="258" fill="#00ff88" font-size="11" font-family="monospace">Result: [1,1,4,2,1,1,0,0]</text></svg>`,
+    complexity:[
+      {badge:'red',big:'O(n²)',label:'BRUTE FORCE',desc:'For each element scan right for next greater'},
+      {badge:'green',big:'O(n)',label:'MONOTONIC STACK',desc:'Each element pushed/popped at most once'}
+    ],
+    meterWidth:'92%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># MONOTONIC STACK — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: "next greater/smaller", "days until warmer"</span>
+<span class="cm"># TIME: O(n) | SPACE: O(n)</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="cm"># ─── Daily Temperatures ───</span>
+<span class="kw">def</span> <span class="fn">dailyTemperatures</span>(temps):
+    n = <span class="fn">len</span>(temps)
+    result = [<span class="nm">0</span>] * n
+    stack = []  <span class="cm"># stores indices, decreasing temps</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):
+        <span class="kw">while</span> stack <span class="kw">and</span> temps[i] &gt; temps[stack[-<span class="nm">1</span>]]:
+            prev = stack.pop()
+            result[prev] = i - prev  <span class="cm"># days to wait</span>
+        stack.append(i)
+    <span class="kw">return</span> result
+
+<span class="cm"># ─── Car Fleet ───</span>
+<span class="kw">def</span> <span class="fn">carFleet</span>(target, position, speed):
+    pairs = <span class="fn">sorted</span>(<span class="fn">zip</span>(position, speed), reverse=<span class="nm">True</span>)
+    stack = []  <span class="cm"># arrival times, decreasing</span>
+    <span class="kw">for</span> pos, spd <span class="kw">in</span> pairs:
+        time = (target - pos) / spd
+        <span class="kw">if not</span> stack <span class="kw">or</span> time &gt; stack[-<span class="nm">1</span>]:
+            stack.append(time)  <span class="cm"># new fleet</span>
+    <span class="kw">return</span> <span class="fn">len</span>(stack)`,
+      java:`<span class="cm">// ═══════════════════════════════════════</span>
+<span class="cm">// MONOTONIC STACK — THE TEMPLATE</span>
+<span class="cm">// TIME: O(n) | SPACE: O(n)</span>
+<span class="cm">// ═══════════════════════════════════════</span>
+
+<span class="cm">// ─── Daily Temperatures ───</span>
+<span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">dailyTemperatures</span>(<span class="tp">int</span>[] temps) {
+    <span class="tp">int</span>[] result = <span class="kw">new</span> <span class="tp">int</span>[temps.length];
+    <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; temps.length; i++) {
+        <span class="kw">while</span> (!stack.isEmpty() &amp;&amp; temps[i] &gt; temps[stack.peek()])  {
+            <span class="tp">int</span> prev = stack.pop();
+            result[prev] = i - prev;
+        }
+        stack.push(i);
+    }
+    <span class="kw">return</span> result;
+}`,
+      csharp:`<span class="cm">// MONOTONIC STACK — THE TEMPLATE</span>
+<span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">DailyTemperatures</span>(<span class="tp">int</span>[] temps) {
+    <span class="tp">int</span>[] result = <span class="kw">new</span> <span class="tp">int</span>[temps.Length];
+    <span class="kw">var</span> stack = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">int</span>&gt;();
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; temps.Length; i++) {
+        <span class="kw">while</span> (stack.Count &gt; <span class="nm">0</span> &amp;&amp; temps[i] &gt; temps[stack.Peek()]) {
+            <span class="tp">int</span> prev = stack.Pop();
+            result[prev] = i - prev;
+        }
+        stack.Push(i);
+    }
+    <span class="kw">return</span> result;
+}`
+    },
+    memoryHack:{
+      oneSentence:'Maintain a stack of decreasing values — when a bigger element arrives, pop all smaller ones (they found their answer).',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'Init stack=[]',type:'start',x:290,y:20},
+          {id:'loop',label:'For each i',type:'action',x:290,y:75},
+          {id:'check',label:'curr > stack.top?',type:'decision',x:290,y:135},
+          {id:'pop',label:'Pop → answer found',type:'action',x:100,y:135},
+          {id:'push',label:'Push i to stack',type:'action',x:480,y:135},
+          {id:'next',label:'Next i',type:'action',x:480,y:75}
+        ],
+        edges:[
+          {from:'start',to:'loop',label:''},
+          {from:'loop',to:'check',label:''},
+          {from:'check',to:'pop',label:'YES'},
+          {from:'pop',to:'check',label:'keep popping'},
+          {from:'check',to:'push',label:'NO'},
+          {from:'push',to:'next',label:''},
+          {from:'next',to:'loop',label:''}
+        ]
+      },
+      annotatedCode:[
+        {line:'int[] dailyTemperatures(int[] temps) {',stepId:'start',note:'Find days until warmer for each day',color:'#5a5f70'},
+        {line:'    Deque<Integer> stack = new ArrayDeque<>();',stepId:'start',note:'Stack holds INDICES of decreasing temps',color:'#ef4444'},
+        {line:'    for (int i = 0; i < temps.length; i++) {',stepId:'loop',note:'Process each day left to right',color:'#00cfff'},
+        {line:'        while (!stack.isEmpty() && temps[i] > temps[stack.peek()])',stepId:'check',note:'Current temp beats stack top?',color:'#ffd600'},
+        {line:'            result[stack.pop()] = i - prev;',stepId:'pop',note:'Pop! That day found its warmer day',color:'#00ff88'},
+        {line:'        stack.push(i);',stepId:'push',note:'Push current — waiting for its warmer day',color:'#ef4444'}
+      ],
+      stateSnapshots:[
+        {label:'Day 0',art:'temp=73  stack=[]  → push 0  stack=[0]',annotation:'73 enters, no one to compare'},
+        {label:'Day 1',art:'temp=74 > 73  → pop 0 (ans[0]=1)  push 1  stack=[1]',annotation:'74 is warmer than 73! Answer: 1 day'},
+        {label:'Day 2',art:'temp=75 > 74  → pop 1 (ans[1]=1)  push 2  stack=[2]',annotation:'75 beats 74 too'},
+        {label:'Day 3-4',art:'temp=71,69 < 75  → push both  stack=[2,3,4]',annotation:'Decreasing, just push and wait'},
+        {label:'Day 5',art:'temp=72 > 69,71  → pop 4(ans=1) pop 3(ans=2)  stack=[2,5]',annotation:'72 resolves both 69 and 71!'}
+      ],
+      variations:[
+        {name:'Daily Temperatures',desc:'Decreasing stack of indices, pop when warmer found',problem:'Daily Temperatures (#739)'},
+        {name:'Car Fleet',desc:'Sort by position desc, stack of arrival times',problem:'Car Fleet (#853)'},
+        {name:'Largest Rectangle in Histogram',desc:'Increasing stack — pop when shorter bar found, calc area',problem:'Largest Rectangle (#84)'},
+        {name:'Next Greater Element',desc:'Classic monotonic stack — pop when next greater appears',problem:'Next Greater Element (#496)'}
+      ],
+      title:'POP THE SMALLER',
+      mnemonic:'POP THE SMALLER — big element arrives, everyone shorter gets their answer and leaves',
+      steps:['Init empty stack (will hold indices)','For each element: while stack.top < current, pop and record answer','Push current index onto stack','Remaining in stack have no answer (0 or -1)'],
+      why:'Each element is pushed and popped at most once, giving O(n) total. The stack maintains a sorted order so the next greater/smaller is found instantly on arrival.'
+    },
+    cheat:{
+      trigger:'next greater element, next smaller, days until warmer, histogram area, car fleet',
+      firstLine:'Deque<Integer> stack = new ArrayDeque<>();',
+      gotcha:'Storing values instead of indices — you usually need indices to calculate distances',
+      pitch:"I'll use a monotonic decreasing stack. Each element pops everything smaller, giving those elements their 'next greater'. O(n) since each element is pushed and popped at most once.",
+      snippet:`<span class="cm">// Monotonic decreasing stack — pop smaller elements</span>
+<span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stk = <span class="kw">new</span> <span class="fn">ArrayDeque</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+    <span class="kw">while</span> (!stk.isEmpty() &amp;&amp; arr[i] &gt; arr[stk.peek()])
+        result[stk.pop()] = i;  <span class="cm">// found next greater!</span>
+    stk.push(i);
+}`
+    }
+  },
+  {
+    icon:'🐢🐇', name:'Fast & Slow Pointers', accent:'#06b6d4',
+    tagline:'Two pointers at different speeds to detect cycles',
+    hook:"Imagine two runners on a circular track. The fast runner goes 2x speed. If the track is circular, the fast runner WILL eventually lap the slow runner — they'll meet! If the track is straight (no loop), the fast runner just reaches the end. This simple idea detects cycles in linked lists, finds duplicate numbers, and even tells you if a number is 'happy'. Two speeds, one powerful trick!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><style>@keyframes fs-slow{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}} @keyframes fs-fast{0%{transform:rotate(0deg)}100%{transform:rotate(720deg)}}</style><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Floyd's Cycle Detection</text><circle cx="200" cy="170" r="80" fill="none" stroke="#1e2230" stroke-width="3"/><text x="200" y="75" fill="#4a5268" text-anchor="middle" font-size="11" font-family="monospace">Circular linked list</text><g style="transform-origin:200px 170px;animation:fs-slow 4s linear infinite"><circle cx="280" cy="170" r="12" fill="#06b6d4"/><text x="280" y="174" fill="#fff" text-anchor="middle" font-size="9" font-weight="bold">S</text></g><g style="transform-origin:200px 170px;animation:fs-fast 4s linear infinite"><circle cx="280" cy="170" r="12" fill="#f472b6"/><text x="280" y="174" fill="#fff" text-anchor="middle" font-size="9" font-weight="bold">F</text></g><text x="200" y="280" fill="#06b6d4" text-anchor="middle" font-size="11" font-family="monospace">Slow: 1 step | Fast: 2 steps</text><rect x="350" y="65" width="220" height="200" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="460" y="90" fill="#fff" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Why they meet</text><text x="370" y="115" fill="#06b6d4" font-size="11" font-family="monospace">Slow: 1→2→3→4</text><text x="370" y="138" fill="#f472b6" font-size="11" font-family="monospace">Fast: 1→3→5→7</text><text x="370" y="165" fill="#ffd600" font-size="11" font-family="monospace">Gap shrinks by 1</text><text x="370" y="188" fill="#ffd600" font-size="11" font-family="monospace">each step!</text><text x="370" y="220" fill="#00ff88" font-size="11" font-family="monospace">They MUST meet</text><text x="370" y="243" fill="#00ff88" font-size="11" font-family="monospace">inside the cycle.</text></svg>`,
+    complexity:[
+      {badge:'red',big:'O(n²)',label:'BRUTE FORCE',desc:'Track visited nodes in a set'},
+      {badge:'green',big:'O(n)',label:'FLOYD\'S',desc:'Two pointers, O(1) space, guaranteed meeting'}
+    ],
+    meterWidth:'88%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># FAST &amp; SLOW POINTERS — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Cycle detection, find middle, find duplicate</span>
+<span class="cm"># TIME: O(n) | SPACE: O(1)</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="cm"># ─── Linked List Cycle ───</span>
+<span class="kw">def</span> <span class="fn">hasCycle</span>(head):
+    slow = fast = head
+    <span class="kw">while</span> fast <span class="kw">and</span> fast.next:
+        slow = slow.next        <span class="cm"># 1 step</span>
+        fast = fast.next.next   <span class="cm"># 2 steps</span>
+        <span class="kw">if</span> slow == fast:
+            <span class="kw">return</span> <span class="nm">True</span>  <span class="cm"># they met = cycle!</span>
+    <span class="kw">return</span> <span class="nm">False</span>  <span class="cm"># fast hit end = no cycle</span>
+
+<span class="cm"># ─── Find Duplicate Number ───</span>
+<span class="kw">def</span> <span class="fn">findDuplicate</span>(nums):
+    slow = fast = nums[<span class="nm">0</span>]
+    <span class="kw">while</span> <span class="nm">True</span>:  <span class="cm"># Phase 1: find meeting point</span>
+        slow = nums[slow]
+        fast = nums[nums[fast]]
+        <span class="kw">if</span> slow == fast: <span class="kw">break</span>
+    slow = nums[<span class="nm">0</span>]  <span class="cm"># Phase 2: find cycle start</span>
+    <span class="kw">while</span> slow != fast:
+        slow = nums[slow]
+        fast = nums[fast]
+    <span class="kw">return</span> slow
+
+<span class="cm"># ─── Happy Number ───</span>
+<span class="kw">def</span> <span class="fn">isHappy</span>(n):
+    <span class="kw">def</span> <span class="fn">next_num</span>(x):
+        <span class="kw">return</span> <span class="fn">sum</span>(<span class="fn">int</span>(d)**<span class="nm">2</span> <span class="kw">for</span> d <span class="kw">in</span> <span class="fn">str</span>(x))
+    slow = fast = n
+    <span class="kw">while</span> <span class="nm">True</span>:
+        slow = <span class="fn">next_num</span>(slow)
+        fast = <span class="fn">next_num</span>(<span class="fn">next_num</span>(fast))
+        <span class="kw">if</span> fast == <span class="nm">1</span>: <span class="kw">return</span> <span class="nm">True</span>
+        <span class="kw">if</span> slow == fast: <span class="kw">return</span> <span class="nm">False</span>`,
+      java:`<span class="cm">// FAST &amp; SLOW POINTERS — THE TEMPLATE</span>
+<span class="cm">// TIME: O(n) | SPACE: O(1)</span>
+
+<span class="cm">// ─── Linked List Cycle ───</span>
+<span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">hasCycle</span>(<span class="tp">ListNode</span> head) {
+    <span class="tp">ListNode</span> slow = head, fast = head;
+    <span class="kw">while</span> (fast != <span class="kw">null</span> &amp;&amp; fast.next != <span class="kw">null</span>) {
+        slow = slow.next;
+        fast = fast.next.next;
+        <span class="kw">if</span> (slow == fast) <span class="kw">return</span> <span class="nm">true</span>;
+    }
+    <span class="kw">return</span> <span class="nm">false</span>;
+}
+
+<span class="cm">// ─── Find Duplicate Number ───</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">findDuplicate</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">int</span> slow = nums[<span class="nm">0</span>], fast = nums[<span class="nm">0</span>];
+    <span class="kw">do</span> { slow = nums[slow]; fast = nums[nums[fast]]; }
+    <span class="kw">while</span> (slow != fast);
+    slow = nums[<span class="nm">0</span>];
+    <span class="kw">while</span> (slow != fast) { slow = nums[slow]; fast = nums[fast]; }
+    <span class="kw">return</span> slow;
+}`,
+      csharp:`<span class="cm">// FAST &amp; SLOW POINTERS — THE TEMPLATE</span>
+<span class="kw">public</span> <span class="tp">bool</span> <span class="fn">HasCycle</span>(<span class="tp">ListNode</span> head) {
+    <span class="tp">ListNode</span> slow = head, fast = head;
+    <span class="kw">while</span> (fast != <span class="kw">null</span> &amp;&amp; fast.next != <span class="kw">null</span>) {
+        slow = slow.next;
+        fast = fast.next.next;
+        <span class="kw">if</span> (slow == fast) <span class="kw">return</span> <span class="nm">true</span>;
+    }
+    <span class="kw">return</span> <span class="nm">false</span>;
+}
+
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">FindDuplicate</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">int</span> slow = nums[<span class="nm">0</span>], fast = nums[<span class="nm">0</span>];
+    <span class="kw">do</span> { slow = nums[slow]; fast = nums[nums[fast]]; }
+    <span class="kw">while</span> (slow != fast);
+    slow = nums[<span class="nm">0</span>];
+    <span class="kw">while</span> (slow != fast) { slow = nums[slow]; fast = nums[fast]; }
+    <span class="kw">return</span> slow;
+}`
+    },
+    memoryHack:{
+      oneSentence:'Slow moves 1 step, fast moves 2 steps — if they meet, there is a cycle; to find cycle start, reset one pointer to head.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'slow=fast=head',type:'start',x:290,y:20},
+          {id:'move',label:'slow+=1, fast+=2',type:'action',x:290,y:75},
+          {id:'end',label:'fast hit null?',type:'decision',x:290,y:135},
+          {id:'no_cycle',label:'No cycle',type:'end',x:480,y:135},
+          {id:'meet',label:'slow==fast?',type:'decision',x:100,y:135},
+          {id:'cycle',label:'Cycle found!',type:'end',x:100,y:200}
+        ],
+        edges:[
+          {from:'start',to:'move',label:''},
+          {from:'move',to:'end',label:''},
+          {from:'end',to:'no_cycle',label:'YES'},
+          {from:'end',to:'meet',label:'NO'},
+          {from:'meet',to:'cycle',label:'YES'},
+          {from:'meet',to:'move',label:'NO'}
+        ]
+      },
+      annotatedCode:[
+        {line:'ListNode slow = head, fast = head;',stepId:'start',note:'Both start at head',color:'#06b6d4'},
+        {line:'while (fast != null && fast.next != null) {',stepId:'move',note:'Fast needs 2 valid nodes ahead',color:'#00cfff'},
+        {line:'    slow = slow.next;',stepId:'move',note:'Tortoise: 1 step',color:'#06b6d4'},
+        {line:'    fast = fast.next.next;',stepId:'move',note:'Hare: 2 steps',color:'#f472b6'},
+        {line:'    if (slow == fast) return true;',stepId:'meet',note:'They met inside the cycle!',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'Step 1',art:'slow=node1  fast=node1  (both at head)',annotation:'Starting together'},
+        {label:'Step 2',art:'slow=node2  fast=node3  (gap growing)',annotation:'Fast pulls ahead'},
+        {label:'Step 3',art:'slow=node3  fast=node5  (fast enters cycle)',annotation:'Fast loops around'},
+        {label:'Step 4',art:'slow=node4  fast=node4  (MEET!)',annotation:'Gap shrinks by 1 each step until they collide'}
+      ],
+      variations:[
+        {name:'Linked List Cycle',desc:'slow+1, fast+2 — if meet, cycle exists',problem:'Linked List Cycle (#141)'},
+        {name:'Find the Duplicate Number',desc:'Treat array as linked list, Floyd\'s to find cycle start = duplicate',problem:'Find the Duplicate Number (#287)'},
+        {name:'Happy Number',desc:'next(n) = sum of digit squares. Floyd\'s detects if sequence cycles or reaches 1',problem:'Happy Number (#202)'},
+        {name:'Middle of Linked List',desc:'When fast reaches end, slow is at middle',problem:'Middle of Linked List (#876)'}
+      ],
+      title:'TORTOISE & HARE',
+      mnemonic:'TORTOISE & HARE — slow walks, fast runs. If they meet, there is a loop.',
+      steps:['Init slow=head, fast=head','Move slow 1 step, fast 2 steps','If fast hits null → no cycle','If slow==fast → cycle detected','To find cycle START: reset slow to head, both move 1 step until they meet again'],
+      why:'Fast closes the gap by 1 each step inside a cycle, guaranteeing a meeting. The math proves the meeting point is exactly cycle-length away from the cycle entrance.'
+    },
+    cheat:{
+      trigger:'cycle detection, find duplicate, happy number, middle of list, loop in linked list',
+      firstLine:'ListNode slow = head, fast = head;',
+      gotcha:'Forgetting to check fast.next != null (fast needs TWO valid steps ahead)',
+      pitch:"I'll use Floyd's cycle detection — slow pointer moves 1 step, fast moves 2. If they meet, there's a cycle. To find the cycle start, reset one to head and walk both at speed 1.",
+      snippet:`<span class="cm">// Floyd's: slow=1step, fast=2steps</span>
+<span class="tp">ListNode</span> slow = head, fast = head;
+<span class="kw">while</span> (fast != <span class="kw">null</span> &amp;&amp; fast.next != <span class="kw">null</span>) {
+    slow = slow.next;
+    fast = fast.next.next;
+    <span class="kw">if</span> (slow == fast) <span class="kw">return</span> <span class="nm">true</span>; <span class="cm">// cycle!</span>
+}`
+    }
+  },
+  {
+    icon:'🌊', name:'Tree BFS / Level Order', accent:'#38bdf8',
+    tagline:'Process a tree level by level using a queue',
+    hook:"Imagine you're the principal of a school. You want to take attendance floor by floor — first all classrooms on floor 1, then floor 2, then floor 3. You don't jump into a classroom and go down a staircase (that's DFS). Instead you sweep across each level. BFS uses a queue: process current floor, add all kids from next floor to the queue. Level complete!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><style>@keyframes bfs-l1{0%,100%{stroke:#38bdf8}50%{stroke:#ffd600}} @keyframes bfs-l2{0%,30%{stroke:#1e2230}30%,100%{stroke:#38bdf8}}</style><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">BFS: Level Order Traversal</text><circle cx="200" cy="65" r="22" fill="#1a1d2e" stroke="#38bdf8" stroke-width="2" style="animation:bfs-l1 3s infinite"/><text x="200" y="70" fill="#38bdf8" text-anchor="middle" font-size="14" font-weight="bold">3</text><text x="245" y="60" fill="#ffd600" font-size="10" font-family="monospace">Level 0</text><line x1="183" y1="83" x2="140" y2="115" stroke="#38bdf8"/><line x1="217" y1="83" x2="260" y2="115" stroke="#38bdf8"/><circle cx="140" cy="135" r="20" fill="#1a1d2e" stroke="#38bdf8" stroke-width="2" style="animation:bfs-l2 3s .5s infinite"/><text x="140" y="140" fill="#38bdf8" text-anchor="middle" font-size="14">9</text><circle cx="260" cy="135" r="20" fill="#1a1d2e" stroke="#38bdf8" stroke-width="2" style="animation:bfs-l2 3s .5s infinite"/><text x="260" y="140" fill="#38bdf8" text-anchor="middle" font-size="14">20</text><text x="305" y="130" fill="#ffd600" font-size="10" font-family="monospace">Level 1</text><line x1="245" y1="152" x2="220" y2="180" stroke="#38bdf8"/><line x1="275" y1="152" x2="300" y2="180" stroke="#38bdf8"/><circle cx="220" cy="200" r="18" fill="#1a1d2e" stroke="#38bdf8" stroke-width="2"/><text x="220" y="205" fill="#38bdf8" text-anchor="middle" font-size="13">15</text><circle cx="300" cy="200" r="18" fill="#1a1d2e" stroke="#38bdf8" stroke-width="2"/><text x="300" y="205" fill="#38bdf8" text-anchor="middle" font-size="13">7</text><text x="340" y="195" fill="#ffd600" font-size="10" font-family="monospace">Level 2</text><rect x="350" y="55" width="220" height="130" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="460" y="78" fill="#38bdf8" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Queue processing</text><text x="370" y="100" fill="#e8eaf0" font-size="11" font-family="monospace">Q=[3] → level=[[3]]</text><text x="370" y="120" fill="#e8eaf0" font-size="11" font-family="monospace">Q=[9,20] → level=[[9,20]]</text><text x="370" y="140" fill="#e8eaf0" font-size="11" font-family="monospace">Q=[15,7] → level=[[15,7]]</text><text x="370" y="165" fill="#00ff88" font-size="11" font-family="monospace">Result: [[3],[9,20],[15,7]]</text><text x="300" y="265" fill="#ffd600" text-anchor="middle" font-size="11" font-family="monospace">Key: process ALL nodes at current level before moving to next</text></svg>`,
+    complexity:[
+      {badge:'green',big:'O(n)',label:'BFS',desc:'Visit every node exactly once via queue'},
+      {badge:'blue',big:'O(w)',label:'SPACE',desc:'Queue holds at most one level width (max width w)'}
+    ],
+    meterWidth:'80%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># TREE BFS / LEVEL ORDER — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Level-by-level, rightmost view, zigzag</span>
+<span class="cm"># TIME: O(n) | SPACE: O(w) where w = max width</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="cm"># ─── Level Order Traversal ───</span>
+<span class="kw">def</span> <span class="fn">levelOrder</span>(root):
+    <span class="kw">if not</span> root: <span class="kw">return</span> []
+    result, queue = [], deque([root])
+    <span class="kw">while</span> queue:
+        level = []
+        <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(queue)):  <span class="cm"># process entire level</span>
+            node = queue.popleft()
+            level.append(node.val)
+            <span class="kw">if</span> node.left:  queue.append(node.left)
+            <span class="kw">if</span> node.right: queue.append(node.right)
+        result.append(level)
+    <span class="kw">return</span> result
+
+<span class="cm"># ─── Right Side View ───</span>
+<span class="kw">def</span> <span class="fn">rightSideView</span>(root):
+    <span class="kw">if not</span> root: <span class="kw">return</span> []
+    result, queue = [], deque([root])
+    <span class="kw">while</span> queue:
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(queue)):
+            node = queue.popleft()
+            <span class="kw">if</span> i == <span class="fn">len</span>(queue):  <span class="cm"># wait, last in level</span>
+                result.append(node.val)
+            <span class="kw">if</span> node.left:  queue.append(node.left)
+            <span class="kw">if</span> node.right: queue.append(node.right)
+        result.append(node.val)  <span class="cm"># last node = rightmost</span>
+    <span class="kw">return</span> result`,
+      java:`<span class="cm">// TREE BFS / LEVEL ORDER — THE TEMPLATE</span>
+<span class="cm">// TIME: O(n) | SPACE: O(w)</span>
+
+<span class="cm">// ─── Level Order Traversal ───</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">levelOrder</span>(<span class="tp">TreeNode</span> root) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span> result;
+    <span class="tp">Queue</span>&lt;<span class="tp">TreeNode</span>&gt; queue = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+    queue.offer(root);
+    <span class="kw">while</span> (!queue.isEmpty()) {
+        <span class="tp">int</span> size = queue.size();  <span class="cm">// snapshot level size!</span>
+        <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; level = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; size; i++) {
+            <span class="tp">TreeNode</span> node = queue.poll();
+            level.add(node.val);
+            <span class="kw">if</span> (node.left != <span class="kw">null</span>)  queue.offer(node.left);
+            <span class="kw">if</span> (node.right != <span class="kw">null</span>) queue.offer(node.right);
+        }
+        result.add(level);
+    }
+    <span class="kw">return</span> result;
+}`,
+      csharp:`<span class="cm">// TREE BFS / LEVEL ORDER — THE TEMPLATE</span>
+<span class="kw">public</span> <span class="tp">IList</span>&lt;<span class="tp">IList</span>&lt;<span class="tp">int</span>&gt;&gt; <span class="fn">LevelOrder</span>(<span class="tp">TreeNode</span> root) {
+    <span class="kw">var</span> result = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">IList</span>&lt;<span class="tp">int</span>&gt;&gt;();
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span> result;
+    <span class="kw">var</span> queue = <span class="kw">new</span> <span class="tp">Queue</span>&lt;<span class="tp">TreeNode</span>&gt;();
+    queue.Enqueue(root);
+    <span class="kw">while</span> (queue.Count &gt; <span class="nm">0</span>) {
+        <span class="tp">int</span> size = queue.Count;
+        <span class="kw">var</span> level = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt;();
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; size; i++) {
+            <span class="kw">var</span> node = queue.Dequeue();
+            level.Add(node.val);
+            <span class="kw">if</span> (node.left != <span class="kw">null</span>)  queue.Enqueue(node.left);
+            <span class="kw">if</span> (node.right != <span class="kw">null</span>) queue.Enqueue(node.right);
+        }
+        result.Add(level);
+    }
+    <span class="kw">return</span> result;
+}`
+    },
+    memoryHack:{
+      oneSentence:'Use a queue. Process all nodes at the current level (snapshot queue size), then their children become the next level.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'Queue=[root]',type:'start',x:290,y:20},
+          {id:'while',label:'Queue empty?',type:'decision',x:290,y:80},
+          {id:'size',label:'size=queue.size()',type:'action',x:290,y:140},
+          {id:'loop',label:'For i in 0..size',type:'action',x:290,y:195},
+          {id:'proc',label:'Poll + add children',type:'action',x:100,y:195},
+          {id:'done',label:'Return levels',type:'end',x:480,y:80}
+        ],
+        edges:[
+          {from:'start',to:'while',label:''},
+          {from:'while',to:'done',label:'YES'},
+          {from:'while',to:'size',label:'NO'},
+          {from:'size',to:'loop',label:'snapshot!'},
+          {from:'loop',to:'proc',label:''},
+          {from:'proc',to:'while',label:'next level'}
+        ]
+      },
+      annotatedCode:[
+        {line:'Queue<TreeNode> queue = new LinkedList<>();',stepId:'start',note:'Queue for BFS — FIFO order',color:'#38bdf8'},
+        {line:'queue.offer(root);',stepId:'start',note:'Seed with root node',color:'#38bdf8'},
+        {line:'while (!queue.isEmpty()) {',stepId:'while',note:'Keep going until all levels processed',color:'#00cfff'},
+        {line:'    int size = queue.size();',stepId:'size',note:'CRITICAL: snapshot size BEFORE adding children!',color:'#ffd600'},
+        {line:'    for (int i = 0; i < size; i++) {',stepId:'loop',note:'Process exactly this many nodes = one level',color:'#a78bfa'},
+        {line:'        TreeNode node = queue.poll();',stepId:'proc',note:'Dequeue front node',color:'#00ff88'},
+        {line:'        if (node.left) queue.offer(node.left);',stepId:'proc',note:'Children go to back of queue = next level',color:'#38bdf8'}
+      ],
+      stateSnapshots:[
+        {label:'Level 0',art:'Q=[3]  size=1  → process 3  → add 9,20  Q=[9,20]',annotation:'Root level: just node 3'},
+        {label:'Level 1',art:'Q=[9,20]  size=2  → process 9,20  → add 15,7  Q=[15,7]',annotation:'Both children processed as one level'},
+        {label:'Level 2',art:'Q=[15,7]  size=2  → process 15,7  → Q empty',annotation:'Leaf level, no more children'},
+        {label:'Result',art:'[[3], [9,20], [15,7]]',annotation:'Each inner list = one tree level'}
+      ],
+      variations:[
+        {name:'Level Order Traversal',desc:'Queue BFS, snapshot size, collect each level',problem:'Binary Tree Level Order Traversal (#102)'},
+        {name:'Right Side View',desc:'BFS — last node of each level is the rightmost',problem:'Binary Tree Right Side View (#199)'},
+        {name:'Rotting Oranges',desc:'Multi-source BFS from all rotten oranges simultaneously',problem:'Rotting Oranges (#994)'},
+        {name:'Walls and Gates',desc:'Multi-source BFS from all gates, flood-fill distances',problem:'Walls and Gates (#286)'}
+      ],
+      title:'SNAPSHOT THE LEVEL',
+      mnemonic:'SNAPSHOT THE LEVEL — save queue.size() before processing so you know where one level ends and the next begins',
+      steps:['Init queue with root','While queue not empty: snapshot size = queue.size()','For i in 0..size: poll node, process it, add children','After inner loop: one complete level is done','Repeat until queue empty'],
+      why:'The key insight is snapshotting queue.size() before the inner loop — this tells you exactly how many nodes belong to the current level vs the next level.'
+    },
+    cheat:{
+      trigger:'level order, level by level, BFS tree, right side view, rotting oranges, shortest path grid',
+      firstLine:'Queue<TreeNode> queue = new LinkedList<>();',
+      gotcha:'NOT snapshotting queue.size() before the loop — children mix with current level nodes',
+      pitch:"I'll use BFS with a queue. The key trick is snapshotting queue.size() at the start of each level to know exactly how many nodes belong to the current level.",
+      snippet:`<span class="cm">// BFS level-order: snapshot size before processing</span>
+<span class="tp">Queue</span>&lt;<span class="tp">TreeNode</span>&gt; q = <span class="kw">new</span> <span class="fn">LinkedList</span>&lt;&gt;();
+q.offer(root);
+<span class="kw">while</span> (!q.isEmpty()) {
+    <span class="kw">int</span> size = q.size(); <span class="cm">// snapshot!</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i=<span class="nm">0</span>;i&lt;size;i++) {
+        <span class="tp">TreeNode</span> n = q.poll();
+        <span class="kw">if</span>(n.left!=<span class="kw">null</span>) q.offer(n.left);
+        <span class="kw">if</span>(n.right!=<span class="kw">null</span>) q.offer(n.right);
+    }
+}`
+    }
+  },
+  {
+    icon:'🔍', name:'BST Property Patterns', accent:'#a3e635',
+    tagline:'Exploit sorted in-order traversal of BSTs',
+    hook:"A Binary Search Tree has a superpower: if you read it in-order (left, root, right), you get a SORTED list! That's like having a bookshelf where books are always alphabetically ordered — you don't need to search everywhere. To validate a BST, just check that in-order gives sorted output. To find the kth smallest, just do in-order and count to k. The BST property = free sorting!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">BST Property: In-Order = Sorted!</text><circle cx="200" cy="70" r="22" fill="#1a1d2e" stroke="#a3e635" stroke-width="2"/><text x="200" y="75" fill="#a3e635" text-anchor="middle" font-size="14" font-weight="bold">5</text><line x1="183" y1="88" x2="130" y2="118" stroke="#a3e635"/><line x1="217" y1="88" x2="270" y2="118" stroke="#a3e635"/><circle cx="130" cy="138" r="20" fill="#1a1d2e" stroke="#a3e635" stroke-width="2"/><text x="130" y="143" fill="#a3e635" text-anchor="middle" font-size="14">3</text><circle cx="270" cy="138" r="20" fill="#1a1d2e" stroke="#a3e635" stroke-width="2"/><text x="270" y="143" fill="#a3e635" text-anchor="middle" font-size="14">8</text><line x1="117" y1="155" x2="90" y2="180" stroke="#a3e635"/><line x1="143" y1="155" x2="170" y2="180" stroke="#a3e635"/><circle cx="90" cy="200" r="18" fill="#1a1d2e" stroke="#a3e635" stroke-width="2"/><text x="90" y="205" fill="#a3e635" text-anchor="middle" font-size="13">1</text><circle cx="170" cy="200" r="18" fill="#1a1d2e" stroke="#a3e635" stroke-width="2"/><text x="170" y="205" fill="#a3e635" text-anchor="middle" font-size="13">4</text><text x="200" y="250" fill="#ffd600" text-anchor="middle" font-size="12" font-family="monospace">In-order: 1→3→4→5→8 (sorted!)</text><rect x="350" y="55" width="220" height="160" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="460" y="78" fill="#a3e635" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">BST Tricks</text><text x="370" y="100" fill="#00ff88" font-size="11" font-family="monospace">✓ Validate: in-order sorted?</text><text x="370" y="122" fill="#00ff88" font-size="11" font-family="monospace">✓ Kth smallest: in-order, k--</text><text x="370" y="144" fill="#00ff88" font-size="11" font-family="monospace">✓ LCA: go left/right by value</text><text x="370" y="166" fill="#ffd600" font-size="11" font-family="monospace">Rule: left &lt; root &lt; right</text><text x="370" y="188" fill="#ffd600" font-size="11" font-family="monospace">For EVERY subtree!</text></svg>`,
+    complexity:[
+      {badge:'green',big:'O(n)',label:'IN-ORDER',desc:'Visit every node once in sorted order'},
+      {badge:'blue',big:'O(h)',label:'BST SEARCH',desc:'Follow left/right path — O(log n) if balanced'}
+    ],
+    meterWidth:'85%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># BST PROPERTY PATTERNS — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># KEY INSIGHT: In-order traversal of BST = sorted array</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="cm"># ─── Validate BST (bounds approach) ───</span>
+<span class="kw">def</span> <span class="fn">isValidBST</span>(root, lo=<span class="fn">float</span>(<span class="st">'-inf'</span>), hi=<span class="fn">float</span>(<span class="st">'inf'</span>)):
+    <span class="kw">if not</span> root: <span class="kw">return</span> <span class="nm">True</span>
+    <span class="kw">if</span> root.val &lt;= lo <span class="kw">or</span> root.val &gt;= hi:
+        <span class="kw">return</span> <span class="nm">False</span>
+    <span class="kw">return</span> (<span class="fn">isValidBST</span>(root.left, lo, root.val) <span class="kw">and</span>
+            <span class="fn">isValidBST</span>(root.right, root.val, hi))
+
+<span class="cm"># ─── Kth Smallest Element ───</span>
+<span class="kw">def</span> <span class="fn">kthSmallest</span>(root, k):
+    stack, curr = [], root
+    <span class="kw">while</span> stack <span class="kw">or</span> curr:
+        <span class="kw">while</span> curr:  <span class="cm"># go as left as possible</span>
+            stack.append(curr)
+            curr = curr.left
+        curr = stack.pop()
+        k -= <span class="nm">1</span>
+        <span class="kw">if</span> k == <span class="nm">0</span>: <span class="kw">return</span> curr.val
+        curr = curr.right
+
+<span class="cm"># ─── Lowest Common Ancestor of BST ───</span>
+<span class="kw">def</span> <span class="fn">lowestCommonAncestor</span>(root, p, q):
+    <span class="kw">while</span> root:
+        <span class="kw">if</span> p.val &lt; root.val <span class="kw">and</span> q.val &lt; root.val:
+            root = root.left   <span class="cm"># both left → go left</span>
+        <span class="kw">elif</span> p.val &gt; root.val <span class="kw">and</span> q.val &gt; root.val:
+            root = root.right  <span class="cm"># both right → go right</span>
+        <span class="kw">else</span>:
+            <span class="kw">return</span> root  <span class="cm"># split point = LCA!</span>`,
+      java:`<span class="cm">// BST PROPERTY PATTERNS — THE TEMPLATE</span>
+
+<span class="cm">// ─── Validate BST ───</span>
+<span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">isValidBST</span>(<span class="tp">TreeNode</span> root) {
+    <span class="kw">return</span> validate(root, Long.MIN_VALUE, Long.MAX_VALUE);
+}
+<span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">validate</span>(<span class="tp">TreeNode</span> node, <span class="tp">long</span> lo, <span class="tp">long</span> hi) {
+    <span class="kw">if</span> (node == <span class="kw">null</span>) <span class="kw">return</span> <span class="nm">true</span>;
+    <span class="kw">if</span> (node.val &lt;= lo || node.val &gt;= hi) <span class="kw">return</span> <span class="nm">false</span>;
+    <span class="kw">return</span> validate(node.left, lo, node.val)
+        &amp;&amp; validate(node.right, node.val, hi);
+}
+
+<span class="cm">// ─── Kth Smallest ───</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">kthSmallest</span>(<span class="tp">TreeNode</span> root, <span class="tp">int</span> k) {
+    <span class="tp">Deque</span>&lt;<span class="tp">TreeNode</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+    <span class="tp">TreeNode</span> curr = root;
+    <span class="kw">while</span> (!stack.isEmpty() || curr != <span class="kw">null</span>) {
+        <span class="kw">while</span> (curr != <span class="kw">null</span>) { stack.push(curr); curr = curr.left; }
+        curr = stack.pop();
+        <span class="kw">if</span> (--k == <span class="nm">0</span>) <span class="kw">return</span> curr.val;
+        curr = curr.right;
+    }
+    <span class="kw">return</span> -<span class="nm">1</span>;
+}
+
+<span class="cm">// ─── LCA of BST ───</span>
+<span class="kw">public</span> <span class="tp">TreeNode</span> <span class="fn">lowestCommonAncestor</span>(<span class="tp">TreeNode</span> root, <span class="tp">TreeNode</span> p, <span class="tp">TreeNode</span> q) {
+    <span class="kw">while</span> (root != <span class="kw">null</span>) {
+        <span class="kw">if</span> (p.val &lt; root.val &amp;&amp; q.val &lt; root.val) root = root.left;
+        <span class="kw">else if</span> (p.val &gt; root.val &amp;&amp; q.val &gt; root.val) root = root.right;
+        <span class="kw">else return</span> root;
+    }
+    <span class="kw">return null</span>;
+}`,
+      csharp:`<span class="cm">// BST PROPERTY PATTERNS — THE TEMPLATE</span>
+<span class="kw">public</span> <span class="tp">bool</span> <span class="fn">IsValidBST</span>(<span class="tp">TreeNode</span> root) {
+    <span class="kw">return</span> Validate(root, <span class="tp">long</span>.MinValue, <span class="tp">long</span>.MaxValue);
+}
+<span class="kw">private</span> <span class="tp">bool</span> <span class="fn">Validate</span>(<span class="tp">TreeNode</span> node, <span class="tp">long</span> lo, <span class="tp">long</span> hi) {
+    <span class="kw">if</span> (node == <span class="kw">null</span>) <span class="kw">return</span> <span class="nm">true</span>;
+    <span class="kw">if</span> (node.val &lt;= lo || node.val &gt;= hi) <span class="kw">return</span> <span class="nm">false</span>;
+    <span class="kw">return</span> Validate(node.left, lo, node.val)
+        &amp;&amp; Validate(node.right, node.val, hi);
+}
+
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">KthSmallest</span>(<span class="tp">TreeNode</span> root, <span class="tp">int</span> k) {
+    <span class="kw">var</span> stack = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">TreeNode</span>&gt;();
+    <span class="kw">var</span> curr = root;
+    <span class="kw">while</span> (stack.Count &gt; <span class="nm">0</span> || curr != <span class="kw">null</span>) {
+        <span class="kw">while</span> (curr != <span class="kw">null</span>) { stack.Push(curr); curr = curr.left; }
+        curr = stack.Pop();
+        <span class="kw">if</span> (--k == <span class="nm">0</span>) <span class="kw">return</span> curr.val;
+        curr = curr.right;
+    }
+    <span class="kw">return</span> -<span class="nm">1</span>;
+}`
+    },
+    memoryHack:{
+      oneSentence:'BST in-order = sorted array. Validate with bounds, find kth by counting in-order, LCA by following the split point.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'BST node',type:'start',x:290,y:20},
+          {id:'check',label:'Both left?',type:'decision',x:290,y:80},
+          {id:'left',label:'Go left',type:'action',x:100,y:80},
+          {id:'right_check',label:'Both right?',type:'decision',x:290,y:140},
+          {id:'right',label:'Go right',type:'action',x:480,y:140},
+          {id:'lca',label:'Split = LCA!',type:'end',x:290,y:200}
+        ],
+        edges:[
+          {from:'start',to:'check',label:''},
+          {from:'check',to:'left',label:'YES'},
+          {from:'left',to:'check',label:''},
+          {from:'check',to:'right_check',label:'NO'},
+          {from:'right_check',to:'right',label:'YES'},
+          {from:'right',to:'right_check',label:''},
+          {from:'right_check',to:'lca',label:'NO = split'}
+        ]
+      },
+      annotatedCode:[
+        {line:'boolean isValidBST(TreeNode node, long lo, long hi) {',stepId:'start',note:'Pass bounds down recursively',color:'#5a5f70'},
+        {line:'    if (node == null) return true;',stepId:'start',note:'Empty subtree is valid',color:'#a3e635'},
+        {line:'    if (node.val <= lo || node.val >= hi) return false;',stepId:'check',note:'Must be strictly within bounds!',color:'#ff4d6d'},
+        {line:'    return validate(left, lo, node.val)',stepId:'left',note:'Left child must be < current',color:'#00ff88'},
+        {line:'        && validate(right, node.val, hi);',stepId:'right',note:'Right child must be > current',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'Validate',art:'Node 5, bounds (-∞, ∞) → valid. Left(3, -∞, 5) Right(8, 5, ∞)',annotation:'Root always valid, pass value as new bound'},
+        {label:'Left subtree',art:'Node 3, bounds (-∞, 5) → valid. Node 1(-∞,3) Node 4(3,5)',annotation:'3 < 5 ✓, tighten bounds for children'},
+        {label:'Kth smallest',art:'In-order: 1,3,4,5,8. k=3 → answer is 4',annotation:'In-order traversal gives sorted order'},
+        {label:'LCA',art:'Find LCA(1,4): root=5→both<5→go left→root=3→split! LCA=3',annotation:'When p and q split to different sides, that is the LCA'}
+      ],
+      variations:[
+        {name:'Validate BST',desc:'Pass (lo, hi) bounds down — each node must be within range',problem:'Validate Binary Search Tree (#98)'},
+        {name:'Kth Smallest in BST',desc:'In-order traversal with counter — stop at k',problem:'Kth Smallest Element in BST (#230)'},
+        {name:'LCA of BST',desc:'Follow the split: both left→go left, both right→go right, else→LCA',problem:'Lowest Common Ancestor of BST (#235)'},
+        {name:'Search in BST',desc:'Simple: go left if target < root, right if target > root',problem:'Search in BST (#700)'}
+      ],
+      title:'IN-ORDER = SORTED',
+      mnemonic:'IN-ORDER = SORTED — BST gives you free sorting, use bounds for validation, split for LCA',
+      steps:['Validate: pass (lo, hi) bounds, each node must be in range','Kth Smallest: in-order traversal, decrement k each pop','LCA: both targets < node → go left; both > → go right; else → found LCA'],
+      why:'The BST property (left < root < right) means in-order traversal produces sorted output, enabling efficient search, validation, and kth element queries.'
+    },
+    cheat:{
+      trigger:'validate BST, kth smallest, lowest common ancestor BST, in-order traversal, BST search',
+      firstLine:'return validate(root, Long.MIN_VALUE, Long.MAX_VALUE);',
+      gotcha:'Using int bounds instead of long — node values can be Integer.MIN_VALUE/MAX_VALUE themselves',
+      pitch:"I'll exploit the BST property: in-order gives sorted order. For validation I'll pass bounds, for kth smallest I'll do iterative in-order, for LCA I'll follow the value split.",
+      snippet:`<span class="cm">// BST validate: pass bounds, tighten at each level</span>
+<span class="kw">boolean</span> <span class="fn">validate</span>(<span class="tp">TreeNode</span> n, <span class="kw">long</span> lo, <span class="kw">long</span> hi) {
+    <span class="kw">if</span> (n==<span class="kw">null</span>) <span class="kw">return true</span>;
+    <span class="kw">if</span> (n.val&lt;=lo || n.val&gt;=hi) <span class="kw">return false</span>;
+    <span class="kw">return</span> <span class="fn">validate</span>(n.left,lo,n.val) &amp;&amp; <span class="fn">validate</span>(n.right,n.val,hi);
+}`
+    }
+  },
+  {
+    icon:'📐', name:'Topological Sort', accent:'#c084fc',
+    tagline:'Order tasks respecting dependencies — detect cycles too',
+    hook:"Imagine getting dressed: you MUST put on underwear before pants, socks before shoes. Some things have prerequisites! Topological sort figures out a valid order. It uses a trick: count each task's prerequisites (in-degree). Tasks with 0 prerequisites go first. When you complete a task, reduce the count for everything depending on it. New zeros? They're ready! If not everything gets processed, there's a circular dependency — impossible!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Topological Sort (Kahn's BFS)</text><text x="300" y="48" fill="#4a5268" text-anchor="middle" font-size="11" font-family="monospace">Course Schedule: [[1,0],[2,0],[3,1],[3,2]]</text><circle cx="150" cy="90" r="22" fill="#1a1d2e" stroke="#c084fc" stroke-width="2"/><text x="150" y="95" fill="#c084fc" text-anchor="middle" font-size="14" font-weight="bold">0</text><text x="150" y="72" fill="#00ff88" font-size="9" font-family="monospace">in:0</text><circle cx="80" cy="170" r="22" fill="#1a1d2e" stroke="#c084fc" stroke-width="2"/><text x="80" y="175" fill="#c084fc" text-anchor="middle" font-size="14">1</text><text x="80" y="152" fill="#ffd600" font-size="9" font-family="monospace">in:1</text><circle cx="220" cy="170" r="22" fill="#1a1d2e" stroke="#c084fc" stroke-width="2"/><text x="220" y="175" fill="#c084fc" text-anchor="middle" font-size="14">2</text><text x="220" y="152" fill="#ffd600" font-size="9" font-family="monospace">in:1</text><circle cx="150" cy="250" r="22" fill="#1a1d2e" stroke="#c084fc" stroke-width="2"/><text x="150" y="255" fill="#c084fc" text-anchor="middle" font-size="14">3</text><text x="150" y="232" fill="#ff4d6d" font-size="9" font-family="monospace">in:2</text><line x1="135" y1="108" x2="95" y2="152" stroke="#c084fc" marker-end="url(#ts-arr)"/><line x1="165" y1="108" x2="205" y2="152" stroke="#c084fc" marker-end="url(#ts-arr)"/><line x1="95" y1="188" x2="135" y2="232" stroke="#c084fc" marker-end="url(#ts-arr)"/><line x1="205" y1="188" x2="165" y2="232" stroke="#c084fc" marker-end="url(#ts-arr)"/><defs><marker id="ts-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#c084fc"/></marker></defs><rect x="330" y="65" width="240" height="180" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="450" y="88" fill="#c084fc" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Kahn's Algorithm</text><text x="350" y="112" fill="#00ff88" font-size="11" font-family="monospace">1. in-degree 0 → queue [0]</text><text x="350" y="135" fill="#e8eaf0" font-size="11" font-family="monospace">2. Process 0 → dec 1,2</text><text x="350" y="158" fill="#ffd600" font-size="11" font-family="monospace">3. Now 1,2 have in=0 → queue</text><text x="350" y="181" fill="#e8eaf0" font-size="11" font-family="monospace">4. Process 1,2 → dec 3</text><text x="350" y="204" fill="#ffd600" font-size="11" font-family="monospace">5. Now 3 has in=0 → queue</text><text x="350" y="230" fill="#00ff88" font-size="11" font-family="monospace">Order: [0,1,2,3] ✓</text></svg>`,
+    complexity:[
+      {badge:'green',big:'O(V+E)',label:'KAHN\'S BFS',desc:'Process each vertex and edge once'},
+      {badge:'green',big:'O(V+E)',label:'DFS',desc:'Post-order DFS also works for topo sort'}
+    ],
+    meterWidth:'88%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># TOPOLOGICAL SORT — THE TEMPLATE (Kahn's)</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Task ordering, course prerequisites, dependency resolution</span>
+<span class="cm"># TIME: O(V+E) | SPACE: O(V+E)</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="kw">from</span> collections <span class="kw">import</span> deque, defaultdict
+
+<span class="cm"># ─── Course Schedule (can finish?) ───</span>
+<span class="kw">def</span> <span class="fn">canFinish</span>(numCourses, prerequisites):
+    graph = defaultdict(<span class="fn">list</span>)
+    indegree = [<span class="nm">0</span>] * numCourses
+    <span class="kw">for</span> course, prereq <span class="kw">in</span> prerequisites:
+        graph[prereq].append(course)
+        indegree[course] += <span class="nm">1</span>
+    queue = deque(i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(numCourses) <span class="kw">if</span> indegree[i] == <span class="nm">0</span>)
+    count = <span class="nm">0</span>
+    <span class="kw">while</span> queue:
+        node = queue.popleft()
+        count += <span class="nm">1</span>
+        <span class="kw">for</span> nei <span class="kw">in</span> graph[node]:
+            indegree[nei] -= <span class="nm">1</span>
+            <span class="kw">if</span> indegree[nei] == <span class="nm">0</span>:
+                queue.append(nei)
+    <span class="kw">return</span> count == numCourses  <span class="cm"># all processed = no cycle</span>
+
+<span class="cm"># ─── Course Schedule II (return order) ───</span>
+<span class="kw">def</span> <span class="fn">findOrder</span>(numCourses, prerequisites):
+    graph = defaultdict(<span class="fn">list</span>)
+    indegree = [<span class="nm">0</span>] * numCourses
+    <span class="kw">for</span> c, p <span class="kw">in</span> prerequisites:
+        graph[p].append(c)
+        indegree[c] += <span class="nm">1</span>
+    queue = deque(i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(numCourses) <span class="kw">if</span> indegree[i] == <span class="nm">0</span>)
+    order = []
+    <span class="kw">while</span> queue:
+        node = queue.popleft()
+        order.append(node)
+        <span class="kw">for</span> nei <span class="kw">in</span> graph[node]:
+            indegree[nei] -= <span class="nm">1</span>
+            <span class="kw">if</span> indegree[nei] == <span class="nm">0</span>:
+                queue.append(nei)
+    <span class="kw">return</span> order <span class="kw">if</span> <span class="fn">len</span>(order) == numCourses <span class="kw">else</span> []`,
+      java:`<span class="cm">// TOPOLOGICAL SORT — THE TEMPLATE (Kahn's BFS)</span>
+<span class="cm">// TIME: O(V+E) | SPACE: O(V+E)</span>
+
+<span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">findOrder</span>(<span class="tp">int</span> numCourses, <span class="tp">int</span>[][] prerequisites) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="tp">int</span>[] indegree = <span class="kw">new</span> <span class="tp">int</span>[numCourses];
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++) graph.add(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;());
+    <span class="kw">for</span> (<span class="tp">int</span>[] p : prerequisites) {
+        graph.get(p[<span class="nm">1</span>]).add(p[<span class="nm">0</span>]);
+        indegree[p[<span class="nm">0</span>]]++;
+    }
+    <span class="tp">Queue</span>&lt;<span class="tp">Integer</span>&gt; queue = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++)
+        <span class="kw">if</span> (indegree[i] == <span class="nm">0</span>) queue.offer(i);
+    <span class="tp">int</span>[] order = <span class="kw">new</span> <span class="tp">int</span>[numCourses];
+    <span class="tp">int</span> idx = <span class="nm">0</span>;
+    <span class="kw">while</span> (!queue.isEmpty()) {
+        <span class="tp">int</span> node = queue.poll();
+        order[idx++] = node;
+        <span class="kw">for</span> (<span class="tp">int</span> nei : graph.get(node))
+            <span class="kw">if</span> (--indegree[nei] == <span class="nm">0</span>) queue.offer(nei);
+    }
+    <span class="kw">return</span> idx == numCourses ? order : <span class="kw">new</span> <span class="tp">int</span>[<span class="nm">0</span>];
+}`,
+      csharp:`<span class="cm">// TOPOLOGICAL SORT — THE TEMPLATE (Kahn's BFS)</span>
+<span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">FindOrder</span>(<span class="tp">int</span> numCourses, <span class="tp">int</span>[][] prerequisites) {
+    <span class="kw">var</span> graph = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt;[numCourses];
+    <span class="tp">int</span>[] indegree = <span class="kw">new</span> <span class="tp">int</span>[numCourses];
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++) graph[i] = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt;();
+    <span class="kw">foreach</span> (<span class="kw">var</span> p <span class="kw">in</span> prerequisites) {
+        graph[p[<span class="nm">1</span>]].Add(p[<span class="nm">0</span>]);
+        indegree[p[<span class="nm">0</span>]]++;
+    }
+    <span class="kw">var</span> queue = <span class="kw">new</span> <span class="tp">Queue</span>&lt;<span class="tp">int</span>&gt;();
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++)
+        <span class="kw">if</span> (indegree[i] == <span class="nm">0</span>) queue.Enqueue(i);
+    <span class="kw">var</span> order = <span class="kw">new</span> <span class="tp">int</span>[numCourses];
+    <span class="tp">int</span> idx = <span class="nm">0</span>;
+    <span class="kw">while</span> (queue.Count &gt; <span class="nm">0</span>) {
+        <span class="tp">int</span> node = queue.Dequeue();
+        order[idx++] = node;
+        <span class="kw">foreach</span> (<span class="tp">int</span> nei <span class="kw">in</span> graph[node])
+            <span class="kw">if</span> (--indegree[nei] == <span class="nm">0</span>) queue.Enqueue(nei);
+    }
+    <span class="kw">return</span> idx == numCourses ? order : Array.Empty&lt;<span class="tp">int</span>&gt;();
+}`
+    },
+    memoryHack:{
+      oneSentence:'Count in-degrees, enqueue zeros, process each node by decrementing neighbors — if all processed, no cycle.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'Build graph + indegree[]',type:'start',x:290,y:20},
+          {id:'seed',label:'Enqueue indegree=0',type:'action',x:290,y:80},
+          {id:'while',label:'Queue empty?',type:'decision',x:290,y:140},
+          {id:'proc',label:'Poll, dec neighbors',type:'action',x:100,y:140},
+          {id:'zero',label:'Neighbor=0? Enqueue',type:'action',x:100,y:200},
+          {id:'check',label:'All processed?',type:'decision',x:290,y:200},
+          {id:'yes',label:'Valid order!',type:'end',x:480,y:200},
+          {id:'no',label:'Cycle exists!',type:'end',x:480,y:140}
+        ],
+        edges:[
+          {from:'start',to:'seed',label:''},
+          {from:'seed',to:'while',label:''},
+          {from:'while',to:'proc',label:'NO'},
+          {from:'proc',to:'zero',label:''},
+          {from:'zero',to:'while',label:''},
+          {from:'while',to:'check',label:'YES'},
+          {from:'check',to:'yes',label:'YES'},
+          {from:'check',to:'no',label:'NO'}
+        ]
+      },
+      annotatedCode:[
+        {line:'int[] indegree = new int[numCourses];',stepId:'start',note:'Count prerequisites for each course',color:'#c084fc'},
+        {line:'for (int[] p : prerequisites) { graph[p[1]].add(p[0]); indegree[p[0]]++; }',stepId:'start',note:'Build adjacency list + count incoming edges',color:'#c084fc'},
+        {line:'for (i) if (indegree[i]==0) queue.offer(i);',stepId:'seed',note:'Courses with NO prereqs can start immediately',color:'#00ff88'},
+        {line:'while (!queue.isEmpty()) {',stepId:'while',note:'Process until queue empty',color:'#00cfff'},
+        {line:'    int node = queue.poll(); order[idx++] = node;',stepId:'proc',note:'Take next available course',color:'#ffd600'},
+        {line:'    for (nei : graph[node]) if (--indegree[nei]==0) queue.offer(nei);',stepId:'zero',note:'Completing this unlocks neighbors!',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'Init',art:'indegree=[0,1,1,2]  queue=[0]',annotation:'Course 0 has no prereqs → ready'},
+        {label:'Process 0',art:'dec 1→0, dec 2→0  queue=[1,2]  order=[0]',annotation:'Completing 0 unlocks courses 1 and 2'},
+        {label:'Process 1',art:'dec 3→1  queue=[2]  order=[0,1]',annotation:'Course 3 still needs course 2'},
+        {label:'Process 2',art:'dec 3→0  queue=[3]  order=[0,1,2]',annotation:'Now course 3 is unlocked!'},
+        {label:'Process 3',art:'queue=[]  order=[0,1,2,3]  count=4=numCourses ✓',annotation:'All courses processed = no cycle'}
+      ],
+      variations:[
+        {name:'Course Schedule',desc:'Kahn\'s BFS — if count < numCourses, cycle exists',problem:'Course Schedule (#207)'},
+        {name:'Course Schedule II',desc:'Same but return the actual ordering',problem:'Course Schedule II (#210)'},
+        {name:'Alien Dictionary',desc:'Build graph from char ordering between words, then topo sort',problem:'Alien Dictionary (#269)'}
+      ],
+      title:'COUNT → SEED → PEEL',
+      mnemonic:'COUNT → SEED → PEEL — count in-degrees, seed queue with zeros, peel off layer by layer',
+      steps:['Build adjacency list + indegree array','Enqueue all nodes with indegree=0 (no dependencies)','While queue: poll node, add to order','For each neighbor: decrement indegree, enqueue if becomes 0','If order.length < numNodes → cycle exists!'],
+      why:'By always processing nodes with zero dependencies first, we naturally build a valid ordering. If a cycle exists, those nodes never reach zero in-degree and are never processed.'
+    },
+    cheat:{
+      trigger:'course schedule, prerequisites, task ordering, dependency graph, detect cycle in directed graph',
+      firstLine:'int[] indegree = new int[numCourses];',
+      gotcha:'Forgetting to check if all nodes were processed — unprocessed nodes mean a cycle exists',
+      pitch:"I'll use Kahn's algorithm: count in-degrees, enqueue nodes with 0 dependencies, and peel off layers. If not all nodes are processed, there's a cycle.",
+      snippet:`<span class="cm">// Kahn's: count indegree, seed zeros, peel layers</span>
+<span class="kw">int</span>[] indeg = <span class="kw">new int</span>[n];
+<span class="cm">// ... build graph + indegree</span>
+<span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">0</span>;i&lt;n;i++) <span class="kw">if</span>(indeg[i]==<span class="nm">0</span>) q.offer(i);
+<span class="kw">while</span>(!q.isEmpty()) {
+    <span class="kw">int</span> node = q.poll(); count++;
+    <span class="kw">for</span>(<span class="kw">int</span> nei : graph[node])
+        <span class="kw">if</span>(--indeg[nei]==<span class="nm">0</span>) q.offer(nei);
+} <span class="cm">// count==n ? no cycle : cycle!</span>`
+    }
+  },
+  {
+    icon:'🔗', name:'Union-Find', accent:'#f59e0b',
+    tagline:'Track connected components — merge and query in near O(1)',
+    hook:"Imagine a school where kids form friend groups. When two kids become friends, their ENTIRE groups merge. To check if two kids are in the same group, you follow the chain to the group leader. Union-Find makes this lightning fast with two tricks: path compression (shortcut to the leader) and union by rank (keep the tree flat). Finding connected groups has never been faster!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Union-Find: Connected Components</text><text x="150" y="55" fill="#f59e0b" text-anchor="middle" font-size="12" font-family="monospace">Before Union(1,4)</text><circle cx="80" cy="95" r="18" fill="#1a1d2e" stroke="#f59e0b" stroke-width="2"/><text x="80" y="100" fill="#f59e0b" text-anchor="middle" font-size="13">0</text><circle cx="80" cy="150" r="16" fill="#1a1d2e" stroke="#f59e0b" stroke-width="2"/><text x="80" y="155" fill="#f59e0b" text-anchor="middle" font-size="12">1</text><circle cx="80" cy="200" r="15" fill="#1a1d2e" stroke="#f59e0b" stroke-width="2"/><text x="80" y="205" fill="#f59e0b" text-anchor="middle" font-size="11">2</text><line x1="80" y1="113" x2="80" y2="134" stroke="#f59e0b"/><line x1="80" y1="166" x2="80" y2="185" stroke="#f59e0b"/><circle cx="220" cy="95" r="18" fill="#1a1d2e" stroke="#00ff88" stroke-width="2"/><text x="220" y="100" fill="#00ff88" text-anchor="middle" font-size="13">3</text><circle cx="220" cy="150" r="16" fill="#1a1d2e" stroke="#00ff88" stroke-width="2"/><text x="220" y="155" fill="#00ff88" text-anchor="middle" font-size="12">4</text><line x1="220" y1="113" x2="220" y2="134" stroke="#00ff88"/><text x="450" y="55" fill="#ffd600" text-anchor="middle" font-size="12" font-family="monospace">After Union(1,4)</text><circle cx="450" cy="95" r="20" fill="#1a1d2e" stroke="#ffd600" stroke-width="2"/><text x="450" y="100" fill="#ffd600" text-anchor="middle" font-size="14" font-weight="bold">0</text><circle cx="390" cy="155" r="16" fill="#1a1d2e" stroke="#ffd600" stroke-width="2"/><text x="390" y="160" fill="#ffd600" text-anchor="middle" font-size="12">1</text><circle cx="450" cy="155" r="16" fill="#1a1d2e" stroke="#ffd600" stroke-width="2"/><text x="450" y="160" fill="#ffd600" text-anchor="middle" font-size="12">3</text><circle cx="390" cy="210" r="14" fill="#1a1d2e" stroke="#ffd600" stroke-width="2"/><text x="390" y="215" fill="#ffd600" text-anchor="middle" font-size="11">2</text><circle cx="510" cy="155" r="16" fill="#1a1d2e" stroke="#ffd600" stroke-width="2"/><text x="510" y="160" fill="#ffd600" text-anchor="middle" font-size="12">4</text><line x1="435" y1="112" x2="395" y2="140" stroke="#ffd600"/><line x1="450" y1="115" x2="450" y2="139" stroke="#ffd600"/><line x1="465" y1="112" x2="505" y2="140" stroke="#ffd600"/><line x1="390" y1="171" x2="390" y2="196" stroke="#ffd600"/><text x="300" y="260" fill="#00ff88" text-anchor="middle" font-size="11" font-family="monospace">find(2) → 0, find(4) → 0 → Same component!</text><text x="300" y="282" fill="#4a5268" text-anchor="middle" font-size="10" font-family="monospace">Path compression: 2→0 directly (skip 1)</text></svg>`,
+    complexity:[
+      {badge:'red',big:'O(n²)',label:'BRUTE FORCE',desc:'Recompute components from scratch each time'},
+      {badge:'green',big:'O(α(n))',label:'UNION-FIND',desc:'Near O(1) with path compression + union by rank'}
+    ],
+    meterWidth:'95%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># UNION-FIND — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Connected components, cycle in undirected graph, MST</span>
+<span class="cm"># TIME: O(α(n)) ≈ O(1) per operation</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="kw">class</span> <span class="fn">UnionFind</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, n):
+        self.parent = <span class="fn">list</span>(<span class="fn">range</span>(n))
+        self.rank = [<span class="nm">0</span>] * n
+        self.components = n
+
+    <span class="kw">def</span> <span class="fn">find</span>(self, x):
+        <span class="kw">if</span> self.parent[x] != x:
+            self.parent[x] = self.<span class="fn">find</span>(self.parent[x])  <span class="cm"># path compression</span>
+        <span class="kw">return</span> self.parent[x]
+
+    <span class="kw">def</span> <span class="fn">union</span>(self, x, y):
+        px, py = self.<span class="fn">find</span>(x), self.<span class="fn">find</span>(y)
+        <span class="kw">if</span> px == py: <span class="kw">return</span> <span class="nm">False</span>  <span class="cm"># already connected</span>
+        <span class="kw">if</span> self.rank[px] &lt; self.rank[py]: px, py = py, px
+        self.parent[py] = px  <span class="cm"># union by rank</span>
+        <span class="kw">if</span> self.rank[px] == self.rank[py]: self.rank[px] += <span class="nm">1</span>
+        self.components -= <span class="nm">1</span>
+        <span class="kw">return</span> <span class="nm">True</span>
+
+<span class="cm"># ─── Redundant Connection ───</span>
+<span class="kw">def</span> <span class="fn">findRedundantConnection</span>(edges):
+    uf = <span class="fn">UnionFind</span>(<span class="fn">len</span>(edges) + <span class="nm">1</span>)
+    <span class="kw">for</span> u, v <span class="kw">in</span> edges:
+        <span class="kw">if not</span> uf.<span class="fn">union</span>(u, v):
+            <span class="kw">return</span> [u, v]  <span class="cm"># already connected = redundant!</span>`,
+      java:`<span class="cm">// UNION-FIND — THE TEMPLATE</span>
+<span class="cm">// TIME: O(α(n)) ≈ O(1) per operation</span>
+
+<span class="kw">class</span> <span class="tp">UnionFind</span> {
+    <span class="tp">int</span>[] parent, rank;
+    <span class="tp">int</span> components;
+    <span class="fn">UnionFind</span>(<span class="tp">int</span> n) {
+        parent = <span class="kw">new</span> <span class="tp">int</span>[n]; rank = <span class="kw">new</span> <span class="tp">int</span>[n]; components = n;
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) parent[i] = i;
+    }
+    <span class="tp">int</span> <span class="fn">find</span>(<span class="tp">int</span> x) {
+        <span class="kw">if</span> (parent[x] != x) parent[x] = find(parent[x]); <span class="cm">// path compression</span>
+        <span class="kw">return</span> parent[x];
+    }
+    <span class="tp">boolean</span> <span class="fn">union</span>(<span class="tp">int</span> x, <span class="tp">int</span> y) {
+        <span class="tp">int</span> px = find(x), py = find(y);
+        <span class="kw">if</span> (px == py) <span class="kw">return</span> <span class="nm">false</span>;
+        <span class="kw">if</span> (rank[px] &lt; rank[py]) { <span class="tp">int</span> t=px; px=py; py=t; }
+        parent[py] = px;
+        <span class="kw">if</span> (rank[px] == rank[py]) rank[px]++;
+        components--;
+        <span class="kw">return</span> <span class="nm">true</span>;
+    }
+}`,
+      csharp:`<span class="cm">// UNION-FIND — THE TEMPLATE</span>
+<span class="kw">class</span> <span class="tp">UnionFind</span> {
+    <span class="tp">int</span>[] parent, rank;
+    <span class="kw">public</span> <span class="tp">int</span> Components;
+    <span class="kw">public</span> <span class="fn">UnionFind</span>(<span class="tp">int</span> n) {
+        parent = <span class="kw">new</span> <span class="tp">int</span>[n]; rank = <span class="kw">new</span> <span class="tp">int</span>[n]; Components = n;
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) parent[i] = i;
+    }
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">Find</span>(<span class="tp">int</span> x) {
+        <span class="kw">if</span> (parent[x] != x) parent[x] = Find(parent[x]);
+        <span class="kw">return</span> parent[x];
+    }
+    <span class="kw">public</span> <span class="tp">bool</span> <span class="fn">Union</span>(<span class="tp">int</span> x, <span class="tp">int</span> y) {
+        <span class="tp">int</span> px = Find(x), py = Find(y);
+        <span class="kw">if</span> (px == py) <span class="kw">return</span> <span class="nm">false</span>;
+        <span class="kw">if</span> (rank[px] &lt; rank[py]) (px,py)=(py,px);
+        parent[py] = px;
+        <span class="kw">if</span> (rank[px] == rank[py]) rank[px]++;
+        Components--;
+        <span class="kw">return</span> <span class="nm">true</span>;
+    }
+}`
+    },
+    memoryHack:{
+      oneSentence:'Each node points to a parent. Find compresses paths to root. Union merges two trees by rank. Connected = same root.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'parent[i]=i',type:'start',x:290,y:20},
+          {id:'find',label:'Find root of x',type:'action',x:140,y:90},
+          {id:'compress',label:'Path compress',type:'action',x:140,y:160},
+          {id:'union',label:'Union(x,y)',type:'action',x:440,y:90},
+          {id:'same',label:'Same root?',type:'decision',x:440,y:160},
+          {id:'skip',label:'Already connected',type:'end',x:290,y:160},
+          {id:'merge',label:'Attach smaller to bigger',type:'action',x:440,y:230}
+        ],
+        edges:[
+          {from:'start',to:'find',label:''},
+          {from:'start',to:'union',label:''},
+          {from:'find',to:'compress',label:'recurse'},
+          {from:'union',to:'same',label:'find both roots'},
+          {from:'same',to:'skip',label:'YES'},
+          {from:'same',to:'merge',label:'NO'}
+        ]
+      },
+      annotatedCode:[
+        {line:'int[] parent = new int[n]; // parent[i] = i initially',stepId:'start',note:'Everyone is their own root at first',color:'#f59e0b'},
+        {line:'int find(int x) {',stepId:'find',note:'Follow parent chain to root',color:'#00cfff'},
+        {line:'    if (parent[x] != x) parent[x] = find(parent[x]);',stepId:'compress',note:'Path compression: point directly to root!',color:'#00ff88'},
+        {line:'boolean union(int x, int y) {',stepId:'union',note:'Merge two components',color:'#ffd600'},
+        {line:'    if (px == py) return false;',stepId:'same',note:'Already same component — skip',color:'#ff4d6d'},
+        {line:'    parent[py] = px; // attach smaller to larger',stepId:'merge',note:'Union by rank keeps tree flat',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'Init',art:'parent=[0,1,2,3,4]  5 components',annotation:'Each node is its own root'},
+        {label:'Union(0,1)',art:'parent=[0,0,2,3,4]  4 components',annotation:'Node 1 now points to 0'},
+        {label:'Union(2,3)',art:'parent=[0,0,2,2,4]  3 components',annotation:'Node 3 now points to 2'},
+        {label:'Union(1,3)',art:'parent=[0,0,0,2,4]  2 components  find(3)→2→0',annotation:'Merging groups: {0,1} + {2,3}'},
+        {label:'Find(3)',art:'parent[3]=2, parent[2]=0 → compress: parent[3]=0',annotation:'Path compression: 3→0 directly now'}
+      ],
+      variations:[
+        {name:'Graph Valid Tree',desc:'Union-Find: n-1 edges + no cycle (union returns false) = tree',problem:'Graph Valid Tree (#261)'},
+        {name:'Connected Components',desc:'Union all edges, count remaining components',problem:'Number of Connected Components (#323)'},
+        {name:'Redundant Connection',desc:'First edge where union returns false = redundant',problem:'Redundant Connection (#684)'}
+      ],
+      title:'FIND ROOT → MERGE TREES',
+      mnemonic:'FIND ROOT → MERGE TREES — path compression + union by rank = near O(1)',
+      steps:['Init parent[i]=i, rank[i]=0','Find(x): follow parent to root, compress path','Union(x,y): find both roots, attach smaller to larger','Connected(x,y): find(x) == find(y)'],
+      why:'Path compression flattens the tree on each find, and union by rank keeps trees balanced. Together they give amortized O(α(n)) ≈ O(1) per operation.'
+    },
+    cheat:{
+      trigger:'connected components, redundant connection, graph valid tree, union find, disjoint set, MST',
+      firstLine:'int[] parent = new int[n]; for (int i=0;i<n;i++) parent[i]=i;',
+      gotcha:'Forgetting path compression — without it, find() degrades to O(n) in worst case',
+      pitch:"I'll use Union-Find with path compression and union by rank. Each union/find is near O(1). For cycle detection, if union returns false, the edge connects already-connected nodes.",
+      snippet:`<span class="cm">// Union-Find with path compression</span>
+<span class="kw">int</span> <span class="fn">find</span>(<span class="kw">int</span> x) {
+    <span class="kw">if</span>(parent[x]!=x) parent[x]=<span class="fn">find</span>(parent[x]); <span class="cm">// compress!</span>
+    <span class="kw">return</span> parent[x];
+}
+<span class="kw">boolean</span> <span class="fn">union</span>(<span class="kw">int</span> x,<span class="kw">int</span> y) {
+    <span class="kw">int</span> px=<span class="fn">find</span>(x), py=<span class="fn">find</span>(y);
+    <span class="kw">if</span>(px==py) <span class="kw">return false</span>; <span class="cm">// cycle!</span>
+    parent[py]=px; <span class="kw">return true</span>;
+}`
+    }
+  },
+  {
+    icon:'⚖️', name:'Two Heaps (Median)', accent:'#ec4899',
+    tagline:'Max-heap + min-heap to track the middle dynamically',
+    hook:"Imagine sorting a deck of cards as you draw them, always knowing which card is in the middle. You split the deck: the left half goes into a max-heap (biggest on top), the right half into a min-heap (smallest on top). The tops of these heaps are the middle cards! When a new card arrives, put it in the correct half and rebalance if needed. The median is always at your fingertips!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Two Heaps: Find Median from Data Stream</text><text x="150" y="65" fill="#ff6b6b" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Max-Heap (left half)</text><rect x="70" y="80" width="160" height="35" fill="#1a1d2e" stroke="#ff6b6b" rx="4"/><text x="150" y="102" fill="#ff6b6b" text-anchor="middle" font-size="13" font-family="monospace">Top: 5 (largest left)</text><text x="150" y="130" fill="#4a5268" font-size="10" font-family="monospace">[5, 3, 1]</text><text x="450" y="65" fill="#4ade80" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Min-Heap (right half)</text><rect x="370" y="80" width="160" height="35" fill="#1a1d2e" stroke="#4ade80" rx="4"/><text x="450" y="102" fill="#4ade80" text-anchor="middle" font-size="13" font-family="monospace">Top: 7 (smallest right)</text><text x="450" y="130" fill="#4a5268" font-size="10" font-family="monospace">[7, 9, 11]</text><text x="300" y="165" fill="#ec4899" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Median = (5 + 7) / 2 = 6.0</text><rect x="70" y="185" width="460" height="100" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="300" y="208" fill="#ffd600" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Invariant: |max_heap| ≥ |min_heap| ≥ |max_heap|-1</text><text x="90" y="232" fill="#e8eaf0" font-size="11" font-family="monospace">1. Add to correct heap (compare with max_heap.top)</text><text x="90" y="252" fill="#e8eaf0" font-size="11" font-family="monospace">2. Rebalance: if size diff &gt; 1, move top element</text><text x="90" y="272" fill="#00ff88" font-size="11" font-family="monospace">3. Median: both same size? avg of tops : max_heap.top</text></svg>`,
+    complexity:[
+      {badge:'red',big:'O(n log n)',label:'SORT EACH TIME',desc:'Re-sort entire array on each add'},
+      {badge:'green',big:'O(log n)',label:'TWO HEAPS',desc:'Add in O(log n), median in O(1)'}
+    ],
+    meterWidth:'90%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># TWO HEAPS (MEDIAN) — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Streaming median, dynamic middle element</span>
+<span class="cm"># TIME: O(log n) add, O(1) median | SPACE: O(n)</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="kw">import</span> heapq
+
+<span class="kw">class</span> <span class="fn">MedianFinder</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.max_heap = []  <span class="cm"># left half (invert for max)</span>
+        self.min_heap = []  <span class="cm"># right half</span>
+
+    <span class="kw">def</span> <span class="fn">addNum</span>(self, num):
+        <span class="cm"># Always add to max_heap first, then rebalance</span>
+        heapq.heappush(self.max_heap, -num)
+        heapq.heappush(self.min_heap, -heapq.heappop(self.max_heap))
+        <span class="cm"># Keep max_heap size ≥ min_heap</span>
+        <span class="kw">if</span> <span class="fn">len</span>(self.min_heap) &gt; <span class="fn">len</span>(self.max_heap):
+            heapq.heappush(self.max_heap, -heapq.heappop(self.min_heap))
+
+    <span class="kw">def</span> <span class="fn">findMedian</span>(self):
+        <span class="kw">if</span> <span class="fn">len</span>(self.max_heap) &gt; <span class="fn">len</span>(self.min_heap):
+            <span class="kw">return</span> -self.max_heap[<span class="nm">0</span>]
+        <span class="kw">return</span> (-self.max_heap[<span class="nm">0</span>] + self.min_heap[<span class="nm">0</span>]) / <span class="nm">2.0</span>`,
+      java:`<span class="cm">// TWO HEAPS (MEDIAN) — THE TEMPLATE</span>
+<span class="cm">// TIME: O(log n) add, O(1) median</span>
+
+<span class="kw">class</span> <span class="tp">MedianFinder</span> {
+    <span class="tp">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; maxHeap;  <span class="cm">// left half (max on top)</span>
+    <span class="tp">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; minHeap;  <span class="cm">// right half (min on top)</span>
+
+    <span class="kw">public</span> <span class="fn">MedianFinder</span>() {
+        maxHeap = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;((a,b) -&gt; b - a);  <span class="cm">// reverse order</span>
+        minHeap = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;();
+    }
+
+    <span class="kw">public</span> <span class="tp">void</span> <span class="fn">addNum</span>(<span class="tp">int</span> num) {
+        maxHeap.offer(num);
+        minHeap.offer(maxHeap.poll());  <span class="cm">// move largest left to right</span>
+        <span class="kw">if</span> (minHeap.size() &gt; maxHeap.size())
+            maxHeap.offer(minHeap.poll());  <span class="cm">// rebalance</span>
+    }
+
+    <span class="kw">public</span> <span class="tp">double</span> <span class="fn">findMedian</span>() {
+        <span class="kw">if</span> (maxHeap.size() &gt; minHeap.size())
+            <span class="kw">return</span> maxHeap.peek();
+        <span class="kw">return</span> (maxHeap.peek() + minHeap.peek()) / <span class="nm">2.0</span>;
+    }
+}`,
+      csharp:`<span class="cm">// TWO HEAPS (MEDIAN) — THE TEMPLATE</span>
+<span class="kw">public</span> <span class="kw">class</span> <span class="tp">MedianFinder</span> {
+    <span class="tp">PriorityQueue</span>&lt;<span class="tp">int</span>,<span class="tp">int</span>&gt; maxHeap;  <span class="cm">// left (larger priority = max)</span>
+    <span class="tp">PriorityQueue</span>&lt;<span class="tp">int</span>,<span class="tp">int</span>&gt; minHeap;  <span class="cm">// right</span>
+
+    <span class="kw">public</span> <span class="fn">MedianFinder</span>() {
+        maxHeap = <span class="kw">new</span>(<span class="tp">Comparer</span>&lt;<span class="tp">int</span>&gt;.Create((a,b)=&gt;b-a));
+        minHeap = <span class="kw">new</span>();
+    }
+
+    <span class="kw">public</span> <span class="tp">void</span> <span class="fn">AddNum</span>(<span class="tp">int</span> num) {
+        maxHeap.Enqueue(num, num);
+        minHeap.Enqueue(maxHeap.Dequeue(), maxHeap.Dequeue());
+        <span class="kw">if</span> (minHeap.Count &gt; maxHeap.Count)
+            maxHeap.Enqueue(minHeap.Dequeue(), minHeap.Dequeue());
+    }
+
+    <span class="kw">public</span> <span class="tp">double</span> <span class="fn">FindMedian</span>() {
+        <span class="kw">if</span> (maxHeap.Count &gt; minHeap.Count)
+            <span class="kw">return</span> maxHeap.Peek();
+        <span class="kw">return</span> (maxHeap.Peek() + minHeap.Peek()) / <span class="nm">2.0</span>;
+    }
+}`
+    },
+    memoryHack:{
+      oneSentence:'Max-heap holds smaller half (largest small on top), min-heap holds larger half (smallest large on top) — median is at the tops.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'Two heaps empty',type:'start',x:290,y:20},
+          {id:'add',label:'Add to max_heap',type:'action',x:290,y:80},
+          {id:'move',label:'Move top to min_heap',type:'action',x:290,y:140},
+          {id:'check',label:'Size diff > 1?',type:'decision',x:290,y:200},
+          {id:'rebal',label:'Move back',type:'action',x:480,y:200},
+          {id:'median',label:'Get median from tops',type:'end',x:100,y:200}
+        ],
+        edges:[
+          {from:'start',to:'add',label:''},
+          {from:'add',to:'move',label:'ensure correctness'},
+          {from:'move',to:'check',label:''},
+          {from:'check',to:'rebal',label:'YES'},
+          {from:'rebal',to:'check',label:''},
+          {from:'check',to:'median',label:'NO = balanced'}
+        ]
+      },
+      annotatedCode:[
+        {line:'PriorityQueue<Integer> maxHeap = new PriorityQueue<>((a,b)->b-a);',stepId:'start',note:'Left half — max on top (reverse comparator)',color:'#ec4899'},
+        {line:'PriorityQueue<Integer> minHeap = new PriorityQueue<>();',stepId:'start',note:'Right half — min on top (default)',color:'#ec4899'},
+        {line:'maxHeap.offer(num);',stepId:'add',note:'Always add to left side first',color:'#ff6b6b'},
+        {line:'minHeap.offer(maxHeap.poll());',stepId:'move',note:'Move largest left to right — ensures all left ≤ all right',color:'#4ade80'},
+        {line:'if (minHeap.size() > maxHeap.size())',stepId:'check',note:'Left must have same or 1 more than right',color:'#ffd600'},
+        {line:'    maxHeap.offer(minHeap.poll());',stepId:'rebal',note:'Rebalance: move smallest right back to left',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'Add 5',art:'max=[] min=[] → add 5 → max=[5] → move → min=[5] → rebal → max=[5] min=[]',annotation:'First element goes to max_heap'},
+        {label:'Add 3',art:'max=[5] → add 3 → max=[5,3] → move 5 → min=[5] max=[3]',annotation:'Balanced: both have 1 element'},
+        {label:'Add 7',art:'max=[3] → add 7 → max=[7,3] → move 7 → min=[5,7] → rebal 5 → max=[5,3] min=[7]',annotation:'Median = 5 (odd count, max_heap.top)'},
+        {label:'Add 1',art:'max=[5,3] → add 1 → max=[5,3,1] → move 5 → min=[5,7] max=[3,1]',annotation:'Median = (3+5)/2 = 4.0 (even count, avg)'}
+      ],
+      variations:[
+        {name:'Find Median from Data Stream',desc:'Two heaps with invariant: |max| ≥ |min| ≥ |max|-1',problem:'Find Median from Data Stream (#295)'},
+        {name:'Sliding Window Median',desc:'Two heaps + lazy deletion for sliding window',problem:'Sliding Window Median (#480)'},
+        {name:'IPO (Maximum Capital)',desc:'Two heaps: available projects (max profit) + locked projects (min capital)',problem:'IPO (#502)'}
+      ],
+      title:'SPLIT LEFT & RIGHT',
+      mnemonic:'SPLIT LEFT & RIGHT — max-heap for left, min-heap for right, tops meet at the median',
+      steps:['Init max_heap (left half, max on top) and min_heap (right half, min on top)','Add: always offer to max_heap first','Move largest from max_heap to min_heap (ensures left ≤ right)','Rebalance: if min_heap bigger, move smallest back to max_heap','Median: if sizes equal → avg of tops, else → max_heap.top'],
+      why:'By maintaining the invariant that all elements in max_heap ≤ all elements in min_heap and keeping sizes balanced, the median is always at the heap tops.'
+    },
+    cheat:{
+      trigger:'median from data stream, running median, middle element, sliding window median, two heaps',
+      firstLine:'PriorityQueue<Integer> maxHeap = new PriorityQueue<>((a,b)->b-a);',
+      gotcha:'Forgetting to reverse the comparator for max-heap — Java PriorityQueue is min-heap by default',
+      pitch:"I'll use two heaps: max-heap for the left half, min-heap for the right half. Add to max first, move top to min, rebalance if needed. Median is at the tops.",
+      snippet:`<span class="cm">// Two heaps: max (left) + min (right)</span>
+<span class="tp">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; maxH=<span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;((a,b)-&gt;b-a), minH=<span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;();
+<span class="tp">void</span> <span class="fn">add</span>(<span class="kw">int</span> n) {
+    maxH.offer(n); minH.offer(maxH.poll()); <span class="cm">// ensure left≤right</span>
+    <span class="kw">if</span>(minH.size()&gt;maxH.size()) maxH.offer(minH.poll()); <span class="cm">// rebalance</span>
+}
+<span class="tp">double</span> <span class="fn">median</span>() {
+    <span class="kw">return</span> maxH.size()&gt;minH.size() ? maxH.peek() : (maxH.peek()+minH.peek())/<span class="nm">2.0</span>;
+}`
+    }
+  },
+  {
+    icon:'🎒', name:'Knapsack DP', accent:'#f97316',
+    tagline:'2D DP table: items × capacity → optimal value',
+    hook:"You have a backpack and a pile of treasures. Each treasure has weight and value. Your backpack has a weight limit. Which treasures do you take to maximize value? You build a table: for each item and each possible weight, you decide: 'take it (if it fits) or skip it'. The table fills up with best values. The bottom-right corner is your answer — the max value you can carry!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Knapsack DP: Items × Capacity Table</text><text x="300" y="48" fill="#4a5268" text-anchor="middle" font-size="11" font-family="monospace">coins=[1,2,5] amount=5 → ways to make 5?</text><rect x="50" y="65" width="500" height="210" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="100" y="88" fill="#f97316" font-size="10" font-family="monospace">amt→</text><text x="145" y="88" fill="#f97316" font-size="10" font-family="monospace">0</text><text x="195" y="88" fill="#f97316" font-size="10" font-family="monospace">1</text><text x="245" y="88" fill="#f97316" font-size="10" font-family="monospace">2</text><text x="295" y="88" fill="#f97316" font-size="10" font-family="monospace">3</text><text x="345" y="88" fill="#f97316" font-size="10" font-family="monospace">4</text><text x="395" y="88" fill="#f97316" font-size="10" font-family="monospace">5</text><text x="70" y="115" fill="#f97316" font-size="10" font-family="monospace">[]</text><rect x="130" y="100" width="40" height="25" fill="#0e1018" stroke="#4a5268" rx="3"/><text x="150" y="117" fill="#00ff88" text-anchor="middle" font-size="11">1</text><rect x="180" y="100" width="40" height="25" fill="#0e1018" stroke="#4a5268" rx="3"/><text x="200" y="117" fill="#4a5268" text-anchor="middle" font-size="11">0</text><rect x="230" y="100" width="40" height="25" fill="#0e1018" stroke="#4a5268" rx="3"/><text x="250" y="117" fill="#4a5268" text-anchor="middle" font-size="11">0</text><rect x="280" y="100" width="40" height="25" fill="#0e1018" stroke="#4a5268" rx="3"/><text x="300" y="117" fill="#4a5268" text-anchor="middle" font-size="11">0</text><rect x="330" y="100" width="40" height="25" fill="#0e1018" stroke="#4a5268" rx="3"/><text x="350" y="117" fill="#4a5268" text-anchor="middle" font-size="11">0</text><rect x="380" y="100" width="40" height="25" fill="#0e1018" stroke="#4a5268" rx="3"/><text x="400" y="117" fill="#4a5268" text-anchor="middle" font-size="11">0</text><text x="70" y="148" fill="#f97316" font-size="10" font-family="monospace">[1]</text><rect x="130" y="133" width="40" height="25" fill="#0e1018" stroke="#f97316" rx="3"/><text x="150" y="150" fill="#00ff88" text-anchor="middle" font-size="11">1</text><rect x="180" y="133" width="40" height="25" fill="#0e1018" stroke="#f97316" rx="3"/><text x="200" y="150" fill="#ffd600" text-anchor="middle" font-size="11">1</text><rect x="230" y="133" width="40" height="25" fill="#0e1018" stroke="#f97316" rx="3"/><text x="250" y="150" fill="#ffd600" text-anchor="middle" font-size="11">1</text><rect x="280" y="133" width="40" height="25" fill="#0e1018" stroke="#f97316" rx="3"/><text x="300" y="150" fill="#ffd600" text-anchor="middle" font-size="11">1</text><rect x="330" y="133" width="40" height="25" fill="#0e1018" stroke="#f97316" rx="3"/><text x="350" y="150" fill="#ffd600" text-anchor="middle" font-size="11">1</text><rect x="380" y="133" width="40" height="25" fill="#0e1018" stroke="#f97316" rx="3"/><text x="400" y="150" fill="#ffd600" text-anchor="middle" font-size="11">1</text><text x="70" y="181" fill="#f97316" font-size="10" font-family="monospace">[1,2]</text><rect x="130" y="166" width="40" height="25" fill="#0e1018" stroke="#a78bfa" rx="3"/><text x="150" y="183" fill="#00ff88" text-anchor="middle" font-size="11">1</text><rect x="180" y="166" width="40" height="25" fill="#0e1018" stroke="#a78bfa" rx="3"/><text x="200" y="183" fill="#ffd600" text-anchor="middle" font-size="11">1</text><rect x="230" y="166" width="40" height="25" fill="#0e1018" stroke="#a78bfa" rx="3"/><text x="250" y="183" fill="#ffd600" text-anchor="middle" font-size="11">2</text><rect x="280" y="166" width="40" height="25" fill="#0e1018" stroke="#a78bfa" rx="3"/><text x="300" y="183" fill="#ffd600" text-anchor="middle" font-size="11">2</text><rect x="330" y="166" width="40" height="25" fill="#0e1018" stroke="#a78bfa" rx="3"/><text x="350" y="183" fill="#ffd600" text-anchor="middle" font-size="11">3</text><rect x="380" y="166" width="40" height="25" fill="#0e1018" stroke="#a78bfa" rx="3"/><text x="400" y="183" fill="#ffd600" text-anchor="middle" font-size="11">3</text><text x="70" y="214" fill="#f97316" font-size="10" font-family="monospace">[1,2,5]</text><rect x="130" y="199" width="40" height="25" fill="#0e1018" stroke="#00ff88" rx="3"/><text x="150" y="216" fill="#00ff88" text-anchor="middle" font-size="11" font-weight="bold">1</text><rect x="180" y="199" width="40" height="25" fill="#0e1018" stroke="#00ff88" rx="3"/><text x="200" y="216" fill="#ffd600" text-anchor="middle" font-size="11">1</text><rect x="230" y="199" width="40" height="25" fill="#0e1018" stroke="#00ff88" rx="3"/><text x="250" y="216" fill="#ffd600" text-anchor="middle" font-size="11">2</text><rect x="280" y="199" width="40" height="25" fill="#0e1018" stroke="#00ff88" rx="3"/><text x="300" y="216" fill="#ffd600" text-anchor="middle" font-size="11">2</text><rect x="330" y="199" width="40" height="25" fill="#0e1018" stroke="#00ff88" rx="3"/><text x="350" y="216" fill="#ffd600" text-anchor="middle" font-size="11">3</text><rect x="380" y="199" width="40" height="25" fill="rgba(0,255,136,.15)" stroke="#00ff88" stroke-width="2" rx="3"/><text x="400" y="216" fill="#00ff88" text-anchor="middle" font-size="12" font-weight="bold">4</text><text x="300" y="255" fill="#00ff88" text-anchor="middle" font-size="11" font-family="monospace">Answer: 4 ways to make amount 5</text></svg>`,
+    complexity:[
+      {badge:'red',big:'O(2^n)',label:'BRUTE FORCE',desc:'Try every subset of items'},
+      {badge:'green',big:'O(n×W)',label:'KNAPSACK DP',desc:'Fill table: items × capacity'}
+    ],
+    meterWidth:'88%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># KNAPSACK DP — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Coin change, subset sum, partition, target sum</span>
+<span class="cm"># TIME: O(n×W) | SPACE: O(n×W) or O(W) optimized</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="cm"># ─── Coin Change (min coins) ───</span>
+<span class="kw">def</span> <span class="fn">coinChange</span>(coins, amount):
+    dp = [<span class="fn">float</span>(<span class="st">'inf'</span>)] * (amount + <span class="nm">1</span>)
+    dp[<span class="nm">0</span>] = <span class="nm">0</span>
+    <span class="kw">for</span> coin <span class="kw">in</span> coins:
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(coin, amount + <span class="nm">1</span>):
+            dp[i] = <span class="fn">min</span>(dp[i], dp[i - coin] + <span class="nm">1</span>)
+    <span class="kw">return</span> dp[amount] <span class="kw">if</span> dp[amount] != <span class="fn">float</span>(<span class="st">'inf'</span>) <span class="kw">else</span> -<span class="nm">1</span>
+
+<span class="cm"># ─── Coin Change II (count ways) ───</span>
+<span class="kw">def</span> <span class="fn">change</span>(amount, coins):
+    dp = [<span class="nm">0</span>] * (amount + <span class="nm">1</span>)
+    dp[<span class="nm">0</span>] = <span class="nm">1</span>  <span class="cm"># 1 way to make 0: use nothing</span>
+    <span class="kw">for</span> coin <span class="kw">in</span> coins:
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(coin, amount + <span class="nm">1</span>):
+            dp[i] += dp[i - coin]
+    <span class="kw">return</span> dp[amount]
+
+<span class="cm"># ─── Partition Equal Subset Sum ───</span>
+<span class="kw">def</span> <span class="fn">canPartition</span>(nums):
+    total = <span class="fn">sum</span>(nums)
+    <span class="kw">if</span> total % <span class="nm">2</span>: <span class="kw">return</span> <span class="nm">False</span>
+    target = total // <span class="nm">2</span>
+    dp = [<span class="nm">False</span>] * (target + <span class="nm">1</span>)
+    dp[<span class="nm">0</span>] = <span class="nm">True</span>
+    <span class="kw">for</span> num <span class="kw">in</span> nums:
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(target, num - <span class="nm">1</span>, -<span class="nm">1</span>):  <span class="cm"># reverse!</span>
+            dp[i] = dp[i] <span class="kw">or</span> dp[i - num]
+    <span class="kw">return</span> dp[target]`,
+      java:`<span class="cm">// KNAPSACK DP — THE TEMPLATE</span>
+<span class="cm">// TIME: O(n×W) | SPACE: O(W)</span>
+
+<span class="cm">// ─── Coin Change (min coins) ───</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">coinChange</span>(<span class="tp">int</span>[] coins, <span class="tp">int</span> amount) {
+    <span class="tp">int</span>[] dp = <span class="kw">new</span> <span class="tp">int</span>[amount + <span class="nm">1</span>];
+    <span class="tp">Arrays</span>.fill(dp, amount + <span class="nm">1</span>);  <span class="cm">// infinity</span>
+    dp[<span class="nm">0</span>] = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> coin : coins)
+        <span class="kw">for</span> (<span class="tp">int</span> i = coin; i &lt;= amount; i++)
+            dp[i] = Math.min(dp[i], dp[i - coin] + <span class="nm">1</span>);
+    <span class="kw">return</span> dp[amount] &gt; amount ? -<span class="nm">1</span> : dp[amount];
+}
+
+<span class="cm">// ─── Coin Change II (count ways) ───</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">change</span>(<span class="tp">int</span> amount, <span class="tp">int</span>[] coins) {
+    <span class="tp">int</span>[] dp = <span class="kw">new</span> <span class="tp">int</span>[amount + <span class="nm">1</span>];
+    dp[<span class="nm">0</span>] = <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> coin : coins)
+        <span class="kw">for</span> (<span class="tp">int</span> i = coin; i &lt;= amount; i++)
+            dp[i] += dp[i - coin];
+    <span class="kw">return</span> dp[amount];
+}
+
+<span class="cm">// ─── Partition Equal Subset Sum ───</span>
+<span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">canPartition</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">int</span> sum = <span class="tp">Arrays</span>.stream(nums).sum();
+    <span class="kw">if</span> (sum % <span class="nm">2</span> != <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">false</span>;
+    <span class="tp">int</span> target = sum / <span class="nm">2</span>;
+    <span class="tp">boolean</span>[] dp = <span class="kw">new</span> <span class="tp">boolean</span>[target + <span class="nm">1</span>];
+    dp[<span class="nm">0</span>] = <span class="nm">true</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> num : nums)
+        <span class="kw">for</span> (<span class="tp">int</span> i = target; i &gt;= num; i--)  <span class="cm">// reverse!</span>
+            dp[i] = dp[i] || dp[i - num];
+    <span class="kw">return</span> dp[target];
+}`,
+      csharp:`<span class="cm">// KNAPSACK DP — THE TEMPLATE</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">CoinChange</span>(<span class="tp">int</span>[] coins, <span class="tp">int</span> amount) {
+    <span class="tp">int</span>[] dp = <span class="kw">new</span> <span class="tp">int</span>[amount + <span class="nm">1</span>];
+    <span class="tp">Array</span>.Fill(dp, amount + <span class="nm">1</span>);
+    dp[<span class="nm">0</span>] = <span class="nm">0</span>;
+    <span class="kw">foreach</span> (<span class="tp">int</span> coin <span class="kw">in</span> coins)
+        <span class="kw">for</span> (<span class="tp">int</span> i = coin; i &lt;= amount; i++)
+            dp[i] = Math.Min(dp[i], dp[i - coin] + <span class="nm">1</span>);
+    <span class="kw">return</span> dp[amount] &gt; amount ? -<span class="nm">1</span> : dp[amount];
+}
+
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">Change</span>(<span class="tp">int</span> amount, <span class="tp">int</span>[] coins) {
+    <span class="tp">int</span>[] dp = <span class="kw">new</span> <span class="tp">int</span>[amount + <span class="nm">1</span>];
+    dp[<span class="nm">0</span>] = <span class="nm">1</span>;
+    <span class="kw">foreach</span> (<span class="tp">int</span> coin <span class="kw">in</span> coins)
+        <span class="kw">for</span> (<span class="tp">int</span> i = coin; i &lt;= amount; i++)
+            dp[i] += dp[i - coin];
+    <span class="kw">return</span> dp[amount];
+}`
+    },
+    memoryHack:{
+      oneSentence:'Build a 1D DP array: dp[i] = best way to reach sum i. For each coin/item, update all reachable sums.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'dp[0]=base (0 or 1)',type:'start',x:290,y:20},
+          {id:'coin',label:'For each coin',type:'action',x:290,y:80},
+          {id:'amt',label:'For each amount',type:'action',x:290,y:140},
+          {id:'update',label:'dp[i] uses dp[i-coin]',type:'action',x:290,y:200},
+          {id:'done',label:'Return dp[target]',type:'end',x:290,y:260}
+        ],
+        edges:[
+          {from:'start',to:'coin',label:''},
+          {from:'coin',to:'amt',label:''},
+          {from:'amt',to:'update',label:'transition'},
+          {from:'update',to:'amt',label:'next amount'},
+          {from:'amt',to:'coin',label:'next coin'},
+          {from:'coin',to:'done',label:'all coins done'}
+        ]
+      },
+      annotatedCode:[
+        {line:'int[] dp = new int[amount + 1];',stepId:'start',note:'dp[i] = min coins to make amount i',color:'#f97316'},
+        {line:'Arrays.fill(dp, amount + 1); dp[0] = 0;',stepId:'start',note:'Base: 0 coins for amount 0',color:'#00ff88'},
+        {line:'for (int coin : coins)',stepId:'coin',note:'Outer loop: each coin type',color:'#ffd600'},
+        {line:'    for (int i = coin; i <= amount; i++)',stepId:'amt',note:'Inner loop: all amounts ≥ coin',color:'#00cfff'},
+        {line:'        dp[i] = Math.min(dp[i], dp[i - coin] + 1);',stepId:'update',note:'Take coin? dp[i-coin] + 1. Skip? keep dp[i]',color:'#a78bfa'}
+      ],
+      stateSnapshots:[
+        {label:'Init',art:'coins=[1,2,5] amount=11  dp=[0,∞,∞,∞,...,∞]',annotation:'Base case: 0 coins for amount 0'},
+        {label:'Coin 1',art:'dp=[0,1,2,3,4,5,6,7,8,9,10,11] (all 1s)',annotation:'Using only coin=1, amounts are 1×amount'},
+        {label:'Coin 2',art:'dp=[0,1,1,2,2,3,3,4,4,5,5,6]',annotation:'Using coin=2 reduces some amounts'},
+        {label:'Coin 5',art:'dp=[0,1,1,2,2,1,2,2,3,3,2,3]',annotation:'Using coin=5 optimizes further: amount 5 = 1 coin'},
+        {label:'Result',art:'dp[11] = 3  (5+5+1)',annotation:'Minimum 3 coins to make 11'}
+      ],
+      variations:[
+        {name:'Coin Change (min coins)',desc:'dp[i] = min coins to make i. Unbounded knapsack.',problem:'Coin Change (#322)'},
+        {name:'Coin Change II (count ways)',desc:'dp[i] = # ways to make i. Sum combinations.',problem:'Coin Change II (#518)'},
+        {name:'Partition Equal Subset Sum',desc:'dp[i] = can we make sum i? 0/1 knapsack (reverse loop!).',problem:'Partition Equal Subset Sum (#416)'},
+        {name:'Target Sum',desc:'Convert to subset sum problem with target=(sum+S)/2',problem:'Target Sum (#494)'}
+      ],
+      title:'ITEM LOOP → CAPACITY LOOP',
+      mnemonic:'ITEM LOOP → CAPACITY LOOP — for each item, update all reachable capacities from item weight to max',
+      steps:['Init dp[0] = base value (0 for min, 1 for count, true for possible)','For each item/coin: for each capacity from item to max','Update dp[capacity] using dp[capacity - item]','For 0/1 knapsack (each item once): loop capacity in REVERSE','For unbounded knapsack (items reusable): loop capacity FORWARD','Return dp[target]'],
+      why:'The DP table encodes "best way to reach each subproblem sum". By iterating items outside and capacities inside, each dp[i] builds on smaller subproblems.'
+    },
+    cheat:{
+      trigger:'coin change, subset sum, partition, target sum, knapsack, 0/1 knapsack, unbounded knapsack',
+      firstLine:'int[] dp = new int[amount + 1]; dp[0] = base;',
+      gotcha:'0/1 knapsack needs REVERSE loop on capacity (to avoid using same item twice). Unbounded uses FORWARD loop.',
+      pitch:"I'll use 1D DP knapsack. dp[i] represents the best way to reach sum i. For each item, I update all reachable sums. Unbounded = forward loop, 0/1 = reverse loop.",
+      snippet:`<span class="cm">// Unbounded knapsack: forward loop (reuse items)</span>
+<span class="kw">int</span>[] dp = <span class="kw">new int</span>[target+<span class="nm">1</span>]; dp[<span class="nm">0</span>]=base;
+<span class="kw">for</span>(<span class="kw">int</span> item : items)
+    <span class="kw">for</span>(<span class="kw">int</span> i=item; i&lt;=target; i++)
+        dp[i] = combine(dp[i], dp[i-item]);
+<span class="cm">// 0/1 knapsack: reverse loop (each item once)</span>
+<span class="kw">for</span>(<span class="kw">int</span> item : items)
+    <span class="kw">for</span>(<span class="kw">int</span> i=target; i&gt;=item; i--)
+        dp[i] = combine(dp[i], dp[i-item]);`
+    }
+  },
+  {
+    icon:'🔄', name:'Palindrome Expand', accent:'#14b8a6',
+    tagline:'Expand from center outward to find palindromes',
+    hook:"How do you check if a string is a palindrome? Start from the middle and walk outward — if left matches right at every step, it's a palindrome! For 'racecar', start at 'e', expand to 'cec', then 'aceca', then 'racecar' — all match! This trick finds ALL palindromes in a string by trying every possible center (including between characters for even-length palindromes). Way faster than checking every substring!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Palindrome Expand from Center</text><text x="300" y="48" fill="#4a5268" text-anchor="middle" font-size="11" font-family="monospace">String: "babad" → Find longest palindrome</text><rect x="120" y="70" width="40" height="40" fill="#1a1d2e" stroke="#4a5268" rx="4"/><text x="140" y="96" fill="#e8eaf0" text-anchor="middle" font-size="16">b</text><rect x="170" y="70" width="40" height="40" fill="#1a1d2e" stroke="#14b8a6" rx="4"/><text x="190" y="96" fill="#14b8a6" text-anchor="middle" font-size="16">a</text><rect x="220" y="70" width="40" height="40" fill="#1a1d2e" stroke="#14b8a6" rx="4"/><text x="240" y="96" fill="#14b8a6" text-anchor="middle" font-size="16">b</text><rect x="270" y="70" width="40" height="40" fill="#1a1d2e" stroke="#14b8a6" rx="4"/><text x="290" y="96" fill="#14b8a6" text-anchor="middle" font-size="16">a</text><rect x="320" y="70" width="40" height="40" fill="#1a1d2e" stroke="#4a5268" rx="4"/><text x="340" y="96" fill="#e8eaf0" text-anchor="middle" font-size="16">d</text><text x="300" y="135" fill="#14b8a6" text-anchor="middle" font-size="12" font-family="monospace">Center: i=2 (middle 'b') → expand!</text><line x1="240" y1="120" x2="210" y2="155" stroke="#14b8a6" stroke-width="2"/><line x1="240" y1="120" x2="270" y2="155" stroke="#14b8a6" stroke-width="2"/><text x="180" y="175" fill="#ffd600" font-size="11" font-family="monospace">←L</text><text x="310" y="175" fill="#ffd600" font-size="11" font-family="monospace">R→</text><rect x="70" y="190" width="460" height="90" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="300" y="213" fill="#14b8a6" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Expand Steps</text><text x="90" y="235" fill="#e8eaf0" font-size="11" font-family="monospace">1. Center='b' (L=2, R=2) → "b" ✓</text><text x="90" y="255" fill="#00ff88" font-size="11" font-family="monospace">2. Expand (L=1, R=3) → "aba" ✓ (a==a)</text><text x="90" y="270" fill="#ff4d6d" font-size="11" font-family="monospace">3. Expand (L=0, R=4) → "babad" ✗ (b≠d) STOP</text></svg>`,
+    complexity:[
+      {badge:'red',big:'O(n³)',label:'BRUTE FORCE',desc:'Check every substring for palindrome'},
+      {badge:'green',big:'O(n²)',label:'EXPAND CENTER',desc:'Try each center, expand up to n characters'}
+    ],
+    meterWidth:'85%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># PALINDROME EXPAND — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Longest palindrome, count palindromes</span>
+<span class="cm"># TIME: O(n²) | SPACE: O(1)</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="cm"># ─── Longest Palindromic Substring ───</span>
+<span class="kw">def</span> <span class="fn">longestPalindrome</span>(s):
+    <span class="kw">def</span> <span class="fn">expand</span>(L, R):
+        <span class="kw">while</span> L &gt;= <span class="nm">0</span> <span class="kw">and</span> R &lt; <span class="fn">len</span>(s) <span class="kw">and</span> s[L] == s[R]:
+            L -= <span class="nm">1</span>
+            R += <span class="nm">1</span>
+        <span class="kw">return</span> R - L - <span class="nm">1</span>  <span class="cm"># length of palindrome</span>
+
+    start = maxLen = <span class="nm">0</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s)):
+        len1 = <span class="fn">expand</span>(i, i)      <span class="cm"># odd-length: center at i</span>
+        len2 = <span class="fn">expand</span>(i, i+<span class="nm">1</span>)  <span class="cm"># even-length: center between i,i+1</span>
+        curLen = <span class="fn">max</span>(len1, len2)
+        <span class="kw">if</span> curLen &gt; maxLen:
+            maxLen = curLen
+            start = i - (curLen - <span class="nm">1</span>) // <span class="nm">2</span>
+    <span class="kw">return</span> s[start:start + maxLen]
+
+<span class="cm"># ─── Palindromic Substrings (count all) ───</span>
+<span class="kw">def</span> <span class="fn">countSubstrings</span>(s):
+    <span class="kw">def</span> <span class="fn">expand</span>(L, R):
+        count = <span class="nm">0</span>
+        <span class="kw">while</span> L &gt;= <span class="nm">0</span> <span class="kw">and</span> R &lt; <span class="fn">len</span>(s) <span class="kw">and</span> s[L] == s[R]:
+            count += <span class="nm">1</span>
+            L -= <span class="nm">1</span>
+            R += <span class="nm">1</span>
+        <span class="kw">return</span> count
+
+    total = <span class="nm">0</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s)):
+        total += <span class="fn">expand</span>(i, i)      <span class="cm"># odd centers</span>
+        total += <span class="fn">expand</span>(i, i+<span class="nm">1</span>)  <span class="cm"># even centers</span>
+    <span class="kw">return</span> total`,
+      java:`<span class="cm">// PALINDROME EXPAND — THE TEMPLATE</span>
+<span class="cm">// TIME: O(n²) | SPACE: O(1)</span>
+
+<span class="cm">// ─── Longest Palindromic Substring ───</span>
+<span class="kw">public</span> <span class="tp">String</span> <span class="fn">longestPalindrome</span>(<span class="tp">String</span> s) {
+    <span class="tp">int</span> start = <span class="nm">0</span>, maxLen = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; s.length(); i++) {
+        <span class="tp">int</span> len1 = expand(s, i, i);      <span class="cm">// odd-length</span>
+        <span class="tp">int</span> len2 = expand(s, i, i+<span class="nm">1</span>);  <span class="cm">// even-length</span>
+        <span class="tp">int</span> curLen = Math.max(len1, len2);
+        <span class="kw">if</span> (curLen &gt; maxLen) {
+            maxLen = curLen;
+            start = i - (curLen - <span class="nm">1</span>) / <span class="nm">2</span>;
+        }
+    }
+    <span class="kw">return</span> s.substring(start, start + maxLen);
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">expand</span>(<span class="tp">String</span> s, <span class="tp">int</span> L, <span class="tp">int</span> R) {
+    <span class="kw">while</span> (L &gt;= <span class="nm">0</span> &amp;&amp; R &lt; s.length() &amp;&amp; s.charAt(L) == s.charAt(R)) {
+        L--; R++;
+    }
+    <span class="kw">return</span> R - L - <span class="nm">1</span>;  <span class="cm">// length</span>
+}
+
+<span class="cm">// ─── Count Palindromic Substrings ───</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">countSubstrings</span>(<span class="tp">String</span> s) {
+    <span class="tp">int</span> count = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; s.length(); i++) {
+        count += expandCount(s, i, i);      <span class="cm">// odd</span>
+        count += expandCount(s, i, i+<span class="nm">1</span>);  <span class="cm">// even</span>
+    }
+    <span class="kw">return</span> count;
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">expandCount</span>(<span class="tp">String</span> s, <span class="tp">int</span> L, <span class="tp">int</span> R) {
+    <span class="tp">int</span> cnt = <span class="nm">0</span>;
+    <span class="kw">while</span> (L &gt;= <span class="nm">0</span> &amp;&amp; R &lt; s.length() &amp;&amp; s.charAt(L) == s.charAt(R)) {
+        cnt++; L--; R++;
+    }
+    <span class="kw">return</span> cnt;
+}`,
+      csharp:`<span class="cm">// PALINDROME EXPAND — THE TEMPLATE</span>
+<span class="kw">public</span> <span class="tp">string</span> <span class="fn">LongestPalindrome</span>(<span class="tp">string</span> s) {
+    <span class="tp">int</span> start = <span class="nm">0</span>, maxLen = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; s.Length; i++) {
+        <span class="tp">int</span> len1 = Expand(s, i, i);
+        <span class="tp">int</span> len2 = Expand(s, i, i+<span class="nm">1</span>);
+        <span class="tp">int</span> curLen = Math.Max(len1, len2);
+        <span class="kw">if</span> (curLen &gt; maxLen) {
+            maxLen = curLen;
+            start = i - (curLen - <span class="nm">1</span>) / <span class="nm">2</span>;
+        }
+    }
+    <span class="kw">return</span> s.Substring(start, maxLen);
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">Expand</span>(<span class="tp">string</span> s, <span class="tp">int</span> L, <span class="tp">int</span> R) {
+    <span class="kw">while</span> (L &gt;= <span class="nm">0</span> &amp;&amp; R &lt; s.Length &amp;&amp; s[L] == s[R]) {
+        L--; R++;
+    }
+    <span class="kw">return</span> R - L - <span class="nm">1</span>;
+}`
+    },
+    memoryHack:{
+      oneSentence:'For each possible center (char or between chars), expand outward while left == right.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'For each center i',type:'start',x:290,y:20},
+          {id:'odd',label:'Expand(i,i)',type:'action',x:140,y:90},
+          {id:'even',label:'Expand(i,i+1)',type:'action',x:440,y:90},
+          {id:'check',label:'L≥0, R<n, s[L]==s[R]?',type:'decision',x:290,y:160},
+          {id:'expand',label:'L--, R++',type:'action',x:290,y:230},
+          {id:'done',label:'Return length',type:'end',x:480,y:160}
+        ],
+        edges:[
+          {from:'start',to:'odd',label:'try odd-length'},
+          {from:'start',to:'even',label:'try even-length'},
+          {from:'odd',to:'check',label:''},
+          {from:'even',to:'check',label:''},
+          {from:'check',to:'expand',label:'YES = palindrome'},
+          {from:'expand',to:'check',label:'keep expanding'},
+          {from:'check',to:'done',label:'NO = stop'}
+        ]
+      },
+      annotatedCode:[
+        {line:'for (int i = 0; i < s.length(); i++) {',stepId:'start',note:'Try every possible center',color:'#14b8a6'},
+        {line:'    int len1 = expand(s, i, i);',stepId:'odd',note:'Odd-length palindrome: center at i',color:'#00ff88'},
+        {line:'    int len2 = expand(s, i, i+1);',stepId:'even',note:'Even-length palindrome: center between i and i+1',color:'#ffd600'},
+        {line:'while (L >= 0 && R < n && s[L] == s[R]) {',stepId:'check',note:'Expand while matching',color:'#a78bfa'},
+        {line:'    L--; R++;',stepId:'expand',note:'Grow palindrome outward',color:'#00cfff'},
+        {line:'return R - L - 1;',stepId:'done',note:'Length of palindrome found',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'Center i=0',art:'s="babad"  expand(0,0): "b"=1  expand(0,1): b≠a STOP',annotation:'Single char palindrome'},
+        {label:'Center i=1',art:'expand(1,1): "a"=1  expand(1,2): "aba"=3! (a==a, b==b)',annotation:'Odd-length palindrome "aba"'},
+        {label:'Center i=2',art:'expand(2,2): "b"=1  expand(2,3): b≠a STOP',annotation:'No even palindrome here'},
+        {label:'Center i=3',art:'expand(3,3): "a"=1  expand(3,4): "ada"? no d',annotation:'End of string, short palindrome'},
+        {label:'Result',art:'Longest found: "aba" or "bab" (length 3)',annotation:'Multiple valid answers possible'}
+      ],
+      variations:[
+        {name:'Longest Palindromic Substring',desc:'Expand from each center, track max length',problem:'Longest Palindromic Substring (#5)'},
+        {name:'Palindromic Substrings',desc:'Count all palindromes: expand from each center, sum counts',problem:'Palindromic Substrings (#647)'},
+        {name:'Longest Palindrome (by constructing)',desc:'Different problem: use char frequency to build longest palindrome',problem:'Longest Palindrome (#409)'}
+      ],
+      title:'EXPAND FROM CENTER',
+      mnemonic:'EXPAND FROM CENTER — try every possible middle, grow outward while matching',
+      steps:['For each index i from 0 to n-1:','Try odd-length: expand(i, i) → center at i','Try even-length: expand(i, i+1) → center between i and i+1','Expand: while L≥0 && R<n && s[L]==s[R]: L--, R++','Track max length found'],
+      why:'There are 2n-1 possible centers (n chars + n-1 gaps). Expanding from each takes O(n), giving O(n²) total. Avoids O(n³) of checking every substring.'
+    },
+    cheat:{
+      trigger:'longest palindrome, palindromic substring, count palindromes, expand from center',
+      firstLine:'for (int i=0; i<s.length(); i++) { expand(i,i); expand(i,i+1); }',
+      gotcha:'Forgetting to check even-length palindromes (center between two chars) — only checking odd-length misses cases like "abba"',
+      pitch:"I'll expand from every possible center. For each index, I try both odd-length (center at i) and even-length (center between i and i+1). Expand while characters match.",
+      snippet:`<span class="cm">// Expand from center: odd + even lengths</span>
+<span class="kw">int</span> <span class="fn">expand</span>(<span class="tp">String</span> s, <span class="kw">int</span> L, <span class="kw">int</span> R) {
+    <span class="kw">while</span>(L&gt;=<span class="nm">0</span> &amp;&amp; R&lt;s.length() &amp;&amp; s.charAt(L)==s.charAt(R)) {
+        L--; R++;
+    }
+    <span class="kw">return</span> R-L-<span class="nm">1</span>; <span class="cm">// length</span>
+}
+<span class="cm">// Call: max(expand(i,i), expand(i,i+1)) for each i</span>`
+    }
+  },
+  {
+    icon:'🔀', name:'Backtracking + Dedup', accent:'#8b5cf6',
+    tagline:'Backtrack with sorted input + skip duplicates',
+    hook:"Imagine picking teams from a lineup. You try every combination — pick player 1, then pick from remaining, backtrack, try without player 1. But what if there are TWO players named 'Alex'? You'd count duplicate teams! Solution: sort the lineup first, and if you skip an Alex, skip ALL Alexes in a row. That's backtracking with deduplication — generate all unique combinations without repeats!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Backtracking + Dedup: Subsets II</text><text x="300" y="48" fill="#4a5268" text-anchor="middle" font-size="11" font-family="monospace">Input: [1,2,2]  →  Unique subsets (no duplicates!)</text><rect x="50" y="70" width="500" height="210" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="300" y="95" fill="#8b5cf6" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Decision Tree (sorted input)</text><circle cx="300" cy="120" r="14" fill="#0e1018" stroke="#8b5cf6" stroke-width="2"/><text x="300" y="125" fill="#8b5cf6" text-anchor="middle" font-size="10">[]</text><line x1="285" y1="133" x2="140" y2="160" stroke="#8b5cf6"/><line x1="300" y1="134" x2="300" y2="160" stroke="#8b5cf6"/><line x1="315" y1="133" x2="460" y2="160" stroke="#4a5268" stroke-dasharray="4"/><circle cx="140" cy="175" r="12" fill="#0e1018" stroke="#8b5cf6" stroke-width="2"/><text x="140" y="179" fill="#8b5cf6" text-anchor="middle" font-size="9">1</text><circle cx="300" cy="175" r="12" fill="#0e1018" stroke="#8b5cf6" stroke-width="2"/><text x="300" y="179" fill="#8b5cf6" text-anchor="middle" font-size="9">2</text><circle cx="460" cy="175" r="12" fill="#0e1018" stroke="#ff4d6d" stroke-width="2"/><text x="460" y="179" fill="#ff4d6d" text-anchor="middle" font-size="9">2</text><text x="460" y="195" fill="#ff4d6d" font-size="8" font-family="monospace">SKIP!</text><line x1="133" y1="186" x2="90" y2="215" stroke="#8b5cf6"/><line x1="147" y1="186" x2="190" y2="215" stroke="#8b5cf6"/><circle cx="90" cy="230" r="11" fill="#0e1018" stroke="#8b5cf6" stroke-width="2"/><text x="90" y="234" fill="#8b5cf6" text-anchor="middle" font-size="8">1,2</text><circle cx="190" cy="230" r="11" fill="#0e1018" stroke="#8b5cf6" stroke-width="2"/><text x="190" y="234" fill="#8b5cf6" text-anchor="middle" font-size="8">1,2,2</text><text x="70" y="260" fill="#00ff88" font-size="10" font-family="monospace">Results: [], [1], [1,2], [1,2,2], [2], [2,2]</text><text x="440" y="220" fill="#ff4d6d" font-size="9" font-family="monospace">if (i > start && nums[i] == nums[i-1])</text><text x="440" y="235" fill="#ff4d6d" font-size="9" font-family="monospace">    continue; // skip duplicate</text></svg>`,
+    complexity:[
+      {badge:'red',big:'O(2^n × n)',label:'BRUTE FORCE',desc:'Generate all, use Set to filter dupes'},
+      {badge:'green',big:'O(2^n × n)',label:'SMART BACKTRACK',desc:'Sort + skip dupes inline, no Set needed'}
+    ],
+    meterWidth:'80%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># BACKTRACKING + DEDUP — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Subsets/combinations/permutations with duplicates</span>
+<span class="cm"># TIME: O(2^n × n) | SPACE: O(n) recursion</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="cm"># ─── Subsets II (with duplicates) ───</span>
+<span class="kw">def</span> <span class="fn">subsetsWithDup</span>(nums):
+    nums.sort()  <span class="cm"># CRITICAL: sort first!</span>
+    result = []
+    <span class="kw">def</span> <span class="fn">backtrack</span>(start, path):
+        result.append(path[:])
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(start, <span class="fn">len</span>(nums)):
+            <span class="cm"># Skip duplicates: if same as previous AND we skipped previous</span>
+            <span class="kw">if</span> i &gt; start <span class="kw">and</span> nums[i] == nums[i-<span class="nm">1</span>]:
+                <span class="kw">continue</span>
+            path.append(nums[i])
+            <span class="fn">backtrack</span>(i + <span class="nm">1</span>, path)
+            path.pop()
+    <span class="fn">backtrack</span>(<span class="nm">0</span>, [])
+    <span class="kw">return</span> result
+
+<span class="cm"># ─── Combination Sum II (each element once) ───</span>
+<span class="kw">def</span> <span class="fn">combinationSum2</span>(candidates, target):
+    candidates.sort()
+    result = []
+    <span class="kw">def</span> <span class="fn">backtrack</span>(start, path, total):
+        <span class="kw">if</span> total == target:
+            result.append(path[:])
+            <span class="kw">return</span>
+        <span class="kw">if</span> total &gt; target:
+            <span class="kw">return</span>
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(start, <span class="fn">len</span>(candidates)):
+            <span class="kw">if</span> i &gt; start <span class="kw">and</span> candidates[i] == candidates[i-<span class="nm">1</span>]:
+                <span class="kw">continue</span>  <span class="cm"># skip duplicate</span>
+            path.append(candidates[i])
+            <span class="fn">backtrack</span>(i + <span class="nm">1</span>, path, total + candidates[i])
+            path.pop()
+    <span class="fn">backtrack</span>(<span class="nm">0</span>, [], <span class="nm">0</span>)
+    <span class="kw">return</span> result`,
+      java:`<span class="cm">// BACKTRACKING + DEDUP — THE TEMPLATE</span>
+<span class="cm">// TIME: O(2^n × n) | SPACE: O(n)</span>
+
+<span class="cm">// ─── Subsets II ───</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">subsetsWithDup</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">Arrays</span>.sort(nums);  <span class="cm">// MUST sort first!</span>
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    backtrack(result, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), nums, <span class="nm">0</span>);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack</span>(<span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; path, <span class="tp">int</span>[] nums, <span class="tp">int</span> start) {
+    result.add(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(path));
+    <span class="kw">for</span> (<span class="tp">int</span> i = start; i &lt; nums.length; i++) {
+        <span class="cm">// Skip duplicates at same decision level</span>
+        <span class="kw">if</span> (i &gt; start &amp;&amp; nums[i] == nums[i-<span class="nm">1</span>]) <span class="kw">continue</span>;
+        path.add(nums[i]);
+        backtrack(result, path, nums, i + <span class="nm">1</span>);
+        path.remove(path.size() - <span class="nm">1</span>);
+    }
+}
+
+<span class="cm">// ─── Combination Sum II ───</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">combinationSum2</span>(<span class="tp">int</span>[] candidates, <span class="tp">int</span> target) {
+    <span class="tp">Arrays</span>.sort(candidates);
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    backtrack2(result, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), candidates, target, <span class="nm">0</span>);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack2</span>(<span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; path, <span class="tp">int</span>[] cand, <span class="tp">int</span> remain, <span class="tp">int</span> start) {
+    <span class="kw">if</span> (remain == <span class="nm">0</span>) { result.add(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(path)); <span class="kw">return</span>; }
+    <span class="kw">if</span> (remain &lt; <span class="nm">0</span>) <span class="kw">return</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> i = start; i &lt; cand.length; i++) {
+        <span class="kw">if</span> (i &gt; start &amp;&amp; cand[i] == cand[i-<span class="nm">1</span>]) <span class="kw">continue</span>;
+        path.add(cand[i]);
+        backtrack2(result, path, cand, remain - cand[i], i + <span class="nm">1</span>);
+        path.remove(path.size() - <span class="nm">1</span>);
+    }
+}`,
+      csharp:`<span class="cm">// BACKTRACKING + DEDUP — THE TEMPLATE</span>
+<span class="kw">public</span> <span class="tp">IList</span>&lt;<span class="tp">IList</span>&lt;<span class="tp">int</span>&gt;&gt; <span class="fn">SubsetsWithDup</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">Array</span>.Sort(nums);
+    <span class="kw">var</span> result = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">IList</span>&lt;<span class="tp">int</span>&gt;&gt;();
+    Backtrack(result, <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt;(), nums, <span class="nm">0</span>);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">Backtrack</span>(<span class="tp">List</span>&lt;<span class="tp">IList</span>&lt;<span class="tp">int</span>&gt;&gt; result, <span class="tp">List</span>&lt;<span class="tp">int</span>&gt; path, <span class="tp">int</span>[] nums, <span class="tp">int</span> start) {
+    result.Add(<span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt;(path));
+    <span class="kw">for</span> (<span class="tp">int</span> i = start; i &lt; nums.Length; i++) {
+        <span class="kw">if</span> (i &gt; start &amp;&amp; nums[i] == nums[i-<span class="nm">1</span>]) <span class="kw">continue</span>;
+        path.Add(nums[i]);
+        Backtrack(result, path, nums, i + <span class="nm">1</span>);
+        path.RemoveAt(path.Count - <span class="nm">1</span>);
+    }
+}`
+    },
+    memoryHack:{
+      oneSentence:'Sort first, then during backtracking skip duplicates: if (i > start && nums[i] == nums[i-1]) continue.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'Sort input',type:'start',x:290,y:20},
+          {id:'bt',label:'Backtrack(start, path)',type:'action',x:290,y:80},
+          {id:'add',label:'Add path to result',type:'action',x:290,y:140},
+          {id:'loop',label:'For i=start..n',type:'action',x:290,y:200},
+          {id:'dup',label:'i>start && nums[i]==nums[i-1]?',type:'decision',x:290,y:260},
+          {id:'skip',label:'Continue (skip)',type:'action',x:480,y:260},
+          {id:'recurse',label:'Add i, recurse, remove',type:'action',x:100,y:260}
+        ],
+        edges:[
+          {from:'start',to:'bt',label:''},
+          {from:'bt',to:'add',label:''},
+          {from:'add',to:'loop',label:''},
+          {from:'loop',to:'dup',label:''},
+          {from:'dup',to:'skip',label:'YES = duplicate'},
+          {from:'skip',to:'loop',label:''},
+          {from:'dup',to:'recurse',label:'NO = unique'},
+          {from:'recurse',to:'loop',label:''}
+        ]
+      },
+      annotatedCode:[
+        {line:'Arrays.sort(nums);',stepId:'start',note:'CRITICAL: sort brings duplicates together',color:'#8b5cf6'},
+        {line:'result.add(new ArrayList<>(path));',stepId:'add',note:'Every path is a valid subset',color:'#00ff88'},
+        {line:'for (int i = start; i < nums.length; i++) {',stepId:'loop',note:'Try adding each remaining element',color:'#00cfff'},
+        {line:'    if (i > start && nums[i] == nums[i-1]) continue;',stepId:'dup',note:'Skip duplicate at same recursion level!',color:'#ff4d6d'},
+        {line:'    path.add(nums[i]);',stepId:'recurse',note:'Choose: add element',color:'#ffd600'},
+        {line:'    backtrack(i + 1, path);',stepId:'recurse',note:'Explore: recurse with next start',color:'#a78bfa'},
+        {line:'    path.remove(path.size()-1);',stepId:'recurse',note:'Unchoose: backtrack',color:'#ffd600'}
+      ],
+      stateSnapshots:[
+        {label:'Sorted',art:'nums = [1, 2, 2]  (duplicates adjacent)',annotation:'Sorting groups duplicates together'},
+        {label:'Level 1',art:'Try [] → [], [1], [2], skip 2nd [2] (duplicate!)',annotation:'At top level, skip 2nd 2'},
+        {label:'Branch [1]',art:'From [1]: try [1,2], then [1,2,2]',annotation:'Within [1] branch, both 2s allowed'},
+        {label:'Branch [2]',art:'From [2]: try [2,2] (using 2nd occurrence)',annotation:'First [2] can use 2nd [2]'},
+        {label:'Result',art:'Unique: [], [1], [1,2], [1,2,2], [2], [2,2]',annotation:'No duplicate subsets!'}
+      ],
+      variations:[
+        {name:'Subsets II',desc:'Sort + skip duplicates at same recursion level',problem:'Subsets II (#90)'},
+        {name:'Combination Sum II',desc:'Sort + skip dupes + target sum constraint',problem:'Combination Sum II (#40)'},
+        {name:'Permutations II',desc:'Sort + use boolean[] used array + skip consecutive dupes',problem:'Permutations II (#47)'},
+        {name:'Palindrome Partitioning',desc:'Backtrack + isPalindrome check at each partition',problem:'Palindrome Partitioning (#131)'}
+      ],
+      title:'SORT → SKIP DUPES',
+      mnemonic:'SORT → SKIP DUPES — sort brings duplicates together, skip when i > start && nums[i] == nums[i-1]',
+      steps:['Sort the input array (brings duplicates adjacent)','Backtrack: for each index from start to end','If i > start && nums[i] == nums[i-1]: continue (skip duplicate)','Otherwise: add nums[i], recurse with start = i+1, backtrack (remove)','The condition "i > start" allows using duplicate within same branch, but skips at same level'],
+      why:'Sorting groups duplicates. The check "i > start" means: at this recursion depth, if we already tried this value, skip subsequent occurrences. But deeper levels can still use them.'
+    },
+    cheat:{
+      trigger:'subsets with duplicates, combination sum with duplicates, permutations with duplicates, backtracking dedup',
+      firstLine:'Arrays.sort(nums); // CRITICAL for dedup',
+      gotcha:'Checking i > 0 instead of i > start — this breaks inner branches. Must be i > start to only skip at current recursion level.',
+      pitch:"I'll sort the input first to group duplicates. During backtracking, if i > start and nums[i] == nums[i-1], I skip to avoid generating duplicate results.",
+      snippet:`<span class="cm">// Backtracking with dedup: sort + skip same at level</span>
+<span class="tp">Arrays</span>.sort(nums);
+<span class="tp">void</span> <span class="fn">backtrack</span>(<span class="kw">int</span> start, <span class="tp">List</span> path) {
+    result.add(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(path));
+    <span class="kw">for</span>(<span class="kw">int</span> i=start; i&lt;nums.length; i++) {
+        <span class="kw">if</span>(i&gt;start &amp;&amp; nums[i]==nums[i-<span class="nm">1</span>]) <span class="kw">continue</span>; <span class="cm">// skip dup</span>
+        path.add(nums[i]); <span class="fn">backtrack</span>(i+<span class="nm">1</span>,path); path.remove(path.size()-<span class="nm">1</span>);
+    }
+}`
+    }
   }
 ];

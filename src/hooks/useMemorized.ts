@@ -18,7 +18,7 @@ export function useMemorized() {
   }, [setMemorized]);
 
   const memorizedCount = useMemo(() => Object.keys(memorized).length, [memorized]);
-  const percentage = useMemo(() => Math.round((memorizedCount / 18) * 100), [memorizedCount]);
+  const percentage = useMemo(() => Math.round((memorizedCount / 30) * 100), [memorizedCount]);
 
   return { memorized, toggleMemorized, memorizedCount, percentage };
 }
