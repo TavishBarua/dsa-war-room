@@ -2,7 +2,7 @@ import { PatternCard } from './types';
 
 export const PATTERNS: PatternCard[] = [
   {
-    icon: '🗂️', name: 'Arrays & Hashing', count: 8,
+    icon: '🗂️', name: 'Arrays & Hashing', count: 7,
     accent: '#00ff88',
     tagline: 'When you need O(1) lookup or counting',
     intuition: 'As a senior dev, you already use HashMaps daily. In DSA, they\'re your first weapon. When brute force is O(n²) and you need to make it O(n) — a HashMap is probably involved.',
@@ -10,53 +10,49 @@ export const PATTERNS: PatternCard[] = [
     problems: [
       {name:'Contains Duplicate', diff:'Easy'}, {name:'Valid Anagram', diff:'Easy'},
       {name:'Two Sum', diff:'Easy'}, {name:'Group Anagrams', diff:'Medium'},
-      {name:'Product of Array Except Self', diff:'Medium'},
       {name:'Valid Sudoku', diff:'Medium'}, {name:'Encode and Decode Strings', diff:'Medium'},
       {name:'Longest Consecutive Sequence', diff:'Medium'}
     ]
   },
   {
-    icon: '👉👈', name: 'Two Pointers', count: 5,
+    icon: '👉👈', name: 'Two Pointers', count: 4,
     accent: '#00cfff',
     tagline: 'Two variables moving toward each other',
     intuition: 'When the array is sorted (or can be sorted) and you\'re looking for pairs or subarrays. One pointer at start, one at end. Move them based on conditions. Eliminates the O(n²) nested loop.',
     trigger: 'When you see: sorted array, find pairs summing to target, reverse something, palindrome check\n→ Left pointer + Right pointer, move inward',
     problems: [
       {name:'Valid Palindrome', diff:'Easy'}, {name:'Two Sum II - Input Array Is Sorted', diff:'Medium'},
-      {name:'3Sum', diff:'Medium'}, {name:'Container With Most Water', diff:'Medium'},
-      {name:'Trapping Rain Water', diff:'Hard'}
+      {name:'3Sum', diff:'Medium'}, {name:'Container With Most Water', diff:'Medium'}
     ]
   },
   {
-    icon: '🪟', name: 'Sliding Window', count: 6,
+    icon: '🪟', name: 'Sliding Window', count: 4,
     accent: '#a78bfa',
     tagline: 'A subarray/substring that moves forward',
     intuition: 'Think of it as a camera frame sliding across the array. You add from the right and remove from the left. The "window" maintains some condition. Never use nested loops when a window works.',
     trigger: 'When you see: "longest/shortest subarray/substring", "max sum of size k", "contains all chars"\n→ Two pointers (left, right) forming a window',
     problems: [
-      {name:'Best Time to Buy and Sell Stock', diff:'Easy'},
       {name:'Longest Substring Without Repeating Characters', diff:'Medium'},
       {name:'Longest Repeating Character Replacement', diff:'Medium'},
       {name:'Permutation in String', diff:'Medium'},
-      {name:'Minimum Window Substring', diff:'Hard'},
-      {name:'Sliding Window Maximum', diff:'Hard'}
+      {name:'Minimum Window Substring', diff:'Hard'}
     ]
   },
   {
-    icon: '📚', name: 'Stack', count: 7,
+    icon: '📚', name: 'Stack', count: 8,
     accent: '#fb923c',
     tagline: 'When order matters and you need last-in-first-out',
     intuition: 'Stack solves "what was the last thing I saw" problems. Parentheses matching, temperature questions ("when is next warmer day"), monotonic stacks for histogram problems.',
     trigger: 'When you see: matching brackets, "next greater element", "calculate at end", undo operations\n→ Push when valid, pop when condition met',
     problems: [
       {name:'Valid Parentheses', diff:'Easy'}, {name:'Min Stack', diff:'Medium'},
-      {name:'Evaluate Reverse Polish Notation', diff:'Medium'}, {name:'Generate Parentheses', diff:'Medium'},
-      {name:'Daily Temperatures', diff:'Medium'}, {name:'Car Fleet', diff:'Medium'},
-      {name:'Largest Rectangle in Histogram', diff:'Hard'}
+      {name:'Evaluate Reverse Polish Notation', diff:'Medium'}, {name:'Daily Temperatures', diff:'Medium'},
+      {name:'Car Fleet', diff:'Medium'}, {name:'Largest Rectangle in Histogram', diff:'Hard'},
+      {name:'Trapping Rain Water', diff:'Hard'}, {name:'Sliding Window Maximum', diff:'Hard'}
     ]
   },
   {
-    icon: '🔍', name: 'Binary Search', count: 7,
+    icon: '🔍', name: 'Binary Search', count: 8,
     accent: '#34d399',
     tagline: 'Eliminate half the search space every step',
     intuition: 'Not just for sorted arrays. Binary search any time the answer has a monotonic property — if X works, then X-1 works too. The "creative binary search" on the answer value is a game changer.',
@@ -65,11 +61,11 @@ export const PATTERNS: PatternCard[] = [
       {name:'Binary Search', diff:'Easy'}, {name:'Search a 2D Matrix', diff:'Medium'},
       {name:'Koko Eating Bananas', diff:'Medium'}, {name:'Find Minimum in Rotated Sorted Array', diff:'Medium'},
       {name:'Search in Rotated Sorted Array', diff:'Medium'}, {name:'Time Based Key-Value Store', diff:'Medium'},
-      {name:'Median of Two Sorted Arrays', diff:'Hard'}
+      {name:'Find the Duplicate Number', diff:'Medium'}, {name:'Median of Two Sorted Arrays', diff:'Hard'}
     ]
   },
   {
-    icon: '🔗', name: 'Linked List', count: 10,
+    icon: '🔗', name: 'Linked List', count: 9,
     accent: '#f472b6',
     tagline: 'Pointer manipulation — think before you move',
     intuition: 'Draw it on paper every time. Literally draw the boxes and arrows. The fast/slow pointer (Floyd\'s cycle detection) solves half these problems. Dummy head node prevents edge case hell.',
@@ -78,8 +74,8 @@ export const PATTERNS: PatternCard[] = [
       {name:'Reverse Linked List', diff:'Easy'}, {name:'Merge Two Sorted Lists', diff:'Easy'},
       {name:'Reorder List', diff:'Medium'}, {name:'Remove Nth Node From End of List', diff:'Medium'},
       {name:'Copy List with Random Pointer', diff:'Medium'}, {name:'Add Two Numbers', diff:'Medium'},
-      {name:'Linked List Cycle', diff:'Easy'}, {name:'Find the Duplicate Number', diff:'Medium'},
-      {name:'LRU Cache', diff:'Medium'}, {name:'Reverse Nodes in K-Group', diff:'Hard'}
+      {name:'Linked List Cycle', diff:'Easy'}, {name:'LRU Cache', diff:'Medium'},
+      {name:'Reverse Nodes in K-Group', diff:'Hard'}
     ]
   },
   {
@@ -100,7 +96,7 @@ export const PATTERNS: PatternCard[] = [
     ]
   },
   {
-    icon: '⛏️', name: 'Heap / Priority Queue', count: 9,
+    icon: '⛏️', name: 'Heap / Priority Queue', count: 8,
     accent: '#fbbf24',
     tagline: 'Always get the min or max in O(log n)',
     intuition: 'Heap = priority queue. Use it whenever you need "the k largest/smallest" or "stream of numbers, get median". Python has heapq (min-heap). For max-heap, negate the values.',
@@ -108,13 +104,12 @@ export const PATTERNS: PatternCard[] = [
     problems: [
       {name:'Kth Largest Element in a Stream', diff:'Easy'}, {name:'Last Stone Weight', diff:'Easy'},
       {name:'K Closest Points to Origin', diff:'Medium'}, {name:'Kth Largest Element in an Array', diff:'Medium'},
-      {name:'Top K Frequent Elements', diff:'Medium'}, {name:'Task Scheduler', diff:'Medium'},
-      {name:'Design Twitter', diff:'Medium'}, {name:'Merge K Sorted Lists', diff:'Hard'},
-      {name:'Find Median from Data Stream', diff:'Hard'}
+      {name:'Top K Frequent Elements', diff:'Medium'}, {name:'Design Twitter', diff:'Medium'},
+      {name:'Merge K Sorted Lists', diff:'Hard'}, {name:'Find Median from Data Stream', diff:'Hard'}
     ]
   },
   {
-    icon: '🌿', name: 'Backtracking', count: 10,
+    icon: '🌿', name: 'Backtracking', count: 11,
     accent: '#e879f9',
     tagline: 'Try everything, undo when stuck',
     intuition: 'Backtracking = DFS on a decision tree. At each step you make a choice, recurse, then undo that choice. The key insight: you\'re building a tree of all possibilities and pruning dead branches early.',
@@ -123,8 +118,9 @@ export const PATTERNS: PatternCard[] = [
       {name:'Subsets', diff:'Medium'}, {name:'Combination Sum', diff:'Medium'},
       {name:'Permutations', diff:'Medium'}, {name:'Subsets II', diff:'Medium'},
       {name:'Combination Sum II', diff:'Medium'}, {name:'Word Search', diff:'Medium'},
-      {name:'Palindrome Partitioning', diff:'Medium'}, {name:'Letter Combinations of a Phone Number', diff:'Medium'},
-      {name:'N-Queens', diff:'Hard'}, {name:'N-Queens II', diff:'Hard'}
+      {name:'Generate Parentheses', diff:'Medium'}, {name:'Palindrome Partitioning', diff:'Medium'},
+      {name:'Letter Combinations of a Phone Number', diff:'Medium'}, {name:'N-Queens', diff:'Hard'},
+      {name:'N-Queens II', diff:'Hard'}
     ]
   },
   {
@@ -175,21 +171,22 @@ export const PATTERNS: PatternCard[] = [
     trigger: 'When you see: "maximum/minimum", "count ways", "can you achieve X"\n→ Define state. Find recurrence. dp[i] = f(dp[i-1], dp[i-2]...)',
     problems: [
       {name:'Climbing Stairs', diff:'Easy'}, {name:'Min Cost Climbing Stairs', diff:'Easy'},
-      {name:'House Robber', diff:'Medium'}, {name:'House Robber II', diff:'Medium'},
-      {name:'Longest Palindromic Substring', diff:'Medium'}, {name:'Palindromic Substrings', diff:'Medium'},
+      {name:'Best Time to Buy and Sell Stock', diff:'Easy'}, {name:'House Robber', diff:'Medium'},
+      {name:'House Robber II', diff:'Medium'}, {name:'Product of Array Except Self', diff:'Medium'},
       {name:'Decode Ways', diff:'Medium'}, {name:'Coin Change', diff:'Medium'},
       {name:'Maximum Product Subarray', diff:'Medium'}, {name:'Word Break', diff:'Medium'},
       {name:'Longest Increasing Subsequence', diff:'Medium'}, {name:'Partition Equal Subset Sum', diff:'Medium'}
     ]
   },
   {
-    icon: '📐', name: '2-D Dynamic Programming', count: 11,
+    icon: '📐', name: '2-D Dynamic Programming', count: 13,
     accent: '#c4b5fd',
     tagline: 'dp[i][j] — grid of subproblems',
     intuition: '2D DP is when your state depends on TWO variables — usually two strings, two arrays, or a grid. dp[i][j] = answer considering first i chars of s1 and first j chars of s2. Draw the grid on paper.',
     trigger: 'When you see: two strings compared (LCS, Edit Distance), grid path problems\n→ dp[i][j] table. Fill row by row. Answer at dp[m][n].',
     problems: [
       {name:'Unique Paths', diff:'Medium'}, {name:'Longest Common Subsequence', diff:'Medium'},
+      {name:'Longest Palindromic Substring', diff:'Medium'}, {name:'Palindromic Substrings', diff:'Medium'},
       {name:'Best Time to Buy/Sell Stock w/ Cooldown', diff:'Medium'}, {name:'Coin Change II', diff:'Medium'},
       {name:'Target Sum', diff:'Medium'}, {name:'Interleaving String', diff:'Medium'},
       {name:'Longest Increasing Path in Matrix', diff:'Hard'}, {name:'Distinct Subsequences', diff:'Hard'},
@@ -198,7 +195,7 @@ export const PATTERNS: PatternCard[] = [
     ]
   },
   {
-    icon: '💰', name: 'Greedy', count: 8,
+    icon: '💰', name: 'Greedy', count: 9,
     accent: '#6ee7b7',
     tagline: 'Make the locally optimal choice each step',
     intuition: 'Greedy works when a local optimal choice leads to a global optimal. No backtracking needed. The hard part is PROVING greedy works — think "if I don\'t take the best available now, can I do better later?"',
@@ -206,8 +203,9 @@ export const PATTERNS: PatternCard[] = [
     problems: [
       {name:'Maximum Subarray', diff:'Medium'}, {name:'Jump Game', diff:'Medium'},
       {name:'Jump Game II', diff:'Medium'}, {name:'Gas Station', diff:'Medium'},
-      {name:'Hand of Straights', diff:'Medium'}, {name:'Merge Triplets to Form Target Triplet', diff:'Medium'},
-      {name:'Partition Labels', diff:'Medium'}, {name:'Valid Parenthesis String', diff:'Medium'}
+      {name:'Hand of Straights', diff:'Medium'}, {name:'Task Scheduler', diff:'Medium'},
+      {name:'Merge Triplets to Form Target Triplet', diff:'Medium'}, {name:'Partition Labels', diff:'Medium'},
+      {name:'Valid Parenthesis String', diff:'Medium'}
     ]
   },
   {
