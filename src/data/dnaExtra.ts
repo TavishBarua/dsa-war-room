@@ -3337,5 +3337,156 @@ q.offer(root);
     }
 }`
     }
+  },
+  {
+    icon:'🗂️', name:'Arrays & Hashing / Sudoku Validation', accent:'#00ff88',
+    tagline:'Hash sets + Box index formula',
+    hook:"Valid Sudoku is about checking if a 9×9 board is valid. The trick? Calculate which 3×3 box a cell belongs to using a simple formula: box = (row/3)*3 + col/3. Use hash sets to track seen numbers in rows, columns, and boxes. Think of it like airport security: each checkpoint (row, column, box) maintains its own list of what's passed through.",
+    complexity:[{badge:'green',big:'O(1)',label:'TIME',desc:'Fixed 9×9 board = 81 cells max'},{badge:'green',big:'O(1)',label:'SPACE',desc:'Max 81 entries in hash set'}],
+    meterWidth:'100%',
+    code:{python:`<span class="cm"># VALID SUDOKU — Hash Set Pattern</span>
+<span class="cm"># TIME: O(1) | SPACE: O(1) — fixed 9×9 board</span>
+
+<span class="kw">def</span> <span class="fn">isValidSudoku</span>(board):
+    seen = <span class="fn">set</span>()
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">9</span>):
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">9</span>):
+            <span class="kw">if</span> board[i][j] != <span class="st">'.'</span>:
+                num = board[i][j]
+                <span class="cm"># Check all 3 constraints at once</span>
+                <span class="kw">if</span> (num, <span class="st">'r'</span>, i) <span class="kw">in</span> seen <span class="kw">or</span> \\
+                   (num, <span class="st">'c'</span>, j) <span class="kw">in</span> seen <span class="kw">or</span> \\
+                   (num, <span class="st">'b'</span>, i//<span class="nm">3</span>, j//<span class="nm">3</span>) <span class="kw">in</span> seen:
+                    <span class="kw">return</span> <span class="kw">False</span>
+                seen.add((num, <span class="st">'r'</span>, i))
+                seen.add((num, <span class="st">'c'</span>, j))
+                seen.add((num, <span class="st">'b'</span>, i//<span class="nm">3</span>, j//<span class="nm">3</span>))
+    <span class="kw">return</span> <span class="kw">True</span>`,csharp:`<span class="cm">// VALID SUDOKU — Hash Set Pattern</span>
+<span class="kw">public</span> <span class="tp">bool</span> <span class="fn">IsValidSudoku</span>(<span class="tp">char</span>[][] board) {
+    <span class="tp">HashSet</span>&lt;<span class="tp">string</span>&gt; seen = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;<span class="tp">string</span>&gt;();
+    <span class="kw">for</span>(<span class="tp">int</span> i=<span class="nm">0</span>; i&lt;<span class="nm">9</span>; i++) {
+        <span class="kw">for</span>(<span class="tp">int</span> j=<span class="nm">0</span>; j&lt;<span class="nm">9</span>; j++) {
+            <span class="kw">if</span>(board[i][j] != <span class="st">'.'</span>) {
+                <span class="tp">char</span> num = board[i][j];
+                <span class="kw">if</span>(!seen.Add(num + <span class="st">" row "</span> + i) ||
+                   !seen.Add(num + <span class="st">" col "</span> + j) ||
+                   !seen.Add(num + <span class="st">" box "</span> + (i/<span class="nm">3</span>)*<span class="nm">3</span> + j/<span class="nm">3</span>))
+                    <span class="kw">return</span> <span class="kw">false</span>;
+            }
+        }
+    }
+    <span class="kw">return</span> <span class="kw">true</span>;
+}`,java:`<span class="cm">// ═══════════════════════════════</span>
+<span class="cm">// VALID SUDOKU — THE BOX FORMULA</span>
+<span class="cm">// ═══════════════════════════════</span>
+<span class="cm">// WHEN TO USE: Grid validation with regions/zones</span>
+<span class="cm">// TIME: O(1) | SPACE: O(1) — fixed 9×9 = 81 cells</span>
+<span class="cm">// KEY TRICK: box_index = (row/3)*3 + col/3</span>
+<span class="cm">// ═══════════════════════════════</span>
+
+<span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">isValidSudoku</span>(<span class="tp">char</span>[][] board) {
+    <span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; seen = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+
+    <span class="kw">for</span>(<span class="tp">int</span> i=<span class="nm">0</span>; i&lt;<span class="nm">9</span>; i++) {
+        <span class="kw">for</span>(<span class="tp">int</span> j=<span class="nm">0</span>; j&lt;<span class="nm">9</span>; j++) {
+            <span class="tp">char</span> num = board[i][j];
+            <span class="kw">if</span>(num != <span class="st">'.'</span>) {
+                <span class="cm">// The TRICK: Check all 3 constraints with unique string keys</span>
+                <span class="kw">if</span>(!seen.add(num + <span class="st">" in row "</span> + i) ||
+                   !seen.add(num + <span class="st">" in col "</span> + j) ||
+                   !seen.add(num + <span class="st">" in box "</span> + (i/<span class="nm">3</span>)*<span class="nm">3</span> + j/<span class="nm">3</span>)) {
+                    <span class="kw">return</span> <span class="kw">false</span>;  <span class="cm">// Duplicate found!</span>
+                }
+            }
+        }
+    }
+    <span class="kw">return</span> <span class="kw">true</span>;
+}
+
+<span class="cm">// ─── THE BOX INDEX FORMULA ───</span>
+<span class="cm">// Cell (4,7) → box = (4/3)*3 + 7/3 = 1*3 + 2 = 5 ✓</span>
+<span class="cm">// Cell (8,1) → box = (8/3)*3 + 1/3 = 2*3 + 0 = 6 ✓</span>
+<span class="cm">//</span>
+<span class="cm">// Box Layout:</span>
+<span class="cm">// ┌─────┬─────┬─────┐</span>
+<span class="cm">// │  0  │  1  │  2  │</span>
+<span class="cm">// ├─────┼─────┼─────┤</span>
+<span class="cm">// │  3  │  4  │  5  │</span>
+<span class="cm">// ├─────┼─────┼─────┤</span>
+<span class="cm">// │  6  │  7  │  8  │</span>
+<span class="cm">// └─────┴─────┴─────┘</span>`},
+    memoryHack:{
+      oneSentence:'Use ONE hash set with unique string keys combining number + constraint type (row/col/box) — the box index formula is (row/3)*3 + col/3.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'For each cell (i,j)',type:'start',x:290,y:20},
+          {id:'empty',label:'Empty cell?',type:'decision',x:290,y:80},
+          {id:'skip',label:'Skip (continue)',type:'action',x:100,y:80},
+          {id:'check',label:'Check row/col/box',type:'action',x:290,y:145},
+          {id:'dup',label:'Duplicate?',type:'decision',x:290,y:210},
+          {id:'fail',label:'Return false',type:'end',x:480,y:210},
+          {id:'add',label:'Add to seen set',type:'action',x:290,y:275},
+          {id:'done',label:'Return true',type:'end',x:290,y:340}
+        ],
+        edges:[
+          {from:'start',to:'empty',label:''},
+          {from:'empty',to:'skip',label:'YES (.)'},
+          {from:'empty',to:'check',label:'NO (digit)'},
+          {from:'skip',to:'start',label:''},
+          {from:'check',to:'dup',label:''},
+          {from:'dup',to:'fail',label:'YES'},
+          {from:'dup',to:'add',label:'NO'},
+          {from:'add',to:'start',label:'next cell'},
+          {from:'start',to:'done',label:'all cells done'}
+        ]
+      },
+      annotatedCode:[
+        {line:'Set<String> seen = new HashSet<>();',stepId:'start',note:'One set for everything',color:'#00ff88'},
+        {line:'for(int i=0; i<9; i++) {',stepId:'start',note:'Scan all rows',color:'#5a5f70'},
+        {line:'  for(int j=0; j<9; j++) {',stepId:'start',note:'Scan all columns',color:'#5a5f70'},
+        {line:'    if(board[i][j] == \'.\') continue;',stepId:'empty',note:'Skip empty cells',color:'#ffd600'},
+        {line:'    char num = board[i][j];',stepId:'check',note:'Get the digit',color:'#a78bfa'},
+        {line:'    int box = (i/3)*3 + j/3;',stepId:'check',note:'THE TRICK: Calculate box index',color:'#ff4d6d'},
+        {line:'    if(!seen.add(num+" row "+i) ||',stepId:'dup',note:'Check + add row constraint',color:'#00cfff'},
+        {line:'       !seen.add(num+" col "+j) ||',stepId:'dup',note:'Check + add column constraint',color:'#00cfff'},
+        {line:'       !seen.add(num+" box "+box))',stepId:'dup',note:'Check + add box constraint',color:'#00cfff'},
+        {line:'      return false;',stepId:'fail',note:'Duplicate found → invalid',color:'#ff4d6d'},
+        {line:'return true;',stepId:'done',note:'All checks passed',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'Box Formula',art:'Cell (0,0) → box = (0/3)*3 + 0/3 = 0\nCell (4,7) → box = (4/3)*3 + 7/3 = 1*3 + 2 = 5',annotation:'Dividing by 3 gives box row/col'},
+        {label:'String Keys',art:'seen.add("5 in row 0")\nseen.add("5 in col 3")\nseen.add("5 in box 1")',annotation:'Unique keys for each constraint'},
+        {label:'Duplicate Check',art:'If "5 in row 0" already in seen → return false',annotation:'Hash set detects duplicates in O(1)'},
+        {label:'Valid Board',art:'All 81 cells checked, no duplicates → return true',annotation:'Each digit appears once per row/col/box'}
+      ],
+      variations:[
+        {name:'Valid Sudoku',desc:'Hash set + box formula (row/3)*3 + col/3',problem:'Valid Sudoku (#36)'},
+        {name:'Sudoku Solver',desc:'Backtracking + same validation logic',problem:'Sudoku Solver (#37)'},
+        {name:'N-Queens',desc:'Similar constraint checking pattern',problem:'N-Queens (#51)'}
+      ],
+      title:'Arrays & Hashing: Sudoku Validation',
+      mnemonic:'ONE SET → UNIQUE STRING KEYS → BOX = (ROW/3)*3 + COL/3',
+      steps:['Create one hash set for tracking seen values','For each non-empty cell, calculate box index: (row/3)*3 + col/3','Create unique string keys: "num in row i", "num in col j", "num in box b"','Try adding all 3 keys to set — if any fails, return false','If all cells pass, return true'],
+      why:'The box formula (row/3)*3 + col/3 maps 9 boxes (0-8) correctly. Using one hash set with unique string keys is simpler than managing 3 separate arrays of sets. Hash set gives O(1) lookup and insertion.'
+    },
+    cheat:{
+      trigger:'sudoku validation, grid with regions, constraint checking, 9×9 board',
+      firstLine:'Set<String> seen = new HashSet<>();',
+      gotcha:'Using (i/3) + (j/3) instead of (i/3)*3 + (j/3) — the *3 is critical! Integer division in Java truncates: 4/3 = 1, not 1.33.',
+      pitch:"I'll use a single hash set with unique string keys combining the number with its constraint type. The key trick is the box formula: (row/3)*3 + col/3.",
+      snippet:`<span class="cm">// Valid Sudoku: The Box Formula Trick</span>
+<span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; seen = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+<span class="kw">for</span>(<span class="tp">int</span> i=<span class="nm">0</span>; i&lt;<span class="nm">9</span>; i++) {
+    <span class="kw">for</span>(<span class="tp">int</span> j=<span class="nm">0</span>; j&lt;<span class="nm">9</span>; j++) {
+        <span class="tp">char</span> num = board[i][j];
+        <span class="kw">if</span>(num != <span class="st">'.'</span>) {
+            <span class="tp">int</span> box = (i/<span class="nm">3</span>)*<span class="nm">3</span> + j/<span class="nm">3</span>;  <span class="cm">// THE TRICK!</span>
+            <span class="kw">if</span>(!seen.add(num+<span class="st">" row "</span>+i) || !seen.add(num+<span class="st">" col "</span>+j) ||
+               !seen.add(num+<span class="st">" box "</span>+box)) <span class="kw">return</span> <span class="kw">false</span>;
+        }
+    }
+}
+<span class="kw">return</span> <span class="kw">true</span>;`
+    }
   }
 ];
