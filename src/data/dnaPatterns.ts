@@ -162,7 +162,10 @@ export const DNA_PATTERNS: DnaPattern[] = [
       variations: [
         { name: 'Two Sum', desc: 'Hashmap stores val→idx, check complement before inserting', problem: 'Two Sum (#1)' },
         { name: 'Group Anagrams', desc: 'Use sorted-string or char-count tuple as hashmap key', problem: 'Group Anagrams (#49)' },
-        { name: 'Contains Duplicate', desc: 'Insert into set — if already present, duplicate found', problem: 'Contains Duplicate (#217)' }
+        { name: 'Contains Duplicate', desc: 'Insert into set — if already present, duplicate found', problem: 'Contains Duplicate (#217)' },
+        { name: 'Encode and Decode Strings', desc: 'Encode: prepend each string with its length + delimiter (e.g. "4#lint"). Decode: read length, extract substring', problem: 'Encode and Decode Strings (#271)' },
+        { name: 'Valid Sudoku', desc: 'Use 3 HashSets (row, col, box) — box index = (r/3)*3 + c/3. Check duplicates per group', problem: 'Valid Sudoku (#36)' },
+        { name: 'Longest Consecutive Sequence', desc: 'Put all in HashSet. Only start counting from sequence starts (num-1 not in set). Expand right.', problem: 'Longest Consecutive Sequence (#128)' }
       ],
       title: 'CHECK then STORE',
       mnemonic: 'CHECK then STORE — ask the map before you add to it',
@@ -542,7 +545,8 @@ export const DNA_PATTERNS: DnaPattern[] = [
       variations: [
         { name: 'Two Sum II (Sorted)', desc: 'Classic squeeze from both ends on a sorted array', problem: 'Two Sum II (#167)' },
         { name: 'Container With Most Water', desc: 'Move the shorter wall inward to potentially find more area', problem: 'Container With Most Water (#11)' },
-        { name: 'Valid Palindrome', desc: 'Two pointers from ends — skip non-alphanumeric, compare chars', problem: 'Valid Palindrome (#125)' }
+        { name: 'Valid Palindrome', desc: 'Two pointers from ends — skip non-alphanumeric, compare chars', problem: 'Valid Palindrome (#125)' },
+        { name: '3Sum', desc: 'Sort array. Fix one number, two-pointer squeeze on the rest. Skip duplicates to avoid repeat triplets.', problem: '3Sum (#15)' }
       ],
       title: 'Two Pointers — Squeeze Inward',
       mnemonic: 'TOO SMALL? Move left up. TOO BIG? Move right down.',
