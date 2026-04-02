@@ -39,10 +39,10 @@ export default function DnaSection() {
       <div className="section-label">// 02 — Pattern DNA</div>
       <h2 className="section-title">PATTERN<br />DNA</h2>
       <p className="section-desc">
-        30 patterns. Learn once. Recognize forever. Each one explained like you're 10, built like you're a FAANG engineer.
+        33 patterns. Learn once. Recognize forever. Each one explained like you're 10, built like you're a FAANG engineer.
       </p>
       <div className="dna-progress-wrap">
-        <span className="dna-progress-text">{memorizedCount} / 30 MEMORIZED</span>
+        <span className="dna-progress-text">{memorizedCount} / 33 MEMORIZED</span>
         <div className="dna-progress-bar">
           <div className="dna-progress-fill" style={{ width: `${percentage}%` }} />
         </div>

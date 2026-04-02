@@ -3489,5 +3489,310 @@ q.offer(root);
 }
 <span class="kw">return</span> <span class="kw">true</span>;`
     }
+  },
+  {
+    icon:'🔤', name:'Encode and Decode Strings', accent:'#00ff88',
+    tagline:'Length-prefix encoding for unambiguous parsing',
+    hook:"Imagine you need to store multiple strings in a single string. If you just join them with a delimiter like '#', what happens if a string contains '#'? You can't parse it back! The trick: prepend each string with its LENGTH. So 'lint' becomes '4#lint'. Now even if the string contains '#', you know exactly where it ends by reading the length first.",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="13" font-weight="bold" font-family="monospace">Length-Prefix Encoding</text><text x="300" y="50" fill="#00ff88" text-anchor="middle" font-size="11" font-family="monospace">Input: ["lint","code","love","you"]</text><rect x="50" y="70" width="500" height="60" fill="#1a1d2e" rx="6" stroke="#1e2230"/><text x="70" y="95" fill="#4a5268" font-size="10" font-family="monospace">Encode Process:</text><text x="70" y="115" fill="#00ff88" font-size="10" font-family="monospace">"lint" → len=4 → "4#lint"</text><rect x="50" y="145" width="500" height="40" fill="rgba(0,255,136,.1)" rx="6" stroke="#00ff88"/><text x="60" y="170" fill="#00ff88" font-size="11" font-family="monospace">4#lint4#code4#love3#you</text><rect x="50" y="200" width="500" height="80" fill="#1a1d2e" rx="6" stroke="#1e2230"/><text x="70" y="225" fill="#4a5268" font-size="10" font-family="monospace">Decode Process:</text><text x="70" y="245" fill="#00cfff" font-size="10" font-family="monospace">1. Read "4" → length=4</text><text x="70" y="260" fill="#00cfff" font-size="10" font-family="monospace">2. Skip "#" → extract 4 chars → "lint"</text><text x="70" y="275" fill="#00cfff" font-size="10" font-family="monospace">3. Repeat for next chunk...</text></svg>`,
+    complexity:[
+      {badge:'green',big:'O(n)',label:'ENCODE',desc:'Single pass through all strings'},
+      {badge:'green',big:'O(n)',label:'DECODE',desc:'Single pass reading lengths + strings'},
+      {badge:'blue',big:'O(1)',label:'PER STRING',desc:'Constant time to prepend length'}
+    ],
+    meterWidth:'85%',
+    code:{
+      python:`<span class="cm"># ════════════════════════════════════════</span>
+<span class="cm"># ENCODE AND DECODE STRINGS — THE PATTERN</span>
+<span class="cm"># ════════════════════════════════════════</span>
+<span class="cm"># WHEN: Serialize list of strings with any chars</span>
+<span class="cm"># TRICK: Length-prefix → immune to delimiters</span>
+<span class="cm"># ════════════════════════════════════════</span>
+
+<span class="kw">class</span> <span class="tp">Codec</span>:
+    <span class="kw">def</span> <span class="fn">encode</span>(<span class="kw">self</span>, strs):
+        <span class="cm"># Format: "len#string" for each string</span>
+        result = <span class="st">""</span>
+        <span class="kw">for</span> s <span class="kw">in</span> strs:
+            result += <span class="fn">str</span>(<span class="fn">len</span>(s)) + <span class="st">"#"</span> + s
+        <span class="kw">return</span> result
+
+    <span class="kw">def</span> <span class="fn">decode</span>(<span class="kw">self</span>, s):
+        result, i = [], <span class="nm">0</span>
+        <span class="kw">while</span> i &lt; <span class="fn">len</span>(s):
+            <span class="cm"># Find delimiter '#'</span>
+            j = i
+            <span class="kw">while</span> s[j] != <span class="st">'#'</span>:
+                j += <span class="nm">1</span>
+            <span class="cm"># Extract length</span>
+            length = <span class="fn">int</span>(s[i:j])
+            <span class="cm"># Extract string of that length</span>
+            result.<span class="fn">append</span>(s[j+<span class="nm">1</span> : j+<span class="nm">1</span>+length])
+            <span class="cm"># Move to next chunk</span>
+            i = j + <span class="nm">1</span> + length
+        <span class="kw">return</span> result`,
+      csharp:`<span class="cm">// ════════════════════════════════════════</span>
+<span class="cm">// ENCODE AND DECODE STRINGS — THE PATTERN</span>
+<span class="cm">// ════════════════════════════════════════</span>
+
+<span class="kw">public class</span> <span class="tp">Codec</span> {
+    <span class="kw">public</span> <span class="tp">string</span> <span class="fn">Encode</span>(<span class="tp">IList</span>&lt;<span class="tp">string</span>&gt; strs) {
+        <span class="kw">var</span> sb = <span class="kw">new</span> <span class="tp">StringBuilder</span>();
+        <span class="kw">foreach</span>(<span class="kw">var</span> s <span class="kw">in</span> strs) {
+            sb.<span class="fn">Append</span>(s.Length).<span class="fn">Append</span>(<span class="st">'#'</span>).<span class="fn">Append</span>(s);
+        }
+        <span class="kw">return</span> sb.<span class="fn">ToString</span>();
+    }
+
+    <span class="kw">public</span> <span class="tp">IList</span>&lt;<span class="tp">string</span>&gt; <span class="fn">Decode</span>(<span class="tp">string</span> s) {
+        <span class="kw">var</span> result = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">string</span>&gt;();
+        <span class="tp">int</span> i = <span class="nm">0</span>;
+        <span class="kw">while</span>(i &lt; s.Length) {
+            <span class="tp">int</span> j = s.<span class="fn">IndexOf</span>(<span class="st">'#'</span>, i);
+            <span class="tp">int</span> len = <span class="fn">int</span>.<span class="fn">Parse</span>(s.<span class="fn">Substring</span>(i, j-i));
+            result.<span class="fn">Add</span>(s.<span class="fn">Substring</span>(j+<span class="nm">1</span>, len));
+            i = j + <span class="nm">1</span> + len;
+        }
+        <span class="kw">return</span> result;
+    }
+}`,
+      java:`<span class="cm">// ════════════════════════════════════════</span>
+<span class="cm">// ENCODE AND DECODE STRINGS — THE PATTERN</span>
+<span class="cm">// ════════════════════════════════════════</span>
+
+<span class="kw">public class</span> <span class="tp">Codec</span> {
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">encode</span>(<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; strs) {
+        <span class="tp">StringBuilder</span> sb = <span class="kw">new</span> <span class="tp">StringBuilder</span>();
+        <span class="kw">for</span>(<span class="tp">String</span> s : strs) {
+            sb.<span class="fn">append</span>(s.<span class="fn">length</span>()).<span class="fn">append</span>(<span class="st">'#'</span>).<span class="fn">append</span>(s);
+        }
+        <span class="kw">return</span> sb.<span class="fn">toString</span>();
+    }
+
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; <span class="fn">decode</span>(<span class="tp">String</span> s) {
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="tp">int</span> i = <span class="nm">0</span>;
+        <span class="kw">while</span>(i &lt; s.<span class="fn">length</span>()) {
+            <span class="tp">int</span> j = s.<span class="fn">indexOf</span>(<span class="st">'#'</span>, i);
+            <span class="tp">int</span> len = <span class="tp">Integer</span>.<span class="fn">parseInt</span>(s.<span class="fn">substring</span>(i, j));
+            result.<span class="fn">add</span>(s.<span class="fn">substring</span>(j+<span class="nm">1</span>, j+<span class="nm">1</span>+len));
+            i = j + <span class="nm">1</span> + len;
+        }
+        <span class="kw">return</span> result;
+    }
+}`
+    },
+    memoryHack:{
+      flowchart:{
+        nodes:[
+          {id:'start',label:'encode(strs)',type:'start',x:300,y:20},
+          {id:'loop',label:'For each str',type:'action',x:300,y:80},
+          {id:'append',label:'result += len(s)+"#"+s',type:'action',x:300,y:140},
+          {id:'done',label:'Return result',type:'end',x:300,y:200}
+        ],
+        edges:[
+          {from:'start',to:'loop',label:''},
+          {from:'loop',to:'append',label:''},
+          {from:'append',to:'loop',label:'next'},
+          {from:'loop',to:'done',label:'done'}
+        ]
+      },
+      annotatedCode:[
+        {line:'def encode(self, strs):',stepId:'start',note:'Takes list of strings',color:'#5a5f70'},
+        {line:'    result = ""',stepId:'start',note:'Build encoded string',color:'#00cfff'},
+        {line:'    for s in strs:',stepId:'loop',note:'Process each string',color:'#00cfff'},
+        {line:'        result += str(len(s)) + "#" + s',stepId:'append',note:'Prepend length + delimiter',color:'#00ff88'},
+        {line:'    return result',stepId:'done',note:'Return encoded string',color:'#5a5f70'}
+      ],
+      stateSnapshots:[
+        {label:'Step 1',art:'strs=["lint","code"]  s="lint"  len=4  →  "4#lint"',annotation:'First string encoded'},
+        {label:'Step 2',art:'result="4#lint"  s="code"  len=4  →  "4#lint4#code"',annotation:'Second string appended'},
+        {label:'Decode',art:'"4#lint..." → read "4" → skip # → take 4 chars → "lint"',annotation:'Reverse process'}
+      ],
+      variations:[
+        {name:'Encode/Decode',desc:'Length-prefix: len + "#" + string',problem:'Encode and Decode Strings (#271)'},
+        {name:'Chunked Transfer',desc:'Same idea used in HTTP chunked encoding',problem:'Real-world pattern'}
+      ],
+      title:'LENGTH-PREFIX ENCODING',
+      mnemonic:'LENGTH FIRST, PARSE SAFE — delimiter can appear in data',
+      steps:['For encode: append "length#string" for each','For decode: read number until #, skip #, extract that many chars','Repeat until end of string'],
+      why:'Length-prefix makes parsing unambiguous even if delimiter appears in the data.',
+      oneSentence:'Prepend each string with its length + delimiter to enable unambiguous decoding.'
+    },
+    cheat:{
+      trigger:'serialize strings, encode list, delimiter ambiguity, chunked data',
+      firstLine:'result = str(len(s)) + "#" + s',
+      gotcha:'Using a simple delimiter without length prefix fails when delimiter appears in data',
+      pitch:"I'll use length-prefix encoding where each string is prepended with its length and a delimiter, making decoding unambiguous in O(n) time.",
+      snippet:`<span class="cm"># ENCODE: prepend length</span>
+<span class="kw">for</span> s <span class="kw">in</span> strs:
+    result += <span class="fn">str</span>(<span class="fn">len</span>(s)) + <span class="st">"#"</span> + s
+
+<span class="cm"># DECODE: read length, extract substring</span>
+j = s.<span class="fn">index</span>(<span class="st">'#'</span>, i)
+length = <span class="fn">int</span>(s[i:j])
+result.<span class="fn">append</span>(s[j+<span class="nm">1</span>:j+<span class="nm">1</span>+length])`
+    }
+  },
+  {
+    icon:'👉👈', name:'3Sum', accent:'#00cfff',
+    tagline:'Sort + fix one + two-pointer squeeze',
+    hook:"Finding two numbers that sum to a target is easy with a HashMap. But three numbers? You'd need O(n²) HashMap lookups. The trick: SORT the array first. Then for each number, turn it into a Two Sum II problem on the remaining sorted portion. Fix one number, use two pointers for the other two. Skip duplicates to avoid repeat triplets.",
+    svg:`<svg viewBox="0 0 600 280" style="max-height:280px;width:100%"><rect width="600" height="280" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="13" font-weight="bold" font-family="monospace">3Sum Pattern</text><text x="300" y="50" fill="#00cfff" text-anchor="middle" font-size="11" font-family="monospace">nums = [-1,0,1,2,-1,-4] → target = 0</text><rect x="50" y="70" width="500" height="35" fill="#1a1d2e" rx="4" stroke="#1e2230"/><text x="60" y="92" fill="#4a5268" font-size="10" font-family="monospace">1. SORT: [-4,-1,-1,0,1,2]</text><rect x="50" y="120" width="500" height="120" fill="rgba(0,207,255,.05)" rx="6" stroke="#00cfff"/><text x="60" y="140" fill="#fbbf24" font-size="10" font-family="monospace">2. FIX i=-1, TWO-POINTER on rest:</text><g transform="translate(80,145)"><rect x="0" y="0" width="30" height="22" fill="rgba(251,191,36,.2)" stroke="#fbbf24" rx="3"/><text x="15" y="16" fill="#fbbf24" text-anchor="middle" font-size="9">-1</text><text x="15" y="35" fill="#fbbf24" text-anchor="middle" font-size="7">i</text><rect x="40" y="0" width="30" height="22" fill="rgba(0,255,136,.15)" stroke="#00ff88" rx="3"/><text x="55" y="16" fill="#00ff88" text-anchor="middle" font-size="9">-1</text><text x="55" y="35" fill="#00ff88" text-anchor="middle" font-size="7">L</text><rect x="80" y="0" width="25" height="22" fill="#1a1d2e" stroke="#4a5268" rx="3"/><text x="92" y="16" fill="#4a5268" text-anchor="middle" font-size="9">0</text><rect x="110" y="0" width="25" height="22" fill="#1a1d2e" stroke="#4a5268" rx="3"/><text x="122" y="16" fill="#4a5268" text-anchor="middle" font-size="9">1</text><rect x="140" y="0" width="25" height="22" fill="rgba(0,255,136,.15)" stroke="#00ff88" rx="3"/><text x="152" y="16" fill="#00ff88" text-anchor="middle" font-size="9">2</text><text x="152" y="35" fill="#00ff88" text-anchor="middle" font-size="7">R</text></g><text x="80" y="195" fill="#00ff88" font-size="10" font-family="monospace">sum = -1 + (-1) + 2 = 0 ✓</text><text x="80" y="215" fill="#00ff88" font-size="10" font-family="monospace">Found triplet: [-1,-1,2]</text><text x="60" y="255" fill="#ff4d6d" font-size="9" font-family="monospace">SKIP DUPLICATES: if nums[i]==nums[i-1] continue</text></svg>`,
+    complexity:[
+      {badge:'yellow',big:'O(n²)',label:'TIME',desc:'Sort O(n log n) + nested two-pointer O(n²)'},
+      {badge:'green',big:'O(1)',label:'SPACE',desc:'No extra data structures, in-place sort'},
+      {badge:'blue',big:'Better than',label:'O(n³)',desc:'Brute force three nested loops'}
+    ],
+    meterWidth:'70%',
+    code:{
+      python:`<span class="cm"># ════════════════════════════</span>
+<span class="cm"># 3SUM — THE PATTERN</span>
+<span class="cm"># ════════════════════════════</span>
+<span class="cm"># WHEN: Find triplets summing to target</span>
+<span class="cm"># TRICK: Sort + fix one + two-pointer</span>
+<span class="cm"># ════════════════════════════</span>
+
+<span class="kw">def</span> <span class="fn">threeSum</span>(nums):
+    nums.<span class="fn">sort</span>()  <span class="cm"># CRITICAL: enables two-pointer</span>
+    result = []
+
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(nums) - <span class="nm">2</span>):
+        <span class="cm"># Skip duplicates for i</span>
+        <span class="kw">if</span> i &gt; <span class="nm">0</span> <span class="kw">and</span> nums[i] == nums[i-<span class="nm">1</span>]:
+            <span class="kw">continue</span>
+
+        <span class="cm"># Two-pointer on remaining array</span>
+        L, R = i + <span class="nm">1</span>, <span class="fn">len</span>(nums) - <span class="nm">1</span>
+        <span class="kw">while</span> L &lt; R:
+            total = nums[i] + nums[L] + nums[R]
+            <span class="kw">if</span> total &lt; <span class="nm">0</span>:
+                L += <span class="nm">1</span>
+            <span class="kw">elif</span> total &gt; <span class="nm">0</span>:
+                R -= <span class="nm">1</span>
+            <span class="kw">else</span>:
+                result.<span class="fn">append</span>([nums[i], nums[L], nums[R]])
+                <span class="cm"># Skip duplicates for L and R</span>
+                <span class="kw">while</span> L &lt; R <span class="kw">and</span> nums[L] == nums[L+<span class="nm">1</span>]:
+                    L += <span class="nm">1</span>
+                <span class="kw">while</span> L &lt; R <span class="kw">and</span> nums[R] == nums[R-<span class="nm">1</span>]:
+                    R -= <span class="nm">1</span>
+                L += <span class="nm">1</span>
+                R -= <span class="nm">1</span>
+
+    <span class="kw">return</span> result`,
+      csharp:`<span class="cm">// ════════════════════════════</span>
+<span class="cm">// 3SUM — THE PATTERN</span>
+<span class="cm">// ════════════════════════════</span>
+
+<span class="kw">public</span> <span class="tp">IList</span>&lt;<span class="tp">IList</span>&lt;<span class="tp">int</span>&gt;&gt; <span class="fn">ThreeSum</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">Array</span>.<span class="fn">Sort</span>(nums);
+    <span class="kw">var</span> result = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">IList</span>&lt;<span class="tp">int</span>&gt;&gt;();
+
+    <span class="kw">for</span>(<span class="tp">int</span> i=<span class="nm">0</span>; i&lt;nums.Length-<span class="nm">2</span>; i++) {
+        <span class="kw">if</span>(i&gt;<span class="nm">0</span> &amp;&amp; nums[i]==nums[i<span class="nm">-1</span>]) <span class="kw">continue</span>;
+
+        <span class="tp">int</span> L=i+<span class="nm">1</span>, R=nums.Length-<span class="nm">1</span>;
+        <span class="kw">while</span>(L &lt; R) {
+            <span class="tp">int</span> sum = nums[i] + nums[L] + nums[R];
+            <span class="kw">if</span>(sum &lt; <span class="nm">0</span>) L++;
+            <span class="kw">else if</span>(sum &gt; <span class="nm">0</span>) R--;
+            <span class="kw">else</span> {
+                result.<span class="fn">Add</span>(<span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt;{nums[i],nums[L],nums[R]});
+                <span class="kw">while</span>(L&lt;R &amp;&amp; nums[L]==nums[L+<span class="nm">1</span>]) L++;
+                <span class="kw">while</span>(L&lt;R &amp;&amp; nums[R]==nums[R<span class="nm">-1</span>]) R--;
+                L++; R--;
+            }
+        }
+    }
+    <span class="kw">return</span> result;
+}`,
+      java:`<span class="cm">// ════════════════════════════</span>
+<span class="cm">// 3SUM — THE PATTERN</span>
+<span class="cm">// ════════════════════════════</span>
+
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">threeSum</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">Arrays</span>.<span class="fn">sort</span>(nums);
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+    <span class="kw">for</span>(<span class="tp">int</span> i=<span class="nm">0</span>; i&lt;nums.length-<span class="nm">2</span>; i++) {
+        <span class="kw">if</span>(i&gt;<span class="nm">0</span> &amp;&amp; nums[i]==nums[i<span class="nm">-1</span>]) <span class="kw">continue</span>;
+
+        <span class="tp">int</span> L=i+<span class="nm">1</span>, R=nums.length-<span class="nm">1</span>;
+        <span class="kw">while</span>(L &lt; R) {
+            <span class="tp">int</span> sum = nums[i] + nums[L] + nums[R];
+            <span class="kw">if</span>(sum &lt; <span class="nm">0</span>) L++;
+            <span class="kw">else if</span>(sum &gt; <span class="nm">0</span>) R--;
+            <span class="kw">else</span> {
+                result.<span class="fn">add</span>(<span class="tp">Arrays</span>.<span class="fn">asList</span>(nums[i],nums[L],nums[R]));
+                <span class="kw">while</span>(L&lt;R &amp;&amp; nums[L]==nums[L+<span class="nm">1</span>]) L++;
+                <span class="kw">while</span>(L&lt;R &amp;&amp; nums[R]==nums[R<span class="nm">-1</span>]) R--;
+                L++; R--;
+            }
+        }
+    }
+    <span class="kw">return</span> result;
+}`
+    },
+    memoryHack:{
+      flowchart:{
+        nodes:[
+          {id:'sort',label:'Sort array',type:'start',x:300,y:20},
+          {id:'fix',label:'Fix i',type:'action',x:300,y:80},
+          {id:'skip',label:'Skip dup i?',type:'decision',x:200,y:140},
+          {id:'twoptr',label:'L=i+1, R=end',type:'action',x:400,y:140},
+          {id:'calc',label:'sum=nums[i]+L+R',type:'action',x:400,y:200},
+          {id:'check',label:'sum?',type:'decision',x:400,y:260},
+          {id:'found',label:'Add triplet',type:'end',x:500,y:320}
+        ],
+        edges:[
+          {from:'sort',to:'fix',label:''},
+          {from:'fix',to:'skip',label:''},
+          {from:'skip',to:'fix',label:'YES'},
+          {from:'skip',to:'twoptr',label:'NO'},
+          {from:'twoptr',to:'calc',label:''},
+          {from:'calc',to:'check',label:''},
+          {from:'check',to:'found',label:'==0'}
+        ]
+      },
+      annotatedCode:[
+        {line:'nums.sort()',stepId:'sort',note:'MUST sort for two-pointer',color:'#fbbf24'},
+        {line:'for i in range(len(nums)-2):',stepId:'fix',note:'Fix first number',color:'#00cfff'},
+        {line:'    if i>0 and nums[i]==nums[i-1]: continue',stepId:'skip',note:'Skip duplicate i',color:'#ff4d6d'},
+        {line:'    L, R = i+1, len(nums)-1',stepId:'twoptr',note:'Two pointers on rest',color:'#00ff88'},
+        {line:'    while L < R:',stepId:'calc',note:'Squeeze inward',color:'#00cfff'},
+        {line:'        total = nums[i] + nums[L] + nums[R]',stepId:'calc',note:'Calculate sum',color:'#a78bfa'},
+        {line:'        if total == 0: result.append([...])',stepId:'found',note:'Found triplet!',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'Start',art:'[-4,-1,-1,0,1,2] sorted',annotation:'Must be sorted'},
+        {label:'i=1',art:'i=-1 (skip i=0:-4 too small)  L=-1  R=2  sum=0 ✓',annotation:'Found [-1,-1,2]'},
+        {label:'Skip',art:'i=2: nums[2]==-1==nums[1] → skip duplicate',annotation:'Avoid duplicate triplets'}
+      ],
+      variations:[
+        {name:'3Sum',desc:'Sort + fix one + two-pointer squeeze',problem:'3Sum (#15)'},
+        {name:'3Sum Closest',desc:'Same pattern, track min diff instead of exact match',problem:'3Sum Closest (#16)'},
+        {name:'4Sum',desc:'Add outer loop, becomes O(n³)',problem:'4Sum (#18)'}
+      ],
+      title:'SORT + FIX ONE + TWO-POINTER',
+      mnemonic:'SORT, FIX, SQUEEZE — reduce 3Sum to 2Sum II',
+      steps:['Sort the array','Fix one element i, skip duplicates','Two-pointer L and R on remaining sorted portion','If sum < 0: L++, if sum > 0: R--, if == 0: found!','Skip duplicates for L and R after finding'],
+      why:'Sorting enables two-pointer technique, reducing O(n³) brute force to O(n²).',
+      oneSentence:'Sort array, fix one number, apply two-pointer squeeze on the rest.'
+    },
+    cheat:{
+      trigger:'three sum, triplets sum to zero, find three numbers',
+      firstLine:'nums.sort()  # CRITICAL FIRST STEP',
+      gotcha:'Forgetting to skip duplicates causes repeat triplets in output',
+      pitch:"I'll sort the array, then for each number fix it and use two-pointer technique on the remaining sorted portion, reducing from O(n³) to O(n²).",
+      snippet:`<span class="cm"># MUST sort first</span>
+nums.<span class="fn">sort</span>()
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(nums)-<span class="nm">2</span>):
+    <span class="kw">if</span> i&gt;<span class="nm">0</span> <span class="kw">and</span> nums[i]==nums[i<span class="nm">-1</span>]: <span class="kw">continue</span>  <span class="cm"># skip dup</span>
+    L, R = i+<span class="nm">1</span>, <span class="fn">len</span>(nums)-<span class="nm">1</span>
+    <span class="kw">while</span> L &lt; R:
+        <span class="kw">if</span> nums[i]+nums[L]+nums[R] == <span class="nm">0</span>:
+            result.<span class="fn">append</span>([nums[i],nums[L],nums[R]])`
+    }
   }
 ];
