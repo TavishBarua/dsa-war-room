@@ -7,15 +7,16 @@ const PROBLEM_COUNTS = WEEKS.map(w => w.problems);
 const TOTAL_PROBLEMS = PROBLEM_COUNTS.reduce((a, b) => a + b, 0);
 
 // DNA pattern index → week index mapping
+// DNA_PATTERNS order: [0-6 from dnaPatterns.ts] + [7-29 from dnaExtra.ts]
 const WEEK_DNA_MAP: Record<number, number[]> = {
-  0: [0, 1],       // Arrays & Hashing, Two Pointers
-  1: [2, 3],       // Sliding Window, Stack
-  2: [4, 5],       // Binary Search, Linked List
-  3: [6],          // Trees / DFS
-  4: [7, 8],       // Heap, Backtracking
-  5: [9, 10, 11],  // Tries, Graphs, Advanced Graphs
-  6: [12, 13],     // 1D DP, 2D DP
-  7: [14, 15, 16, 17], // Greedy, Intervals, Math, Bit Manipulation
+  0: [0, 2],           // Week 0: Arrays & Hashing, Two Pointers
+  1: [3, 4],           // Week 1: Sliding Window, Stack
+  2: [5, 6],           // Week 2: Binary Search, Linked List
+  3: [7],              // Week 3: Trees / DFS
+  4: [8, 9],           // Week 4: Heap, Backtracking
+  5: [10, 11, 12],     // Week 5: Tries, Graphs, Advanced Graphs
+  6: [13, 14],         // Week 6: 1D DP, 2D DP
+  7: [15, 16, 17, 18], // Week 7: Greedy, Intervals, Math, Bit Manipulation
 };
 
 export function toLocalISO(d: Date): string {
