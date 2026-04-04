@@ -5,6 +5,7 @@ export default function Nav() {
       <ul className="nav-links">
         <li><a href="#patterns">Patterns</a></li>
         <li><a href="#pattern-dna">Pattern DNA</a></li>
+        <li><a href="#collections">Collections</a></li>
         <li><a href="#plan">Battle Plan</a></li>
         <li><a href="#simulator">Simulator</a></li>
         <li><a href="#rules">Rules</a></li>
