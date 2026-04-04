@@ -27,65 +27,98 @@ export default function CollectionsSection() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">
-        {/* Header with animation */}
-        <div className="text-center mb-16 animate-fade-in">
-          <div className="inline-block mb-4 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-full">
-            <span className="text-blue-300 text-sm font-semibold tracking-wide uppercase">Developer's Best Friend</span>
+        {/* Header with animation - ENHANCED */}
+        <div className="text-center mb-20 animate-fade-in">
+          <div className="inline-block mb-6 px-6 py-3 bg-gradient-to-r from-blue-500/30 to-purple-500/30 border-2 border-blue-400/40 rounded-full shadow-xl shadow-blue-500/20">
+            <span className="text-blue-200 text-sm font-bold tracking-widest uppercase">☕ Java Developer's Best Friend</span>
           </div>
-          <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-4 animate-gradient">
+          <h2 className="text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-6 drop-shadow-2xl">
             📚 Collections Cheat Sheet
           </h2>
-          <p className="text-slate-300 text-xl max-w-3xl mx-auto leading-relaxed">
-            Your <span className="text-yellow-400 font-semibold">instant reference</span> for all data structures.
-            <span className="block mt-2 text-slate-400">80+ methods • Time complexity • Real examples</span>
+          <p className="text-slate-200 text-2xl max-w-4xl mx-auto leading-relaxed mb-4">
+            Your <span className="text-yellow-300 font-bold underline decoration-wavy decoration-yellow-400">instant reference</span> for all Java data structures
           </p>
+          <div className="flex items-center justify-center gap-6 text-slate-400 text-lg">
+            <span className="flex items-center gap-2">
+              <span className="text-2xl">📝</span>
+              <span className="font-semibold">70+ methods</span>
+            </span>
+            <span className="text-slate-600">•</span>
+            <span className="flex items-center gap-2">
+              <span className="text-2xl">⚡</span>
+              <span className="font-semibold">Time complexity</span>
+            </span>
+            <span className="text-slate-600">•</span>
+            <span className="flex items-center gap-2">
+              <span className="text-2xl">💻</span>
+              <span className="font-semibold">Real examples</span>
+            </span>
+          </div>
         </div>
 
-        {/* Quick Reference Cards - Enhanced */}
-        <div className="mb-16 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="group bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700 hover:border-yellow-500/50 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-yellow-500/20">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-500 rounded-xl flex items-center justify-center text-2xl shadow-lg">
-                🎯
-              </div>
-              <h3 className="text-2xl font-bold text-yellow-400">Set vs Map</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="bg-slate-900/70 rounded-lg p-3 border-l-4 border-green-500">
-                <div className="font-mono text-green-400 font-bold mb-1">Set</div>
-                <div className="text-slate-300 text-sm leading-relaxed">{QUICK_REFERENCE.setVsMap.Set}</div>
-              </div>
-              <div className="bg-slate-900/70 rounded-lg p-3 border-l-4 border-blue-500">
-                <div className="font-mono text-blue-400 font-bold mb-1">Map</div>
-                <div className="text-slate-300 text-sm leading-relaxed">{QUICK_REFERENCE.setVsMap.Map}</div>
-              </div>
-            </div>
-          </div>
+        {/* Quick Reference Cards - MASSIVELY ENHANCED */}
+        <div className="mb-20 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="group relative bg-gradient-to-br from-slate-800 via-slate-850 to-slate-900 border-2 border-yellow-500/30 hover:border-yellow-400/60 rounded-3xl p-8 transition-all duration-500 hover:scale-[1.03] shadow-2xl hover:shadow-yellow-500/30">
+            {/* Glow effect */}
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-green-500 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition duration-500"></div>
 
-          <div className="group bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700 hover:border-purple-500/50 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/20">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-2xl shadow-lg">
-                ⚡
-              </div>
-              <h3 className="text-2xl font-bold text-purple-400">Add vs Set</h3>
-            </div>
-            <div className="space-y-2">
-              {Object.entries(QUICK_REFERENCE.addVsSet).map(([key, value]) => (
-                <div key={key} className="bg-slate-900/70 rounded-lg p-2.5 hover:bg-slate-900 transition-colors">
-                  <div className="font-mono text-purple-400 text-sm font-semibold">{key}</div>
-                  <div className="text-slate-400 text-xs mt-1">→ {value}</div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl flex items-center justify-center text-3xl shadow-2xl shadow-green-500/50 group-hover:scale-110 transition-transform">
+                  🎯
                 </div>
-              ))}
+                <h3 className="text-3xl font-black text-yellow-300">HashSet vs HashMap</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-5 border-l-4 border-green-400 shadow-lg hover:shadow-green-500/20 transition-shadow">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">🎯</span>
+                    <div className="font-mono text-green-300 font-black text-lg">HashSet</div>
+                  </div>
+                  <div className="text-slate-200 text-base leading-relaxed">{QUICK_REFERENCE.setVsMap.Set}</div>
+                </div>
+                <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-5 border-l-4 border-blue-400 shadow-lg hover:shadow-blue-500/20 transition-shadow">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">🗺️</span>
+                    <div className="font-mono text-blue-300 font-black text-lg">HashMap</div>
+                  </div>
+                  <div className="text-slate-200 text-base leading-relaxed">{QUICK_REFERENCE.setVsMap.Map}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="group relative bg-gradient-to-br from-slate-800 via-slate-850 to-slate-900 border-2 border-purple-500/30 hover:border-purple-400/60 rounded-3xl p-8 transition-all duration-500 hover:scale-[1.03] shadow-2xl hover:shadow-purple-500/30">
+            {/* Glow effect */}
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition duration-500"></div>
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center text-3xl shadow-2xl shadow-purple-500/50 group-hover:scale-110 transition-transform">
+                  ⚡
+                </div>
+                <h3 className="text-3xl font-black text-purple-300">add() vs put()</h3>
+              </div>
+              <div className="space-y-3">
+                {Object.entries(QUICK_REFERENCE.addVsSet).map(([key, value]) => (
+                  <div key={key} className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-4 hover:bg-slate-800 transition-all border border-slate-700 hover:border-purple-500/50 shadow-lg">
+                    <div className="font-mono text-purple-300 font-bold text-base mb-1.5">{key}</div>
+                    <div className="text-slate-300 text-sm leading-relaxed">→ {value}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Collection Selector - Enhanced with Icons */}
-        <div className="mb-12">
-          <h3 className="text-center text-slate-400 text-sm font-semibold tracking-wider uppercase mb-6">
-            Select Collection
+        {/* Collection Selector - MASSIVELY ENHANCED */}
+        <div className="mb-16">
+          <h3 className="text-center text-slate-300 text-base font-bold tracking-widest uppercase mb-8 flex items-center justify-center gap-3">
+            <span className="h-px w-20 bg-gradient-to-r from-transparent to-slate-600"></span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Choose Your Collection</span>
+            <span className="h-px w-20 bg-gradient-to-l from-transparent to-slate-600"></span>
           </h3>
-          <div className="flex flex-wrap gap-3 justify-center max-w-5xl mx-auto">
+          <div className="flex flex-wrap gap-4 justify-center max-w-6xl mx-auto">
             {COLLECTIONS_CHEAT_SHEET.map((col, idx) => (
               <button
                 key={col.name}
@@ -93,18 +126,23 @@ export default function CollectionsSection() {
                   setSelectedCollection(idx);
                   setExpandedMethod(null);
                 }}
-                className={`group relative px-5 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                className={`group relative px-6 py-4 rounded-2xl font-bold transition-all duration-300 ${
                   selectedCollection === idx
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/50 scale-105'
-                    : 'bg-slate-800/70 text-slate-300 hover:bg-slate-700 hover:scale-105 hover:shadow-lg'
+                    ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-2xl shadow-blue-500/50 scale-110 border-2 border-white/20'
+                    : 'bg-gradient-to-br from-slate-800 to-slate-900 text-slate-300 hover:from-slate-700 hover:to-slate-800 hover:scale-105 hover:shadow-xl hover:text-white border-2 border-slate-700 hover:border-slate-600'
                 }`}
               >
-                <span className="flex items-center gap-2">
-                  <span className="text-xl">{collectionIcons[col.name] || '📌'}</span>
-                  <span className="text-sm">{col.name}</span>
+                <span className="flex items-center gap-3">
+                  <span className={`text-2xl ${selectedCollection === idx ? 'animate-bounce' : 'group-hover:scale-110 transition-transform'}`}>
+                    {collectionIcons[col.name] || '📌'}
+                  </span>
+                  <span className="text-base font-black">{col.name}</span>
                 </span>
                 {selectedCollection === idx && (
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full"></div>
+                  <>
+                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl opacity-50 blur-xl -z-10"></div>
+                  </>
                 )}
               </button>
             ))}
