@@ -2,309 +2,146 @@ import { useState } from 'react';
 import { COLLECTIONS_CHEAT_SHEET, QUICK_REFERENCE } from '../../data/collectionsCheatSheet';
 
 const collectionIcons: Record<string, string> = {
-  'String': '📝',
-  'ArrayList': '📦',
-  'HashSet': '🎯',
-  'HashMap': '🗺️',
-  'Stack': '📚',
-  'Queue (LinkedList)': '🚶',
-  'Deque (ArrayDeque)': '↔️',
-  'PriorityQueue (Heap)': '⭐',
-  'Arrays & Collections': '🔢'
+  'String': '📝', 'ArrayList': '📦', 'HashSet': '🎯', 'HashMap': '🗺️',
+  'Stack': '📚', 'Queue (LinkedList)': '🚶', 'Deque (ArrayDeque)': '↔️',
+  'PriorityQueue (Heap)': '⭐', 'Arrays & Collections': '🔢'
 };
 
 export default function CollectionsSection() {
-  const [selectedCollection, setSelectedCollection] = useState(0);
-  const [expandedMethod, setExpandedMethod] = useState<number | null>(null);
-  const collection = COLLECTIONS_CHEAT_SHEET[selectedCollection];
+  const [selected, setSelected] = useState(0);
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const col = COLLECTIONS_CHEAT_SHEET[selected];
 
   return (
-    <section id="collections" className="py-20 bg-gradient-to-b from-slate-950 via-indigo-950/20 to-slate-900 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+    <section id="collections">
+      <div className="section-label">06 — Collections Reference</div>
+      <h2 className="section-title">JAVA COLLECTIONS<br />CHEAT SHEET</h2>
+      <p className="section-desc">
+        Your instant reference for all Java data structures used in the 150 problems.
+        70+ methods with syntax, examples, and time complexity.
+      </p>
+
+      {/* Quick Reference Cards */}
+      <div className="coll-quick-grid">
+        <div className="coll-quick-card">
+          <div className="coll-quick-label">🎯 HashSet vs HashMap</div>
+          {Object.entries(QUICK_REFERENCE.setVsMap).map(([key, value]) => (
+            <div className="coll-quick-row" key={key}>
+              <div className="coll-quick-key">{key}</div>
+              <div className="coll-quick-val">{value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="coll-quick-card">
+          <div className="coll-quick-label">⚡ add() vs put()</div>
+          {Object.entries(QUICK_REFERENCE.addVsSet).map(([key, value]) => (
+            <div className="coll-quick-row" key={key}>
+              <div className="coll-quick-key">{key}</div>
+              <div className="coll-quick-val">→ {value}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 relative z-10">
-        {/* Header with animation - ENHANCED */}
-        <div className="text-center mb-20 animate-fade-in">
-          <div className="inline-block mb-6 px-6 py-3 bg-gradient-to-r from-blue-500/30 to-purple-500/30 border-2 border-blue-400/40 rounded-full shadow-xl shadow-blue-500/20">
-            <span className="text-blue-200 text-sm font-bold tracking-widest uppercase">☕ Java Developer's Best Friend</span>
-          </div>
-          <h2 className="text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-6 drop-shadow-2xl">
-            📚 Collections Cheat Sheet
-          </h2>
-          <p className="text-slate-200 text-2xl max-w-4xl mx-auto leading-relaxed mb-4">
-            Your <span className="text-yellow-300 font-bold underline decoration-wavy decoration-yellow-400">instant reference</span> for all Java data structures
-          </p>
-          <div className="flex items-center justify-center gap-6 text-slate-400 text-lg">
-            <span className="flex items-center gap-2">
-              <span className="text-2xl">📝</span>
-              <span className="font-semibold">70+ methods</span>
-            </span>
-            <span className="text-slate-600">•</span>
-            <span className="flex items-center gap-2">
-              <span className="text-2xl">⚡</span>
-              <span className="font-semibold">Time complexity</span>
-            </span>
-            <span className="text-slate-600">•</span>
-            <span className="flex items-center gap-2">
-              <span className="text-2xl">💻</span>
-              <span className="font-semibold">Real examples</span>
-            </span>
+      {/* Collection Filter Buttons */}
+      <div className="coll-filters">
+        {COLLECTIONS_CHEAT_SHEET.map((c, idx) => (
+          <button
+            key={c.name}
+            className={`filter-btn${selected === idx ? ' active' : ''}`}
+            onClick={() => { setSelected(idx); setExpanded(null); }}
+          >
+            {collectionIcons[c.name] || '📌'} {c.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Collection Detail Panel */}
+      <div className="coll-detail">
+        {/* Header */}
+        <div className="coll-detail-header">
+          <div className="coll-detail-icon">{collectionIcons[col.name] || '📌'}</div>
+          <div>
+            <div className="coll-detail-name">{col.name}</div>
+            <div className="coll-detail-desc">{col.description}</div>
           </div>
         </div>
 
-        {/* Quick Reference Cards - MASSIVELY ENHANCED */}
-        <div className="mb-20 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="group relative bg-gradient-to-br from-slate-800 via-slate-850 to-slate-900 border-2 border-yellow-500/30 hover:border-yellow-400/60 rounded-3xl p-8 transition-all duration-500 hover:scale-[1.03] shadow-2xl hover:shadow-yellow-500/30">
-            {/* Glow effect */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-green-500 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition duration-500"></div>
-
-            <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl flex items-center justify-center text-3xl shadow-2xl shadow-green-500/50 group-hover:scale-110 transition-transform">
-                  🎯
-                </div>
-                <h3 className="text-3xl font-black text-yellow-300">HashSet vs HashMap</h3>
-              </div>
-              <div className="space-y-4">
-                <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-5 border-l-4 border-green-400 shadow-lg hover:shadow-green-500/20 transition-shadow">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">🎯</span>
-                    <div className="font-mono text-green-300 font-black text-lg">HashSet</div>
-                  </div>
-                  <div className="text-slate-200 text-base leading-relaxed">{QUICK_REFERENCE.setVsMap.Set}</div>
-                </div>
-                <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-5 border-l-4 border-blue-400 shadow-lg hover:shadow-blue-500/20 transition-shadow">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">🗺️</span>
-                    <div className="font-mono text-blue-300 font-black text-lg">HashMap</div>
-                  </div>
-                  <div className="text-slate-200 text-base leading-relaxed">{QUICK_REFERENCE.setVsMap.Map}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="group relative bg-gradient-to-br from-slate-800 via-slate-850 to-slate-900 border-2 border-purple-500/30 hover:border-purple-400/60 rounded-3xl p-8 transition-all duration-500 hover:scale-[1.03] shadow-2xl hover:shadow-purple-500/30">
-            {/* Glow effect */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition duration-500"></div>
-
-            <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center text-3xl shadow-2xl shadow-purple-500/50 group-hover:scale-110 transition-transform">
-                  ⚡
-                </div>
-                <h3 className="text-3xl font-black text-purple-300">add() vs put()</h3>
-              </div>
-              <div className="space-y-3">
-                {Object.entries(QUICK_REFERENCE.addVsSet).map(([key, value]) => (
-                  <div key={key} className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-4 hover:bg-slate-800 transition-all border border-slate-700 hover:border-purple-500/50 shadow-lg">
-                    <div className="font-mono text-purple-300 font-bold text-base mb-1.5">{key}</div>
-                    <div className="text-slate-300 text-sm leading-relaxed">→ {value}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        {/* Declaration */}
+        <div className="coll-declaration">
+          <div className="coll-declaration-label">Declaration</div>
+          {col.declaration}
         </div>
 
-        {/* Collection Selector - MASSIVELY ENHANCED */}
-        <div className="mb-16">
-          <h3 className="text-center text-slate-300 text-base font-bold tracking-widest uppercase mb-8 flex items-center justify-center gap-3">
-            <span className="h-px w-20 bg-gradient-to-r from-transparent to-slate-600"></span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Choose Your Collection</span>
-            <span className="h-px w-20 bg-gradient-to-l from-transparent to-slate-600"></span>
-          </h3>
-          <div className="flex flex-wrap gap-4 justify-center max-w-6xl mx-auto">
-            {COLLECTIONS_CHEAT_SHEET.map((col, idx) => (
-              <button
-                key={col.name}
-                onClick={() => {
-                  setSelectedCollection(idx);
-                  setExpandedMethod(null);
-                }}
-                className={`group relative px-6 py-4 rounded-2xl font-bold transition-all duration-300 ${
-                  selectedCollection === idx
-                    ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-2xl shadow-blue-500/50 scale-110 border-2 border-white/20'
-                    : 'bg-gradient-to-br from-slate-800 to-slate-900 text-slate-300 hover:from-slate-700 hover:to-slate-800 hover:scale-105 hover:shadow-xl hover:text-white border-2 border-slate-700 hover:border-slate-600'
-                }`}
-              >
-                <span className="flex items-center gap-3">
-                  <span className={`text-2xl ${selectedCollection === idx ? 'animate-bounce' : 'group-hover:scale-110 transition-transform'}`}>
-                    {collectionIcons[col.name] || '📌'}
-                  </span>
-                  <span className="text-base font-black">{col.name}</span>
-                </span>
-                {selectedCollection === idx && (
-                  <>
-                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white rounded-full animate-pulse"></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl opacity-50 blur-xl -z-10"></div>
-                  </>
-                )}
-              </button>
-            ))}
-          </div>
+        {/* Methods Header */}
+        <div className="coll-methods-header">
+          <div className="coll-methods-title">Methods</div>
+          <div className="coll-methods-count">{col.methods.length} methods</div>
         </div>
 
-        {/* Collection Details - Enhanced */}
-        <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 shadow-2xl animate-fade-in">
-          {/* Collection Header - Enhanced */}
-          <div className="mb-8 pb-6 border-b border-slate-700">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-4xl shadow-xl">
-                {collectionIcons[collection.name] || '📌'}
-              </div>
-              <div>
-                <h3 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                  {collection.name}
-                </h3>
-                <p className="text-slate-400 mt-1">{collection.description}</p>
-              </div>
-            </div>
-            <div className="bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-600 rounded-xl p-4 font-mono text-sm shadow-inner">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-pink-400 font-semibold">💡 Declaration</span>
-              </div>
-              <code className="text-green-400 leading-relaxed block">{collection.declaration}</code>
-            </div>
-          </div>
+        {/* Method Rows */}
+        {col.methods.map((method, idx) => (
+          <div className="coll-method" key={idx}>
+            <button
+              className="coll-method-row"
+              onClick={() => setExpanded(expanded === idx ? null : idx)}
+            >
+              <div className="coll-method-num">{String(idx + 1).padStart(2, '0')}</div>
+              <div className="coll-method-name">{method.method}</div>
+              <div className="coll-method-desc">{method.description}</div>
+              {method.timeComplexity && (
+                <div className="coll-method-badge">{method.timeComplexity}</div>
+              )}
+              <svg className={`coll-method-chevron${expanded === idx ? ' open' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
 
-          {/* Methods - Accordion Style */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-xl">⚙️</span>
-              </div>
-              <h4 className="text-2xl font-bold text-yellow-400">Methods Reference</h4>
-              <span className="ml-auto text-sm text-slate-500 bg-slate-800 px-3 py-1 rounded-full">
-                {collection.methods.length} methods
-              </span>
-            </div>
-            <div className="space-y-3">
-              {collection.methods.map((method, idx) => (
-                <div
-                  key={idx}
-                  className="group bg-gradient-to-r from-slate-900/80 to-slate-800/80 border border-slate-600 hover:border-blue-500/60 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20"
-                >
-                  <button
-                    onClick={() => setExpandedMethod(expandedMethod === idx ? null : idx)}
-                    className="w-full p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 flex-1 text-left">
-                      <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400 font-bold text-sm">
-                        {idx + 1}
-                      </div>
-                      <div>
-                        <div className="font-mono text-blue-400 font-bold text-lg">
-                          {method.method}
-                        </div>
-                        <div className="text-slate-400 text-sm mt-0.5">{method.description}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {method.timeComplexity && (
-                        <span className="px-3 py-1 bg-orange-500/20 text-orange-400 text-xs font-mono rounded-full border border-orange-500/30">
-                          {method.timeComplexity}
-                        </span>
-                      )}
-                      <svg
-                        className={`w-5 h-5 text-slate-400 transition-transform ${
-                          expandedMethod === idx ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </button>
-                  {expandedMethod === idx && (
-                    <div className="px-4 pb-4 border-t border-slate-700 pt-4 animate-fade-in bg-slate-900/30">
-                      <div className="bg-slate-950 border border-slate-700 rounded-lg p-4 mb-3 shadow-inner">
-                        <div className="text-xs text-pink-400 font-semibold mb-2 flex items-center gap-2">
-                          <span>💻</span> Example
-                        </div>
-                        <pre className="text-sm text-green-300 whitespace-pre-wrap font-mono leading-relaxed">
-                          {method.example}
-                        </pre>
-                      </div>
-                      <div className="flex gap-4 text-sm">
-                        <div className="flex-1 bg-purple-500/10 border border-purple-500/30 rounded-lg p-3">
-                          <span className="text-purple-400 font-semibold">Returns:</span>
-                          <span className="text-slate-300 ml-2">{method.returns}</span>
-                        </div>
-                        {method.timeComplexity && (
-                          <div className="flex-1 bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
-                            <span className="text-orange-400 font-semibold">Time:</span>
-                            <span className="text-slate-300 ml-2">{method.timeComplexity}</span>
-                          </div>
-                        )}
-                      </div>
+            <div className={`coll-method-body${expanded === idx ? ' open' : ''}`}>
+              <div className="coll-method-content">
+                <div className="coll-method-example">
+                  <div className="coll-method-example-label">Example</div>
+                  <pre>{method.example}</pre>
+                </div>
+                <div className="coll-method-meta">
+                  <div className="coll-method-meta-item">
+                    <div className="coll-method-meta-label">Returns</div>
+                    <div className="coll-method-meta-val">{method.returns}</div>
+                  </div>
+                  {method.timeComplexity && (
+                    <div className="coll-method-meta-item">
+                      <div className="coll-method-meta-label">Time</div>
+                      <div className="coll-method-meta-val">{method.timeComplexity}</div>
                     </div>
                   )}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
+        ))}
 
-          {/* Common Patterns - Enhanced */}
-          {collection.commonPatterns && collection.commonPatterns.length > 0 && (
-            <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border border-green-700/30 rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center shadow-lg">
-                  <span className="text-xl">💡</span>
-                </div>
-                <h4 className="text-2xl font-bold text-green-400">Common Patterns</h4>
-              </div>
-              <div className="grid gap-3">
-                {collection.commonPatterns.map((pattern, idx) => (
-                  <div
-                    key={idx}
-                    className="group bg-slate-900/50 hover:bg-slate-900/70 border border-slate-700 hover:border-green-500/50 rounded-lg p-4 transition-all duration-200 hover:scale-[1.01]"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-green-400 text-lg mt-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
-                        ▸
-                      </span>
-                      <code className="text-sm text-slate-200 font-mono leading-relaxed flex-1">
-                        {pattern}
-                      </code>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Check Existence Reference - Enhanced */}
-        <div className="mt-12 bg-gradient-to-br from-purple-900/40 via-blue-900/30 to-cyan-900/40 border border-purple-500/40 rounded-3xl p-8 shadow-2xl">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-xl">
-              <span className="text-3xl">🔍</span>
-            </div>
-            <div>
-              <h4 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
-                Quick Lookup
-              </h4>
-              <p className="text-slate-400 text-sm mt-1">Check if element exists - Know the difference!</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(QUICK_REFERENCE.checkExistence).map(([method, desc]) => (
-              <div
-                key={method}
-                className="group bg-slate-900/60 hover:bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl p-4 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-cyan-500/20"
-              >
-                <div className="font-mono text-cyan-400 font-bold mb-2 text-sm">{method}</div>
-                <div className="text-slate-400 text-xs leading-relaxed">{desc}</div>
-              </div>
+        {/* Common Patterns */}
+        {col.commonPatterns && col.commonPatterns.length > 0 && (
+          <div className="coll-patterns">
+            <div className="coll-patterns-title">Common Patterns</div>
+            {col.commonPatterns.map((pattern, idx) => (
+              <div className="coll-pattern-item" key={idx}>{pattern}</div>
             ))}
           </div>
+        )}
+      </div>
+
+      {/* Quick Lookup */}
+      <div className="coll-lookup">
+        <div className="section-label">Quick Lookup — Check if Element Exists</div>
+        <div className="coll-lookup-grid">
+          {Object.entries(QUICK_REFERENCE.checkExistence).map(([method, desc]) => (
+            <div className="coll-lookup-card" key={method}>
+              <div className="coll-lookup-method">{method}</div>
+              <div className="coll-lookup-desc">{desc}</div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
