@@ -6,6 +6,7 @@ import Hero from './components/hero/Hero';
 import ProgressBar from './components/progress/ProgressBar';
 import PatternsSection from './components/patterns/PatternsSection';
 import DnaSection from './components/dna/DnaSection';
+import CollectionsSection from './components/collections/CollectionsSection';
 import PlanSection from './components/plan/PlanSection';
 import SimulatorSection from './components/simulator/SimulatorSection';
 import RulesSection from './components/rules/RulesSection';
@@ -21,6 +22,7 @@ export default function App() {
           <ProgressBar />
           <PatternsSection />
           <DnaSection />
+          <CollectionsSection />
           <PlanSection />
           <SimulatorSection />
           <RulesSection />
