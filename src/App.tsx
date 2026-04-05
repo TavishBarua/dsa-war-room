@@ -1,34 +1,16 @@
-import { ScheduleProvider } from './context/ScheduleContext';
-import { ProgressProvider } from './context/ProgressContext';
-import { MemorizedProvider } from './context/MemorizedContext';
+import { Routes, Route } from 'react-router-dom';
 import Nav from './components/layout/Nav';
-import Hero from './components/hero/Hero';
-import ProgressBar from './components/progress/ProgressBar';
-import PatternsSection from './components/patterns/PatternsSection';
-import DnaSection from './components/dna/DnaSection';
-import CollectionsSection from './components/collections/CollectionsSection';
-import PlanSection from './components/plan/PlanSection';
-import SimulatorSection from './components/simulator/SimulatorSection';
-import RulesSection from './components/rules/RulesSection';
-import Footer from './components/layout/Footer';
+import DSAPage from './pages/DSAPage';
+import SystemDesignPage from './pages/SystemDesignPage';
 
 export default function App() {
   return (
-    <ScheduleProvider>
-      <ProgressProvider>
-        <MemorizedProvider>
-          <Nav />
-          <Hero />
-          <ProgressBar />
-          <PatternsSection />
-          <DnaSection />
-          <CollectionsSection />
-          <PlanSection />
-          <SimulatorSection />
-          <RulesSection />
-          <Footer />
-        </MemorizedProvider>
-      </ProgressProvider>
-    </ScheduleProvider>
+    <>
+      <Nav />
+      <Routes>
+        <Route path="/" element={<DSAPage />} />
+        <Route path="/system-design" element={<SystemDesignPage />} />
+      </Routes>
+    </>
   );
 }
