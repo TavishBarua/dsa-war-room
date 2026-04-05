@@ -72,11 +72,11 @@ export const YOUTUBE: SDProblem = {
   <style>
     @keyframes flowRight { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
     @keyframes flowDown { from { stroke-dashoffset: 80; } to { stroke-dashoffset: 0; } }
-    text { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; }
-    .node { fill: #111318; stroke: #1e2230; stroke-width: 2; rx: 12; }
-    .arrow { stroke: #ff6b6b; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowRight 1.5s linear infinite; }
-    .arrow-down { stroke: #ff6b6b; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowDown 1.5s linear infinite; }
-    .label { font-size: 10px; fill: #8b8fa3; }
+    .yt-text { font-family: 'Space Mono', monospace; font-size: 12px; fill: #e8eaf0; }
+    .yt-node { fill: #1a1e2a; stroke: #2e3446; stroke-width: 2; rx: 12; }
+    .yt-arrow { stroke: #ff6b6b; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowRight 1.5s linear infinite; }
+    .yt-arrow-down { stroke: #ff6b6b; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowDown 1.5s linear infinite; }
+    .yt-label { font-size: 10px; fill: #8b8fa3; }
   </style>
   <defs>
     <marker id="yt-arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
@@ -84,50 +84,50 @@ export const YOUTUBE: SDProblem = {
     </marker>
   </defs>
   <!-- Creator -->
-  <rect class="node" x="20" y="70" width="100" height="55" />
-  <text x="70" y="102" text-anchor="middle">Creator</text>
+  <rect class="yt-node" x="20" y="70" width="100" height="55" />
+  <text class="yt-text" x="70" y="102" text-anchor="middle">Creator</text>
   <!-- Viewer -->
-  <rect class="node" x="20" y="270" width="100" height="55" />
-  <text x="70" y="302" text-anchor="middle">Viewer</text>
+  <rect class="yt-node" x="20" y="270" width="100" height="55" />
+  <text class="yt-text" x="70" y="302" text-anchor="middle">Viewer</text>
   <!-- Upload Service -->
-  <rect class="node" x="190" y="70" width="130" height="55" />
-  <text x="255" y="102" text-anchor="middle">Upload Service</text>
+  <rect class="yt-node" x="190" y="70" width="130" height="55" />
+  <text class="yt-text" x="255" y="102" text-anchor="middle">Upload Service</text>
   <!-- Transcoding -->
-  <rect class="node" x="390" y="70" width="140" height="55" />
-  <text x="460" y="95" text-anchor="middle">Transcoding</text>
-  <text x="460" y="110" text-anchor="middle">Pipeline</text>
+  <rect class="yt-node" x="390" y="70" width="140" height="55" />
+  <text class="yt-text" x="460" y="95" text-anchor="middle">Transcoding</text>
+  <text class="yt-text" x="460" y="110" text-anchor="middle">Pipeline</text>
   <!-- S3 + CDN -->
-  <rect class="node" x="610" y="70" width="130" height="55" />
-  <text x="675" y="102" text-anchor="middle">S3 + CDN</text>
+  <rect class="yt-node" x="610" y="70" width="130" height="55" />
+  <text class="yt-text" x="675" y="102" text-anchor="middle">S3 + CDN</text>
   <!-- Metadata -->
-  <rect class="node" x="190" y="270" width="130" height="55" />
-  <text x="255" y="302" text-anchor="middle">Metadata DB</text>
+  <rect class="yt-node" x="190" y="270" width="130" height="55" />
+  <text class="yt-text" x="255" y="302" text-anchor="middle">Metadata DB</text>
   <!-- Recommendations -->
-  <rect class="node" x="390" y="270" width="140" height="55" />
-  <text x="460" y="295" text-anchor="middle">Recommend</text>
-  <text x="460" y="310" text-anchor="middle">Engine</text>
+  <rect class="yt-node" x="390" y="270" width="140" height="55" />
+  <text class="yt-text" x="460" y="295" text-anchor="middle">Recommend</text>
+  <text class="yt-text" x="460" y="310" text-anchor="middle">Engine</text>
   <!-- View Counter -->
-  <rect class="node" x="610" y="270" width="130" height="55" />
-  <text x="675" y="295" text-anchor="middle">View Counter</text>
-  <text x="675" y="310" text-anchor="middle">(Kafka)</text>
+  <rect class="yt-node" x="610" y="270" width="130" height="55" />
+  <text class="yt-text" x="675" y="295" text-anchor="middle">View Counter</text>
+  <text class="yt-text" x="675" y="310" text-anchor="middle">(Kafka)</text>
   <!-- Arrows — upload path -->
-  <line class="arrow" x1="120" y1="97" x2="190" y2="97" marker-end="url(#yt-arrow)" />
-  <line class="arrow" x1="320" y1="97" x2="390" y2="97" marker-end="url(#yt-arrow)" />
-  <line class="arrow" x1="530" y1="97" x2="610" y2="97" marker-end="url(#yt-arrow)" />
+  <line class="yt-arrow" x1="120" y1="97" x2="190" y2="97" marker-end="url(#yt-arrow)" />
+  <line class="yt-arrow" x1="320" y1="97" x2="390" y2="97" marker-end="url(#yt-arrow)" />
+  <line class="yt-arrow" x1="530" y1="97" x2="610" y2="97" marker-end="url(#yt-arrow)" />
   <!-- Arrows — read path -->
-  <line class="arrow" x1="120" y1="297" x2="190" y2="297" marker-end="url(#yt-arrow)" />
-  <line class="arrow" x1="320" y1="297" x2="390" y2="297" marker-end="url(#yt-arrow)" />
+  <line class="yt-arrow" x1="120" y1="297" x2="190" y2="297" marker-end="url(#yt-arrow)" />
+  <line class="yt-arrow" x1="320" y1="297" x2="390" y2="297" marker-end="url(#yt-arrow)" />
   <!-- Viewer to CDN -->
-  <line class="arrow" x1="120" y1="280" x2="610" y2="120" marker-end="url(#yt-arrow)" />
+  <line class="yt-arrow" x1="120" y1="280" x2="610" y2="120" marker-end="url(#yt-arrow)" />
   <!-- View events -->
-  <line class="arrow" x1="120" y1="310" x2="610" y2="280" marker-end="url(#yt-arrow)" />
-  <text class="label" x="150" y="90">upload</text>
-  <text class="label" x="345" y="90">transcode</text>
-  <text class="label" x="565" y="90">store</text>
-  <text class="label" x="145" y="290">search</text>
-  <text class="label" x="345" y="290">suggest</text>
-  <text class="label" x="340" y="195">stream HLS</text>
-  <text class="label" x="390" y="325">view event</text>
+  <line class="yt-arrow" x1="120" y1="310" x2="610" y2="280" marker-end="url(#yt-arrow)" />
+  <text class="yt-label" x="150" y="90">upload</text>
+  <text class="yt-label" x="345" y="90">transcode</text>
+  <text class="yt-label" x="565" y="90">store</text>
+  <text class="yt-label" x="145" y="290">search</text>
+  <text class="yt-label" x="345" y="290">suggest</text>
+  <text class="yt-label" x="340" y="195">stream HLS</text>
+  <text class="yt-label" x="390" y="325">view event</text>
 </svg>`,
   },
 
@@ -137,48 +137,48 @@ export const YOUTUBE: SDProblem = {
       explanation: `Raw uploaded videos need to be transcoded into multiple resolutions (360p, 720p, 1080p, 4K) and codecs (H.264 for compatibility, VP9/AV1 for efficiency). A 1-hour 4K video takes ~4 hours to transcode sequentially on CPU. To speed this up, we split the video into segments (e.g., 10-second chunks at GOP boundaries) and transcode each segment in parallel across a fleet of GPU workers. A coordinator service manages the DAG: split → transcode each segment in N resolutions → concatenate → generate manifest → mark ready. For a 1-hour video with 360 segments and 4 resolutions, that's 1,440 parallel tasks — completing in minutes instead of hours. We use spot/preemptible instances for cost savings (60-80% cheaper) with checkpointing so interrupted work can resume.`,
       svgDiagram: `<svg viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg">
   <style>
-    text { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; }
-    .box { fill: #111318; stroke: #1e2230; stroke-width: 2; rx: 8; }
-    .active { fill: #111318; stroke: #ff6b6b; stroke-width: 2; rx: 8; }
-    .label { font-size: 10px; fill: #8b8fa3; }
-    .title { font-size: 12px; fill: #ff6b6b; font-weight: bold; }
-    .seg { fill: #ff6b6b; opacity: 0.3; rx: 4; }
+    .yt2-text { font-family: 'Space Mono', monospace; font-size: 12px; fill: #e8eaf0; }
+    .yt2-box { fill: #1a1e2a; stroke: #2e3446; stroke-width: 2; rx: 8; }
+    .yt2-active { fill: #1a1e2a; stroke: #ff6b6b; stroke-width: 2; rx: 8; }
+    .yt2-label { font-size: 10px; fill: #8b8fa3; }
+    .yt2-title { font-size: 12px; fill: #ff6b6b; font-weight: bold; }
+    .yt2-seg { fill: #ff6b6b; opacity: 0.3; rx: 4; }
   </style>
-  <text class="title" x="400" y="25" text-anchor="middle">Parallel Segment Transcoding</text>
+  <text class="yt2-title" x="400" y="25" text-anchor="middle">Parallel Segment Transcoding</text>
   <!-- Raw video -->
-  <rect class="box" x="30" y="50" width="120" height="40" />
-  <text x="90" y="75" text-anchor="middle">Raw Video</text>
+  <rect class="yt2-box" x="30" y="50" width="120" height="40" />
+  <text class="yt-text" x="90" y="75" text-anchor="middle">Raw Video</text>
   <!-- Split -->
-  <rect class="active" x="30" y="120" width="120" height="35" />
-  <text x="90" y="142" text-anchor="middle">Split (GOP)</text>
+  <rect class="yt2-active" x="30" y="120" width="120" height="35" />
+  <text class="yt-text" x="90" y="142" text-anchor="middle">Split (GOP)</text>
   <!-- Segments -->
-  <rect class="seg" x="200" y="50" width="70" height="30" />
-  <text x="235" y="70" text-anchor="middle" font-size="9">Seg 1</text>
-  <rect class="seg" x="200" y="90" width="70" height="30" />
-  <text x="235" y="110" text-anchor="middle" font-size="9">Seg 2</text>
-  <rect class="seg" x="200" y="130" width="70" height="30" />
-  <text x="235" y="150" text-anchor="middle" font-size="9">Seg 3</text>
-  <text class="label" x="235" y="180" text-anchor="middle">...N segs</text>
+  <rect class="yt2-seg" x="200" y="50" width="70" height="30" />
+  <text class="yt-text" x="235" y="70" text-anchor="middle" font-size="9">Seg 1</text>
+  <rect class="yt2-seg" x="200" y="90" width="70" height="30" />
+  <text class="yt-text" x="235" y="110" text-anchor="middle" font-size="9">Seg 2</text>
+  <rect class="yt2-seg" x="200" y="130" width="70" height="30" />
+  <text class="yt-text" x="235" y="150" text-anchor="middle" font-size="9">Seg 3</text>
+  <text class="yt-label" x="235" y="180" text-anchor="middle">...N segs</text>
   <!-- Workers -->
-  <rect class="active" x="330" y="50" width="100" height="30" />
-  <text x="380" y="70" text-anchor="middle" font-size="9">GPU Worker</text>
-  <rect class="active" x="330" y="90" width="100" height="30" />
-  <text x="380" y="110" text-anchor="middle" font-size="9">GPU Worker</text>
-  <rect class="active" x="330" y="130" width="100" height="30" />
-  <text x="380" y="150" text-anchor="middle" font-size="9">GPU Worker</text>
+  <rect class="yt2-active" x="330" y="50" width="100" height="30" />
+  <text class="yt-text" x="380" y="70" text-anchor="middle" font-size="9">GPU Worker</text>
+  <rect class="yt2-active" x="330" y="90" width="100" height="30" />
+  <text class="yt-text" x="380" y="110" text-anchor="middle" font-size="9">GPU Worker</text>
+  <rect class="yt2-active" x="330" y="130" width="100" height="30" />
+  <text class="yt-text" x="380" y="150" text-anchor="middle" font-size="9">GPU Worker</text>
   <!-- Output resolutions -->
-  <rect class="box" x="490" y="40" width="80" height="25" />
-  <text x="530" y="57" text-anchor="middle" font-size="9">360p</text>
-  <rect class="box" x="490" y="75" width="80" height="25" />
-  <text x="530" y="92" text-anchor="middle" font-size="9">720p</text>
-  <rect class="box" x="490" y="110" width="80" height="25" />
-  <text x="530" y="127" text-anchor="middle" font-size="9">1080p</text>
-  <rect class="box" x="490" y="145" width="80" height="25" />
-  <text x="530" y="162" text-anchor="middle" font-size="9">4K</text>
+  <rect class="yt2-box" x="490" y="40" width="80" height="25" />
+  <text class="yt-text" x="530" y="57" text-anchor="middle" font-size="9">360p</text>
+  <rect class="yt2-box" x="490" y="75" width="80" height="25" />
+  <text class="yt-text" x="530" y="92" text-anchor="middle" font-size="9">720p</text>
+  <rect class="yt2-box" x="490" y="110" width="80" height="25" />
+  <text class="yt-text" x="530" y="127" text-anchor="middle" font-size="9">1080p</text>
+  <rect class="yt2-box" x="490" y="145" width="80" height="25" />
+  <text class="yt-text" x="530" y="162" text-anchor="middle" font-size="9">4K</text>
   <!-- Concat + manifest -->
-  <rect class="active" x="630" y="80" width="130" height="40" />
-  <text x="695" y="105" text-anchor="middle">HLS Manifest</text>
-  <text class="label" x="695" y="140" text-anchor="middle">m3u8 + segments</text>
+  <rect class="yt2-active" x="630" y="80" width="130" height="40" />
+  <text class="yt-text" x="695" y="105" text-anchor="middle">HLS Manifest</text>
+  <text class="yt-label" x="695" y="140" text-anchor="middle">m3u8 + segments</text>
 </svg>`,
     },
     {
@@ -201,28 +201,28 @@ export const YOUTUBE: SDProblem = {
       title: 'Creator Uploads Video',
       description: 'The creator selects a video file and the client initiates a resumable upload. The file is uploaded in chunks to the Upload Service, which stores the raw video in temporary blob storage and creates a metadata record.',
       svgHighlight: `<rect x="18" y="68" width="104" height="59" fill="none" stroke="#ff6b6b" stroke-width="3" rx="12" opacity="0.9" />
-<text x="70" y="150" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">1. Upload raw video</text>`,
+<text class="yt-text" x="70" y="150" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">1. Upload raw video</text>`,
     },
     {
       stepNumber: 2,
       title: 'Transcoding Job Enqueued',
       description: 'The Upload Service publishes a transcoding job to Kafka. The job includes the raw video location, target resolutions, and codec preferences. A coordinator picks it up and splits the video into segments.',
       svgHighlight: `<rect x="188" y="68" width="134" height="59" fill="none" stroke="#ff6b6b" stroke-width="3" rx="12" opacity="0.9" />
-<text x="255" y="150" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">2. Enqueue transcode job</text>`,
+<text class="yt-text" x="255" y="150" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">2. Enqueue transcode job</text>`,
     },
     {
       stepNumber: 3,
       title: 'Parallel Transcoding on GPU Workers',
       description: 'GPU workers process video segments in parallel across multiple resolutions. A 1-hour video is split into 360 segments, each transcoded into 4 resolutions — 1,440 tasks completing in minutes. Results are uploaded to S3.',
       svgHighlight: `<rect x="388" y="68" width="144" height="59" fill="none" stroke="#ff6b6b" stroke-width="3" rx="12" opacity="0.9" />
-<text x="460" y="150" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">3. GPU transcode (parallel)</text>`,
+<text class="yt-text" x="460" y="150" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">3. GPU transcode (parallel)</text>`,
     },
     {
       stepNumber: 4,
       title: 'Segments Stored in S3 + CDN',
       description: 'Transcoded segments and HLS/DASH manifests are stored in S3. The CDN begins caching segments at edge locations. The video status is updated to "published" and it appears on the creator\'s channel.',
       svgHighlight: `<rect x="608" y="68" width="134" height="59" fill="none" stroke="#ff6b6b" stroke-width="3" rx="12" opacity="0.9" />
-<text x="675" y="150" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">4. Store + CDN distribute</text>`,
+<text class="yt-text" x="675" y="150" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">4. Store + CDN distribute</text>`,
     },
     {
       stepNumber: 5,
@@ -230,21 +230,21 @@ export const YOUTUBE: SDProblem = {
       description: 'A viewer finds the video via search or recommendations. The player fetches the HLS manifest from the CDN, starts with a low quality segment, and progressively upgrades quality as it measures available bandwidth.',
       svgHighlight: `<rect x="18" y="268" width="104" height="59" fill="none" stroke="#ff6b6b" stroke-width="3" rx="12" opacity="0.9" />
 <line x1="120" y1="280" x2="610" y2="120" stroke="#ff6b6b" stroke-width="4" fill="none" opacity="0.9" />
-<text x="350" y="185" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">5. Stream HLS segments</text>`,
+<text class="yt-text" x="350" y="185" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">5. Stream HLS segments</text>`,
     },
     {
       stepNumber: 6,
       title: 'View Event Counted',
       description: 'After 30 seconds of watch time, the client fires a "view" event to Kafka. The stream processor deduplicates and aggregates counts. Redis is updated for the real-time display, and Cassandra stores the durable count.',
       svgHighlight: `<rect x="608" y="268" width="134" height="59" fill="none" stroke="#ff6b6b" stroke-width="3" rx="12" opacity="0.9" />
-<text x="675" y="348" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">6. Count view (Kafka pipeline)</text>`,
+<text class="yt-text" x="675" y="348" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#ff6b6b">6. Count view (Kafka pipeline)</text>`,
     },
     {
       stepNumber: 7,
       title: 'Recommendations Updated',
       description: 'The view event also feeds the recommendation engine. User watch history is updated, and the next time they open the home feed, the model incorporates this new signal to improve suggestions.',
       svgHighlight: `<rect x="388" y="268" width="144" height="59" fill="none" stroke="#00e676" stroke-width="3" rx="12" opacity="0.9" />
-<text x="460" y="348" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#00e676">7. Update recommendations</text>`,
+<text class="yt-text" x="460" y="348" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#00e676">7. Update recommendations</text>`,
     },
   ],
 

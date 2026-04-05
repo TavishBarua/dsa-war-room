@@ -69,13 +69,13 @@ export const FACEBOOK_NEWS_FEED: SDProblem = {
     dataFlow: 'Write path: User creates a post, Post Service stores it and publishes to Kafka. Fan-Out Service reads follower lists, scores the post via Ranking Service, and inserts it into each follower\'s Redis sorted set. Read path: User opens the app, Feed Service reads the precomputed feed from Redis, fetches celebrity posts on-the-fly, merges and hydrates with engagement counts, returns the final ranked feed.',
     svgDiagram: `<svg viewBox="0 0 820 370" fill="none" xmlns="http://www.w3.org/2000/svg">
       <style>
-        .node { fill: #111318; stroke: #1e2230; stroke-width: 1.5; rx: 8; }
-        .node-accent { fill: #111318; stroke: #4267B2; stroke-width: 1.5; stroke-opacity: 0.5; rx: 8; }
-        .label { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; text-anchor: middle; }
-        .sub { font-family: 'Space Mono', monospace; font-size: 8px; fill: #5a5f70; text-anchor: middle; }
-        .arrow { stroke: #4267B2; stroke-width: 1.5; marker-end: url(#ahFB); }
+        .fb-node { fill: #1a1e2a; stroke: #2e3446; stroke-width: 1.5; rx: 8; }
+        .fb-node-accent { fill: #1a1e2a; stroke: #4267B2; stroke-width: 1.5; stroke-opacity: 0.8; rx: 8; }
+        .fb-label { font-family: 'Space Mono', monospace; font-size: 12px; fill: #e8eaf0; text-anchor: middle; }
+        .fb-sub { font-family: 'Space Mono', monospace; font-size: 10px; fill: #5a5f70; text-anchor: middle; }
+        .fb-arrow { stroke: #4267B2; stroke-width: 1.5; marker-end: url(#ahFB); }
         @keyframes flowFB { 0% { stroke-dashoffset: 20; } 100% { stroke-dashoffset: 0; } }
-        .flow { stroke-dasharray: 10 10; animation: flowFB 1s linear infinite; }
+        .fb-flow { stroke-dasharray: 10 10; animation: flowFB 1s linear infinite; }
       </style>
       <defs>
         <marker id="ahFB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -84,66 +84,66 @@ export const FACEBOOK_NEWS_FEED: SDProblem = {
       </defs>
 
       <!-- User / Client -->
-      <rect class="node" x="10" y="150" width="100" height="50"/>
-      <text class="label" x="60" y="175">Client</text>
+      <rect class="fb-node" x="10" y="150" width="100" height="50"/>
+      <text class="fb-label" x="60" y="175">Client</text>
 
       <!-- Post Service -->
-      <rect class="node" x="160" y="60" width="120" height="50"/>
-      <text class="label" x="220" y="83">Post Service</text>
-      <text class="sub" x="220" y="98">write path</text>
+      <rect class="fb-node" x="160" y="60" width="120" height="50"/>
+      <text class="fb-label" x="220" y="83">Post Service</text>
+      <text class="fb-sub" x="220" y="98">write path</text>
 
       <!-- Feed Service -->
-      <rect class="node" x="160" y="240" width="120" height="50"/>
-      <text class="label" x="220" y="263">Feed Service</text>
-      <text class="sub" x="220" y="278">read path</text>
+      <rect class="fb-node" x="160" y="240" width="120" height="50"/>
+      <text class="fb-label" x="220" y="263">Feed Service</text>
+      <text class="fb-sub" x="220" y="278">read path</text>
 
       <!-- Kafka -->
-      <rect class="node" x="340" y="60" width="100" height="50"/>
-      <text class="label" x="390" y="83">Kafka</text>
-      <text class="sub" x="390" y="98">post events</text>
+      <rect class="fb-node" x="340" y="60" width="100" height="50"/>
+      <text class="fb-label" x="390" y="83">Kafka</text>
+      <text class="fb-sub" x="390" y="98">post events</text>
 
       <!-- Fan-Out Service -->
-      <rect class="node-accent" x="500" y="60" width="130" height="50"/>
-      <text class="label" x="565" y="83" fill="#4267B2">Fan-Out Svc</text>
-      <text class="sub" x="565" y="98">write to feeds</text>
+      <rect class="fb-node-accent" x="500" y="60" width="130" height="50"/>
+      <text class="fb-label" x="565" y="83" fill="#4267B2">Fan-Out Svc</text>
+      <text class="fb-sub" x="565" y="98">write to feeds</text>
 
       <!-- Ranking -->
-      <rect class="node" x="500" y="150" width="130" height="50"/>
-      <text class="label" x="565" y="173">Ranking Svc</text>
-      <text class="sub" x="565" y="188">ML scoring</text>
+      <rect class="fb-node" x="500" y="150" width="130" height="50"/>
+      <text class="fb-label" x="565" y="173">Ranking Svc</text>
+      <text class="fb-sub" x="565" y="188">ML scoring</text>
 
       <!-- Feed Cache -->
-      <rect class="node-accent" x="340" y="240" width="120" height="50"/>
-      <text class="label" x="400" y="263" fill="#4267B2">Feed Cache</text>
-      <text class="sub" x="400" y="278">Redis sorted sets</text>
+      <rect class="fb-node-accent" x="340" y="240" width="120" height="50"/>
+      <text class="fb-label" x="400" y="263" fill="#4267B2">Feed Cache</text>
+      <text class="fb-sub" x="400" y="278">Redis sorted sets</text>
 
       <!-- Social Graph -->
-      <rect class="node" x="690" y="60" width="110" height="50"/>
-      <text class="label" x="745" y="83">Social</text>
-      <text class="sub" x="745" y="98">graph / TAO</text>
+      <rect class="fb-node" x="690" y="60" width="110" height="50"/>
+      <text class="fb-label" x="745" y="83">Social</text>
+      <text class="fb-sub" x="745" y="98">graph / TAO</text>
 
       <!-- Post DB -->
-      <rect class="node" x="690" y="150" width="110" height="50"/>
-      <text class="label" x="745" y="173">Post DB</text>
-      <text class="sub" x="745" y="188">PostgreSQL</text>
+      <rect class="fb-node" x="690" y="150" width="110" height="50"/>
+      <text class="fb-label" x="745" y="173">Post DB</text>
+      <text class="fb-sub" x="745" y="188">PostgreSQL</text>
 
       <!-- Celebrity merge -->
-      <rect class="node" x="340" y="150" width="120" height="50"/>
-      <text class="label" x="400" y="168">Celebrity</text>
-      <text class="sub" x="400" y="183">fan-out on read</text>
+      <rect class="fb-node" x="340" y="150" width="120" height="50"/>
+      <text class="fb-label" x="400" y="168">Celebrity</text>
+      <text class="fb-sub" x="400" y="183">fan-out on read</text>
 
       <!-- Arrows: Write path -->
-      <line class="arrow flow" x1="110" y1="162" x2="155" y2="90"/>
-      <line class="arrow flow" x1="280" y1="85" x2="335" y2="85"/>
-      <line class="arrow flow" x1="440" y1="85" x2="495" y2="85"/>
-      <line class="arrow flow" x1="630" y1="85" x2="685" y2="85"/>
-      <line class="arrow flow" x1="565" y1="110" x2="565" y2="145"/>
-      <line class="arrow flow" x1="500" y1="95" x2="460" y2="240"/>
+      <line class="fb-arrow fb-flow" x1="110" y1="162" x2="155" y2="90"/>
+      <line class="fb-arrow fb-flow" x1="280" y1="85" x2="335" y2="85"/>
+      <line class="fb-arrow fb-flow" x1="440" y1="85" x2="495" y2="85"/>
+      <line class="fb-arrow fb-flow" x1="630" y1="85" x2="685" y2="85"/>
+      <line class="fb-arrow fb-flow" x1="565" y1="110" x2="565" y2="145"/>
+      <line class="fb-arrow fb-flow" x1="500" y1="95" x2="460" y2="240"/>
 
       <!-- Arrows: Read path -->
-      <line class="arrow flow" x1="110" y1="185" x2="155" y2="260"/>
-      <line class="arrow flow" x1="280" y1="265" x2="335" y2="265"/>
-      <line class="arrow flow" x1="280" y1="250" x2="335" y2="180"/>
+      <line class="fb-arrow fb-flow" x1="110" y1="185" x2="155" y2="260"/>
+      <line class="fb-arrow fb-flow" x1="280" y1="265" x2="335" y2="265"/>
+      <line class="fb-arrow fb-flow" x1="280" y1="250" x2="335" y2="180"/>
     </svg>`,
   },
 

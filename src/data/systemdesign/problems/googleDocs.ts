@@ -70,13 +70,13 @@ export const GOOGLE_DOCS: SDProblem = {
     dataFlow: 'A client types a character, generating an insert operation. The operation is sent via WebSocket to the Document Service instance handling that document. The OT engine transforms the operation against any concurrent operations, applies it to the server state, appends it to the Operation Log, and broadcasts the transformed operation to all other connected clients. Each client applies the transformed operation to their local copy.',
     svgDiagram: `<svg viewBox="0 0 820 400" fill="none" xmlns="http://www.w3.org/2000/svg">
       <style>
-        .node { fill: #111318; stroke: #1e2230; stroke-width: 1.5; rx: 8; }
-        .node-accent { fill: #111318; stroke: #4285F4; stroke-width: 1.5; stroke-opacity: 0.5; rx: 8; }
-        .label { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; text-anchor: middle; }
-        .sub { font-family: 'Space Mono', monospace; font-size: 8px; fill: #5a5f70; text-anchor: middle; }
-        .arrow { stroke: #4285F4; stroke-width: 1.5; marker-end: url(#ahGD); }
+        .gd-node { fill: #1a1e2a; stroke: #2e3446; stroke-width: 1.5; rx: 8; }
+        .gd-node-accent { fill: #1a1e2a; stroke: #4285F4; stroke-width: 1.5; stroke-opacity: 0.8; rx: 8; }
+        .gd-label { font-family: 'Space Mono', monospace; font-size: 12px; fill: #e8eaf0; text-anchor: middle; }
+        .gd-sub { font-family: 'Space Mono', monospace; font-size: 10px; fill: #5a5f70; text-anchor: middle; }
+        .gd-arrow { stroke: #4285F4; stroke-width: 1.5; marker-end: url(#ahGD); }
         @keyframes flowGD { 0% { stroke-dashoffset: 20; } 100% { stroke-dashoffset: 0; } }
-        .flow { stroke-dasharray: 10 10; animation: flowGD 1s linear infinite; }
+        .gd-flow { stroke-dasharray: 10 10; animation: flowGD 1s linear infinite; }
       </style>
       <defs>
         <marker id="ahGD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -85,60 +85,60 @@ export const GOOGLE_DOCS: SDProblem = {
       </defs>
 
       <!-- Clients -->
-      <rect class="node" x="10" y="60" width="100" height="45"/>
-      <text class="label" x="60" y="83">Client A</text>
-      <text class="sub" x="60" y="96">Alice</text>
+      <rect class="gd-node" x="10" y="60" width="100" height="45"/>
+      <text class="gd-label" x="60" y="83">Client A</text>
+      <text class="gd-sub" x="60" y="96">Alice</text>
 
-      <rect class="node" x="10" y="160" width="100" height="45"/>
-      <text class="label" x="60" y="183">Client B</text>
-      <text class="sub" x="60" y="196">Bob</text>
+      <rect class="gd-node" x="10" y="160" width="100" height="45"/>
+      <text class="gd-label" x="60" y="183">Client B</text>
+      <text class="gd-sub" x="60" y="196">Bob</text>
 
-      <rect class="node" x="10" y="260" width="100" height="45"/>
-      <text class="label" x="60" y="283">Client C</text>
-      <text class="sub" x="60" y="296">Carol</text>
+      <rect class="gd-node" x="10" y="260" width="100" height="45"/>
+      <text class="gd-label" x="60" y="283">Client C</text>
+      <text class="gd-sub" x="60" y="296">Carol</text>
 
       <!-- WebSocket Gateway -->
-      <rect class="node-accent" x="180" y="130" width="120" height="55"/>
-      <text class="label" x="240" y="155">WS Gateway</text>
-      <text class="sub" x="240" y="170">WebSocket</text>
+      <rect class="gd-node-accent" x="180" y="130" width="120" height="55"/>
+      <text class="gd-label" x="240" y="155">WS Gateway</text>
+      <text class="gd-sub" x="240" y="170">WebSocket</text>
 
       <!-- Session Router -->
-      <rect class="node" x="180" y="40" width="120" height="45"/>
-      <text class="label" x="240" y="63">Session Router</text>
-      <text class="sub" x="240" y="76">doc→server map</text>
+      <rect class="gd-node" x="180" y="40" width="120" height="45"/>
+      <text class="gd-label" x="240" y="63">Session Router</text>
+      <text class="gd-sub" x="240" y="76">doc→server map</text>
 
       <!-- OT Engine -->
-      <rect class="node-accent" x="370" y="130" width="140" height="55"/>
-      <text class="label" x="440" y="155" fill="#4285F4">OT Engine</text>
-      <text class="sub" x="440" y="170">transform + apply</text>
+      <rect class="gd-node-accent" x="370" y="130" width="140" height="55"/>
+      <text class="gd-label" x="440" y="155" fill="#4285F4">OT Engine</text>
+      <text class="gd-sub" x="440" y="170">transform + apply</text>
 
       <!-- Operation Log -->
-      <rect class="node" x="370" y="240" width="140" height="50"/>
-      <text class="label" x="440" y="263">Operation Log</text>
-      <text class="sub" x="440" y="278">Cassandra</text>
+      <rect class="gd-node" x="370" y="240" width="140" height="50"/>
+      <text class="gd-label" x="440" y="263">Operation Log</text>
+      <text class="gd-sub" x="440" y="278">Cassandra</text>
 
       <!-- Document Store -->
-      <rect class="node" x="580" y="240" width="130" height="50"/>
-      <text class="label" x="645" y="263">Doc Store</text>
-      <text class="sub" x="645" y="278">PostgreSQL + S3</text>
+      <rect class="gd-node" x="580" y="240" width="130" height="50"/>
+      <text class="gd-label" x="645" y="263">Doc Store</text>
+      <text class="gd-sub" x="645" y="278">PostgreSQL + S3</text>
 
       <!-- Presence Service -->
-      <rect class="node" x="580" y="130" width="130" height="55"/>
-      <text class="label" x="645" y="155">Presence Svc</text>
-      <text class="sub" x="645" y="170">Redis Pub/Sub</text>
+      <rect class="gd-node" x="580" y="130" width="130" height="55"/>
+      <text class="gd-label" x="645" y="155">Presence Svc</text>
+      <text class="gd-sub" x="645" y="170">Redis Pub/Sub</text>
 
       <!-- Arrows -->
-      <line class="arrow flow" x1="110" y1="83" x2="175" y2="145"/>
-      <line class="arrow flow" x1="110" y1="183" x2="175" y2="160"/>
-      <line class="arrow flow" x1="110" y1="275" x2="175" y2="175"/>
-      <line class="arrow flow" x1="300" y1="158" x2="365" y2="158"/>
-      <line class="arrow flow" x1="440" y1="185" x2="440" y2="235"/>
-      <line class="arrow flow" x1="510" y1="265" x2="575" y2="265"/>
-      <line class="arrow flow" x1="510" y1="155" x2="575" y2="155"/>
-      <line class="arrow" x1="240" y1="85" x2="240" y2="125" stroke-dasharray="4 4" stroke="#5a5f70"/>
+      <line class="gd-arrow gd-flow" x1="110" y1="83" x2="175" y2="145"/>
+      <line class="gd-arrow gd-flow" x1="110" y1="183" x2="175" y2="160"/>
+      <line class="gd-arrow gd-flow" x1="110" y1="275" x2="175" y2="175"/>
+      <line class="gd-arrow gd-flow" x1="300" y1="158" x2="365" y2="158"/>
+      <line class="gd-arrow gd-flow" x1="440" y1="185" x2="440" y2="235"/>
+      <line class="gd-arrow gd-flow" x1="510" y1="265" x2="575" y2="265"/>
+      <line class="gd-arrow gd-flow" x1="510" y1="155" x2="575" y2="155"/>
+      <line class="gd-arrow" x1="240" y1="85" x2="240" y2="125" stroke-dasharray="4 4" stroke="#5a5f70"/>
 
       <!-- Broadcast arrows back -->
-      <line class="arrow flow" x1="370" y1="145" x2="300" y2="145"/>
+      <line class="gd-arrow gd-flow" x1="370" y1="145" x2="300" y2="145"/>
     </svg>`,
   },
 

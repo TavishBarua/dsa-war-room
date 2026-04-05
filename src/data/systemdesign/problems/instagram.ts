@@ -72,11 +72,11 @@ export const INSTAGRAM: SDProblem = {
   <style>
     @keyframes flowRight { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
     @keyframes flowDown { from { stroke-dashoffset: 80; } to { stroke-dashoffset: 0; } }
-    text { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; }
-    .node { fill: #111318; stroke: #1e2230; stroke-width: 2; rx: 12; }
-    .arrow { stroke: #E1306C; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowRight 1.5s linear infinite; }
-    .arrow-down { stroke: #E1306C; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowDown 1.5s linear infinite; }
-    .label { font-size: 10px; fill: #8b8fa3; }
+    .ig-text { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; }
+    .ig-node { fill: #1a1e2a; stroke: #2e3446; stroke-width: 2; rx: 12; }
+    .ig-arrow { stroke: #E1306C; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowRight 1.5s linear infinite; }
+    .ig-arrow-down { stroke: #E1306C; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowDown 1.5s linear infinite; }
+    .ig-label { font-size: 12px; fill: #8b8fa3; }
   </style>
   <defs>
     <marker id="ig-arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
@@ -84,43 +84,43 @@ export const INSTAGRAM: SDProblem = {
     </marker>
   </defs>
   <!-- Client -->
-  <rect class="node" x="20" y="160" width="100" height="60" />
-  <text x="70" y="195" text-anchor="middle">Client</text>
+  <rect class="ig-node" x="20" y="160" width="100" height="60" />
+  <text class="ig-text" x="70" y="195" text-anchor="middle">Client</text>
   <!-- Upload Service -->
-  <rect class="node" x="180" y="60" width="130" height="55" />
-  <text x="245" y="92" text-anchor="middle">Upload Service</text>
+  <rect class="ig-node" x="180" y="60" width="130" height="55" />
+  <text class="ig-text" x="245" y="92" text-anchor="middle">Upload Service</text>
   <!-- Image Processing -->
-  <rect class="node" x="380" y="60" width="140" height="55" />
-  <text x="450" y="85" text-anchor="middle">Image</text>
-  <text x="450" y="100" text-anchor="middle">Processing</text>
+  <rect class="ig-node" x="380" y="60" width="140" height="55" />
+  <text class="ig-text" x="450" y="85" text-anchor="middle">Image</text>
+  <text class="ig-text" x="450" y="100" text-anchor="middle">Processing</text>
   <!-- S3 + CDN -->
-  <rect class="node" x="600" y="60" width="130" height="55" />
-  <text x="665" y="85" text-anchor="middle">S3 + CDN</text>
+  <rect class="ig-node" x="600" y="60" width="130" height="55" />
+  <text class="ig-text" x="665" y="85" text-anchor="middle">S3 + CDN</text>
   <!-- Feed Service -->
-  <rect class="node" x="180" y="270" width="130" height="55" />
-  <text x="245" y="302" text-anchor="middle">Feed Service</text>
+  <rect class="ig-node" x="180" y="270" width="130" height="55" />
+  <text class="ig-text" x="245" y="302" text-anchor="middle">Feed Service</text>
   <!-- Redis Feed Cache -->
-  <rect class="node" x="380" y="270" width="140" height="55" />
-  <text x="450" y="295" text-anchor="middle">Redis</text>
-  <text x="450" y="310" text-anchor="middle">(Feed Cache)</text>
+  <rect class="ig-node" x="380" y="270" width="140" height="55" />
+  <text class="ig-text" x="450" y="295" text-anchor="middle">Redis</text>
+  <text class="ig-text" x="450" y="310" text-anchor="middle">(Feed Cache)</text>
   <!-- Social Graph -->
-  <rect class="node" x="600" y="270" width="130" height="55" />
-  <text x="665" y="302" text-anchor="middle">Social Graph</text>
+  <rect class="ig-node" x="600" y="270" width="130" height="55" />
+  <text class="ig-text" x="665" y="302" text-anchor="middle">Social Graph</text>
   <!-- Arrows -->
-  <line class="arrow" x1="120" y1="175" x2="180" y2="92" marker-end="url(#ig-arrow)" />
-  <line class="arrow" x1="310" y1="87" x2="380" y2="87" marker-end="url(#ig-arrow)" />
-  <line class="arrow" x1="520" y1="87" x2="600" y2="87" marker-end="url(#ig-arrow)" />
-  <line class="arrow" x1="120" y1="205" x2="180" y2="290" marker-end="url(#ig-arrow)" />
-  <line class="arrow" x1="310" y1="297" x2="380" y2="297" marker-end="url(#ig-arrow)" />
-  <line class="arrow" x1="520" y1="297" x2="600" y2="297" marker-end="url(#ig-arrow)" />
-  <line class="arrow-down" x1="450" y1="115" x2="450" y2="270" marker-end="url(#ig-arrow)" />
-  <text class="label" x="135" y="125">upload</text>
-  <text class="label" x="340" y="80">process</text>
-  <text class="label" x="555" y="80">store</text>
-  <text class="label" x="130" y="260">read</text>
-  <text class="label" x="335" y="290">fetch</text>
-  <text class="label" x="555" y="290">followers</text>
-  <text class="label" x="458" y="195">fan-out</text>
+  <line class="ig-arrow" x1="120" y1="175" x2="180" y2="92" marker-end="url(#ig-arrow)" />
+  <line class="ig-arrow" x1="310" y1="87" x2="380" y2="87" marker-end="url(#ig-arrow)" />
+  <line class="ig-arrow" x1="520" y1="87" x2="600" y2="87" marker-end="url(#ig-arrow)" />
+  <line class="ig-arrow" x1="120" y1="205" x2="180" y2="290" marker-end="url(#ig-arrow)" />
+  <line class="ig-arrow" x1="310" y1="297" x2="380" y2="297" marker-end="url(#ig-arrow)" />
+  <line class="ig-arrow" x1="520" y1="297" x2="600" y2="297" marker-end="url(#ig-arrow)" />
+  <line class="ig-arrow-down" x1="450" y1="115" x2="450" y2="270" marker-end="url(#ig-arrow)" />
+  <text class="ig-label" x="135" y="125">upload</text>
+  <text class="ig-label" x="340" y="80">process</text>
+  <text class="ig-label" x="555" y="80">store</text>
+  <text class="ig-label" x="130" y="260">read</text>
+  <text class="ig-label" x="335" y="290">fetch</text>
+  <text class="ig-label" x="555" y="290">followers</text>
+  <text class="ig-label" x="458" y="195">fan-out</text>
 </svg>`,
   },
 
@@ -149,35 +149,35 @@ export const INSTAGRAM: SDProblem = {
       title: 'User Uploads a Photo',
       description: 'The client app requests a pre-signed URL from the Upload Service, then uploads the photo directly to S3. This avoids routing large image blobs through our application servers.',
       svgHighlight: `<rect x="18" y="158" width="104" height="64" fill="none" stroke="#E1306C" stroke-width="3" rx="12" opacity="0.9" />
-<text x="70" y="245" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">1. Upload photo</text>`,
+<text class="ig-text" x="70" y="245" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">1. Upload photo</text>`,
     },
     {
       stepNumber: 2,
       title: 'Upload Service Stores Metadata',
       description: 'The Upload Service receives confirmation of the S3 upload, validates the image, writes metadata (user, caption, tags, location) to the database, and enqueues an image processing job.',
       svgHighlight: `<rect x="178" y="58" width="134" height="59" fill="none" stroke="#E1306C" stroke-width="3" rx="12" opacity="0.9" />
-<text x="245" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">2. Save metadata + enqueue</text>`,
+<text class="ig-text" x="245" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">2. Save metadata + enqueue</text>`,
     },
     {
       stepNumber: 3,
       title: 'Image Processing Workers Resize',
       description: 'Workers consume the job, download the original from S3, generate thumbnail (150px), medium (640px), and large (1080px) variants, and upload all variants back to S3.',
       svgHighlight: `<rect x="378" y="58" width="144" height="59" fill="none" stroke="#E1306C" stroke-width="3" rx="12" opacity="0.9" />
-<text x="450" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">3. Resize → 150/640/1080px</text>`,
+<text class="ig-text" x="450" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">3. Resize → 150/640/1080px</text>`,
     },
     {
       stepNumber: 4,
       title: 'Variants Pushed to CDN',
       description: 'Resized images are stored in S3 and the CDN is warmed for the uploader\'s region. The immutable URL pattern ensures aggressive caching at edge locations worldwide.',
       svgHighlight: `<rect x="598" y="58" width="134" height="59" fill="none" stroke="#E1306C" stroke-width="3" rx="12" opacity="0.9" />
-<text x="665" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">4. CDN edge caching</text>`,
+<text class="ig-text" x="665" y="140" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">4. CDN edge caching</text>`,
     },
     {
       stepNumber: 5,
       title: 'Fan-Out to Followers\' Feeds',
       description: 'The Feed Service is notified of the new post. For a normal user, it pushes the photoID to each follower\'s Redis sorted set. For celebrities, it skips fan-out (pull at read time).',
       svgHighlight: `<line x1="450" y1="115" x2="450" y2="270" stroke="#E1306C" stroke-width="4" fill="none" opacity="0.9" />
-<text x="500" y="195" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">5. Fan-out photoID</text>`,
+<text class="ig-text" x="500" y="195" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">5. Fan-out photoID</text>`,
     },
     {
       stepNumber: 6,
@@ -185,14 +185,14 @@ export const INSTAGRAM: SDProblem = {
       description: 'When a follower opens the app, the Feed Service reads their pre-computed feed from Redis, merges in any celebrity posts (pull), resolves photo URLs, and returns a ranked list of posts.',
       svgHighlight: `<rect x="178" y="268" width="134" height="59" fill="none" stroke="#E1306C" stroke-width="3" rx="12" opacity="0.9" />
 <rect x="378" y="268" width="144" height="59" fill="none" stroke="#E1306C" stroke-width="3" rx="12" opacity="0.9" />
-<text x="320" y="350" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">6. Fetch feed → merge → rank</text>`,
+<text class="ig-text" x="320" y="350" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#E1306C">6. Fetch feed → merge → rank</text>`,
     },
     {
       stepNumber: 7,
       title: 'Images Served from CDN Edge',
       description: 'The client receives feed data with CDN image URLs. Images load from the nearest edge location in milliseconds. The client requests the appropriate size variant based on device resolution.',
       svgHighlight: `<rect x="598" y="58" width="134" height="59" fill="none" stroke="#00e676" stroke-width="3" rx="12" opacity="0.9" />
-<text x="665" y="30" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#00e676">7. Serve from edge (< 50ms)</text>`,
+<text class="ig-text" x="665" y="30" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#00e676">7. Serve from edge (< 50ms)</text>`,
     },
   ],
 

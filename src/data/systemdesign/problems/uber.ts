@@ -72,11 +72,11 @@ export const UBER: SDProblem = {
   <style>
     @keyframes flowRight { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
     @keyframes flowDown { from { stroke-dashoffset: 80; } to { stroke-dashoffset: 0; } }
-    text { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; }
-    .node { fill: #111318; stroke: #1e2230; stroke-width: 2; rx: 12; }
-    .arrow { stroke: #a78bfa; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowRight 1.5s linear infinite; }
-    .arrow-down { stroke: #a78bfa; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowDown 1.5s linear infinite; }
-    .label { font-size: 10px; fill: #8b8fa3; }
+    .ub-text { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; }
+    .ub-node { fill: #1a1e2a; stroke: #2e3446; stroke-width: 2; rx: 12; }
+    .ub-arrow { stroke: #a78bfa; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowRight 1.5s linear infinite; }
+    .ub-arrow-down { stroke: #a78bfa; stroke-width: 2; stroke-dasharray: 10 10; fill: none; animation: flowDown 1.5s linear infinite; }
+    .ub-label { font-size: 12px; fill: #8b8fa3; }
   </style>
   <defs>
     <marker id="ub-arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
@@ -84,48 +84,48 @@ export const UBER: SDProblem = {
     </marker>
   </defs>
   <!-- Rider -->
-  <rect class="node" x="20" y="80" width="100" height="55" />
-  <text x="70" y="112" text-anchor="middle">Rider App</text>
+  <rect class="ub-node" x="20" y="80" width="100" height="55" />
+  <text class="ub-text" x="70" y="112" text-anchor="middle">Rider App</text>
   <!-- Driver -->
-  <rect class="node" x="20" y="260" width="100" height="55" />
-  <text x="70" y="292" text-anchor="middle">Driver App</text>
+  <rect class="ub-node" x="20" y="260" width="100" height="55" />
+  <text class="ub-text" x="70" y="292" text-anchor="middle">Driver App</text>
   <!-- WebSocket Gateway -->
-  <rect class="node" x="190" y="160" width="130" height="55" />
-  <text x="255" y="185" text-anchor="middle">WebSocket</text>
-  <text x="255" y="200" text-anchor="middle">Gateway</text>
+  <rect class="ub-node" x="190" y="160" width="130" height="55" />
+  <text class="ub-text" x="255" y="185" text-anchor="middle">WebSocket</text>
+  <text class="ub-text" x="255" y="200" text-anchor="middle">Gateway</text>
   <!-- Matching Engine -->
-  <rect class="node" x="390" y="80" width="140" height="55" />
-  <text x="460" y="112" text-anchor="middle">Matching Engine</text>
+  <rect class="ub-node" x="390" y="80" width="140" height="55" />
+  <text class="ub-text" x="460" y="112" text-anchor="middle">Matching Engine</text>
   <!-- Location Service -->
-  <rect class="node" x="390" y="260" width="140" height="55" />
-  <text x="460" y="285" text-anchor="middle">Location</text>
-  <text x="460" y="300" text-anchor="middle">Service</text>
+  <rect class="ub-node" x="390" y="260" width="140" height="55" />
+  <text class="ub-text" x="460" y="285" text-anchor="middle">Location</text>
+  <text class="ub-text" x="460" y="300" text-anchor="middle">Service</text>
   <!-- ETA Service -->
-  <rect class="node" x="610" y="80" width="130" height="55" />
-  <text x="675" y="112" text-anchor="middle">ETA Service</text>
+  <rect class="ub-node" x="610" y="80" width="130" height="55" />
+  <text class="ub-text" x="675" y="112" text-anchor="middle">ETA Service</text>
   <!-- Surge Pricing -->
-  <rect class="node" x="610" y="260" width="130" height="55" />
-  <text x="675" y="285" text-anchor="middle">Surge</text>
-  <text x="675" y="300" text-anchor="middle">Pricing</text>
+  <rect class="ub-node" x="610" y="260" width="130" height="55" />
+  <text class="ub-text" x="675" y="285" text-anchor="middle">Surge</text>
+  <text class="ub-text" x="675" y="300" text-anchor="middle">Pricing</text>
   <!-- Trip Service -->
-  <rect class="node" x="610" y="170" width="130" height="55" />
-  <text x="675" y="202" text-anchor="middle">Trip Service</text>
+  <rect class="ub-node" x="610" y="170" width="130" height="55" />
+  <text class="ub-text" x="675" y="202" text-anchor="middle">Trip Service</text>
   <!-- Arrows -->
-  <line class="arrow" x1="120" y1="107" x2="190" y2="175" marker-end="url(#ub-arrow)" />
-  <line class="arrow" x1="120" y1="287" x2="190" y2="200" marker-end="url(#ub-arrow)" />
-  <line class="arrow" x1="320" y1="175" x2="390" y2="107" marker-end="url(#ub-arrow)" />
-  <line class="arrow" x1="320" y1="200" x2="390" y2="280" marker-end="url(#ub-arrow)" />
-  <line class="arrow" x1="530" y1="107" x2="610" y2="107" marker-end="url(#ub-arrow)" />
-  <line class="arrow" x1="530" y1="287" x2="610" y2="287" marker-end="url(#ub-arrow)" />
-  <line class="arrow-down" x1="460" y1="135" x2="460" y2="260" marker-end="url(#ub-arrow)" />
-  <line class="arrow" x1="530" y1="107" x2="610" y2="190" marker-end="url(#ub-arrow)" />
-  <text class="label" x="140" y="132">request</text>
-  <text class="label" x="140" y="252">GPS</text>
-  <text class="label" x="340" y="132">match</text>
-  <text class="label" x="340" y="248">update</text>
-  <text class="label" x="565" y="100">ETA</text>
-  <text class="label" x="558" y="280">supply/demand</text>
-  <text class="label" x="468" y="200">nearby?</text>
+  <line class="ub-arrow" x1="120" y1="107" x2="190" y2="175" marker-end="url(#ub-arrow)" />
+  <line class="ub-arrow" x1="120" y1="287" x2="190" y2="200" marker-end="url(#ub-arrow)" />
+  <line class="ub-arrow" x1="320" y1="175" x2="390" y2="107" marker-end="url(#ub-arrow)" />
+  <line class="ub-arrow" x1="320" y1="200" x2="390" y2="280" marker-end="url(#ub-arrow)" />
+  <line class="ub-arrow" x1="530" y1="107" x2="610" y2="107" marker-end="url(#ub-arrow)" />
+  <line class="ub-arrow" x1="530" y1="287" x2="610" y2="287" marker-end="url(#ub-arrow)" />
+  <line class="ub-arrow-down" x1="460" y1="135" x2="460" y2="260" marker-end="url(#ub-arrow)" />
+  <line class="ub-arrow" x1="530" y1="107" x2="610" y2="190" marker-end="url(#ub-arrow)" />
+  <text class="ub-label" x="140" y="132">request</text>
+  <text class="ub-label" x="140" y="252">GPS</text>
+  <text class="ub-label" x="340" y="132">match</text>
+  <text class="ub-label" x="340" y="248">update</text>
+  <text class="ub-label" x="565" y="100">ETA</text>
+  <text class="ub-label" x="558" y="280">supply/demand</text>
+  <text class="ub-label" x="468" y="200">nearby?</text>
 </svg>`,
   },
 
@@ -135,43 +135,43 @@ export const UBER: SDProblem = {
       explanation: `Finding nearby drivers efficiently is the core challenge. We use a GeoHash-based approach: the world is divided into a grid of cells at multiple resolutions. Each driver's GPS coordinate is hashed into a cell ID, and we store active driver IDs per cell in Redis (GEOADD). When a rider requests a ride, we compute their GeoHash, then search the same cell plus neighboring cells (to handle boundary effects) using GEOSEARCH with a radius. This gives us O(1) per cell lookup. An alternative is a QuadTree, which adaptively subdivides busy areas into finer cells — NYC might have cells of 100m while rural Kansas has cells of 10km. Redis GeoHash is simpler and works well up to ~5M active drivers; beyond that, a custom in-memory QuadTree with sharding by region is more efficient.`,
       svgDiagram: `<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg">
   <style>
-    text { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; }
-    .cell { fill: none; stroke: #1e2230; stroke-width: 1; }
-    .active { fill: #a78bfa; fill-opacity: 0.15; stroke: #a78bfa; stroke-width: 2; }
-    .driver { fill: #a78bfa; }
-    .rider { fill: #ff4d6d; }
-    .label { font-size: 10px; fill: #8b8fa3; }
-    .title { font-size: 12px; fill: #a78bfa; font-weight: bold; }
+    .ub2-text { font-family: 'Space Mono', monospace; font-size: 12px; fill: #e8eaf0; }
+    .ub2-cell { fill: none; stroke: #2e3446; stroke-width: 1; }
+    .ub2-active { fill: #a78bfa; fill-opacity: 0.15; stroke: #a78bfa; stroke-width: 2; }
+    .ub2-driver { fill: #a78bfa; }
+    .ub2-rider { fill: #ff4d6d; }
+    .ub2-label { font-size: 10px; fill: #8b8fa3; }
+    .ub2-title { font-size: 12px; fill: #a78bfa; font-weight: bold; }
   </style>
-  <text class="title" x="200" y="25">GeoHash Grid — Nearby Search</text>
+  <text class="ub2-title" x="200" y="25">GeoHash Grid — Nearby Search</text>
   <!-- Grid 6x6 -->
-  <rect class="cell" x="100" y="40" width="60" height="60" />
-  <rect class="cell" x="160" y="40" width="60" height="60" />
-  <rect class="cell" x="220" y="40" width="60" height="60" />
-  <rect class="cell" x="280" y="40" width="60" height="60" />
-  <rect class="cell" x="100" y="100" width="60" height="60" />
-  <rect class="active" x="160" y="100" width="60" height="60" />
-  <rect class="active" x="220" y="100" width="60" height="60" />
-  <rect class="active" x="280" y="100" width="60" height="60" />
-  <rect class="cell" x="100" y="160" width="60" height="60" />
-  <rect class="active" x="160" y="160" width="60" height="60" />
-  <rect class="active" x="220" y="160" width="60" height="60" />
-  <rect class="active" x="280" y="160" width="60" height="60" />
+  <rect class="ub2-cell" x="100" y="40" width="60" height="60" />
+  <rect class="ub2-cell" x="160" y="40" width="60" height="60" />
+  <rect class="ub2-cell" x="220" y="40" width="60" height="60" />
+  <rect class="ub2-cell" x="280" y="40" width="60" height="60" />
+  <rect class="ub2-cell" x="100" y="100" width="60" height="60" />
+  <rect class="ub2-active" x="160" y="100" width="60" height="60" />
+  <rect class="ub2-active" x="220" y="100" width="60" height="60" />
+  <rect class="ub2-active" x="280" y="100" width="60" height="60" />
+  <rect class="ub2-cell" x="100" y="160" width="60" height="60" />
+  <rect class="ub2-active" x="160" y="160" width="60" height="60" />
+  <rect class="ub2-active" x="220" y="160" width="60" height="60" />
+  <rect class="ub2-active" x="280" y="160" width="60" height="60" />
   <!-- Rider -->
-  <circle class="rider" cx="230" cy="140" r="8" />
-  <text x="245" y="145" fill="#ff4d6d" font-size="10">Rider</text>
+  <circle class="ub2-rider" cx="230" cy="140" r="8" />
+  <text class="ub-text" x="245" y="145" fill="#ff4d6d" font-size="10">Rider</text>
   <!-- Drivers -->
-  <circle class="driver" cx="180" cy="120" r="5" />
-  <circle class="driver" cx="260" cy="110" r="5" />
-  <circle class="driver" cx="300" cy="180" r="5" />
-  <circle class="driver" cx="190" cy="190" r="5" />
-  <circle class="driver" cx="140" cy="80" r="5" />
+  <circle class="ub2-driver" cx="180" cy="120" r="5" />
+  <circle class="ub2-driver" cx="260" cy="110" r="5" />
+  <circle class="ub2-driver" cx="300" cy="180" r="5" />
+  <circle class="ub2-driver" cx="190" cy="190" r="5" />
+  <circle class="ub2-driver" cx="140" cy="80" r="5" />
   <!-- Legend -->
-  <text class="label" x="420" y="80">Purple cells = search area</text>
-  <text class="label" x="420" y="100">Purple dots = available drivers</text>
-  <text class="label" x="420" y="120">Red dot = rider location</text>
-  <text class="label" x="420" y="160">Search: rider's cell + 8 neighbors</text>
-  <text class="label" x="420" y="180">Then rank by ETA, not distance</text>
+  <text class="ub-label" x="420" y="80">Purple cells = search area</text>
+  <text class="ub-label" x="420" y="100">Purple dots = available drivers</text>
+  <text class="ub-label" x="420" y="120">Red dot = rider location</text>
+  <text class="ub-label" x="420" y="160">Search: rider's cell + 8 neighbors</text>
+  <text class="ub-label" x="420" y="180">Then rank by ETA, not distance</text>
 </svg>`,
     },
     {
@@ -194,49 +194,49 @@ export const UBER: SDProblem = {
       title: 'Rider Requests a Ride',
       description: 'The rider opens the app, enters a destination, and taps "Request Ride." The request includes pickup coordinates, destination, and ride type (UberX, XL, etc.) and is sent via WebSocket to the backend.',
       svgHighlight: `<rect x="18" y="78" width="104" height="59" fill="none" stroke="#a78bfa" stroke-width="3" rx="12" opacity="0.9" />
-<text x="70" y="155" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">1. Ride request</text>`,
+<text class="ub-text" x="70" y="155" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">1. Ride request</text>`,
     },
     {
       stepNumber: 2,
       title: 'Matching Engine Queries Nearby Drivers',
       description: 'The Matching Engine receives the request and queries the Location Service for all available drivers within a 3km radius of the pickup point using GeoHash-based search.',
       svgHighlight: `<line x1="460" y1="135" x2="460" y2="260" stroke="#a78bfa" stroke-width="4" fill="none" opacity="0.9" />
-<text x="505" y="200" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">2. Find nearby</text>`,
+<text class="ub-text" x="505" y="200" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">2. Find nearby</text>`,
     },
     {
       stepNumber: 3,
       title: 'ETA Calculation & Driver Ranking',
       description: 'For each candidate driver, the ETA Service calculates real driving time using the road network and current traffic. Drivers are ranked by a weighted score of ETA, rating, and acceptance rate.',
       svgHighlight: `<rect x="608" y="78" width="134" height="59" fill="none" stroke="#a78bfa" stroke-width="3" rx="12" opacity="0.9" />
-<text x="675" y="155" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">3. Compute ETAs</text>`,
+<text class="ub-text" x="675" y="155" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">3. Compute ETAs</text>`,
     },
     {
       stepNumber: 4,
       title: 'Driver Receives Match Notification',
       description: 'The top-ranked driver gets a push notification with ride details (pickup location, rider rating, estimated fare). They have 15 seconds to accept. If they decline, the next driver is offered.',
       svgHighlight: `<rect x="18" y="258" width="104" height="59" fill="none" stroke="#a78bfa" stroke-width="3" rx="12" opacity="0.9" />
-<text x="70" y="340" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">4. Match notification</text>`,
+<text class="ub-text" x="70" y="340" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">4. Match notification</text>`,
     },
     {
       stepNumber: 5,
       title: 'Trip Created — Live Tracking Begins',
       description: 'Once the driver accepts, the Trip Service creates a trip record and both rider and driver enter a live tracking session. Driver GPS updates stream through WebSocket to the rider\'s map in real time.',
       svgHighlight: `<rect x="608" y="168" width="134" height="59" fill="none" stroke="#a78bfa" stroke-width="3" rx="12" opacity="0.9" />
-<text x="675" y="248" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">5. Trip created</text>`,
+<text class="ub-text" x="675" y="248" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">5. Trip created</text>`,
     },
     {
       stepNumber: 6,
       title: 'Driver Arrives & Trip In Progress',
       description: 'The driver arrives at the pickup point (detected by GPS proximity). The rider confirms pickup, and the trip transitions to "in-progress." The app now shows navigation to the destination with live ETA updates.',
       svgHighlight: `<rect x="188" y="158" width="134" height="59" fill="none" stroke="#a78bfa" stroke-width="3" rx="12" opacity="0.9" />
-<text x="255" y="240" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">6. Live tracking via WS</text>`,
+<text class="ub-text" x="255" y="240" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#a78bfa">6. Live tracking via WS</text>`,
     },
     {
       stepNumber: 7,
       title: 'Trip Completed — Payment Processed',
       description: 'At the destination, the driver ends the trip. The Trip Service calculates the final fare (base + distance + time + surge), charges the rider\'s payment method, and credits the driver. Both can rate each other.',
       svgHighlight: `<rect x="608" y="168" width="134" height="59" fill="none" stroke="#00e676" stroke-width="3" rx="12" opacity="0.9" />
-<text x="675" y="248" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#00e676">7. Fare calculated + paid</text>`,
+<text class="ub-text" x="675" y="248" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#00e676">7. Fare calculated + paid</text>`,
     },
   ],
 

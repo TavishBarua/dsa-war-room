@@ -75,13 +75,13 @@ export const TICKETMASTER: SDProblem = {
     dataFlow: 'Browsing: Client fetches seat maps from CDN and availability from Redis. Booking: User enters the virtual queue, gets admitted, selects seats, Reservation Service acquires distributed locks (10-min TTL hold), user completes payment, Reservation Service confirms and writes to PostgreSQL, e-ticket sent via Notification Service.',
     svgDiagram: `<svg viewBox="0 0 820 370" fill="none" xmlns="http://www.w3.org/2000/svg">
       <style>
-        .node { fill: #111318; stroke: #1e2230; stroke-width: 1.5; rx: 8; }
-        .node-accent { fill: #111318; stroke: #ffd600; stroke-width: 1.5; stroke-opacity: 0.5; rx: 8; }
-        .label { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; text-anchor: middle; }
-        .sub { font-family: 'Space Mono', monospace; font-size: 8px; fill: #5a5f70; text-anchor: middle; }
-        .arrow { stroke: #ffd600; stroke-width: 1.5; marker-end: url(#ahY); }
+        .tm-node { fill: #1a1e2a; stroke: #2e3446; stroke-width: 1.5; rx: 8; }
+        .tm-node-accent { fill: #1a1e2a; stroke: #ffd600; stroke-width: 1.5; stroke-opacity: 0.8; rx: 8; }
+        .tm-label { font-family: 'Space Mono', monospace; font-size: 12px; fill: #e8eaf0; text-anchor: middle; }
+        .tm-sub { font-family: 'Space Mono', monospace; font-size: 10px; fill: #5a5f70; text-anchor: middle; }
+        .tm-arrow { stroke: #ffd600; stroke-width: 1.5; marker-end: url(#ahY); }
         @keyframes flowY { 0% { stroke-dashoffset: 20; } 100% { stroke-dashoffset: 0; } }
-        .flow { stroke-dasharray: 10 10; animation: flowY 1s linear infinite; }
+        .tm-flow { stroke-dasharray: 10 10; animation: flowY 1s linear infinite; }
       </style>
       <defs>
         <marker id="ahY" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -90,59 +90,59 @@ export const TICKETMASTER: SDProblem = {
       </defs>
 
       <!-- Users -->
-      <rect class="node" x="10" y="145" width="90" height="50"/>
-      <text class="label" x="55" y="170">Users</text>
-      <text class="sub" x="55" y="185">10M+</text>
+      <rect class="tm-node" x="10" y="145" width="90" height="50"/>
+      <text class="tm-label" x="55" y="170">Users</text>
+      <text class="tm-sub" x="55" y="185">10M+</text>
 
       <!-- Queue -->
-      <rect class="node-accent" x="140" y="145" width="110" height="50"/>
-      <text class="label" x="195" y="167" fill="#ffd600">Wait Queue</text>
-      <text class="sub" x="195" y="182">fairness</text>
+      <rect class="tm-node-accent" x="140" y="145" width="110" height="50"/>
+      <text class="tm-label" x="195" y="167" fill="#ffd600">Wait Queue</text>
+      <text class="tm-sub" x="195" y="182">fairness</text>
 
       <!-- Seat Availability -->
-      <rect class="node" x="300" y="60" width="130" height="50"/>
-      <text class="label" x="365" y="83">Seat Avail.</text>
-      <text class="sub" x="365" y="98">Redis bitmap</text>
+      <rect class="tm-node" x="300" y="60" width="130" height="50"/>
+      <text class="tm-label" x="365" y="83">Seat Avail.</text>
+      <text class="tm-sub" x="365" y="98">Redis bitmap</text>
 
       <!-- Reservation Service -->
-      <rect class="node-accent" x="300" y="145" width="130" height="50"/>
-      <text class="label" x="365" y="168">Reservation</text>
-      <text class="sub" x="365" y="183">dist. locks</text>
+      <rect class="tm-node-accent" x="300" y="145" width="130" height="50"/>
+      <text class="tm-label" x="365" y="168">Reservation</text>
+      <text class="tm-sub" x="365" y="183">dist. locks</text>
 
       <!-- Payment -->
-      <rect class="node" x="300" y="240" width="130" height="50"/>
-      <text class="label" x="365" y="263">Payment Svc</text>
-      <text class="sub" x="365" y="278">Stripe</text>
+      <rect class="tm-node" x="300" y="240" width="130" height="50"/>
+      <text class="tm-label" x="365" y="263">Payment Svc</text>
+      <text class="tm-sub" x="365" y="278">Stripe</text>
 
       <!-- Redis Locks -->
-      <rect class="node" x="490" y="100" width="110" height="50"/>
-      <text class="label" x="545" y="123">Redis</text>
-      <text class="sub" x="545" y="138">locks + seats</text>
+      <rect class="tm-node" x="490" y="100" width="110" height="50"/>
+      <text class="tm-label" x="545" y="123">Redis</text>
+      <text class="tm-sub" x="545" y="138">locks + seats</text>
 
       <!-- PostgreSQL -->
-      <rect class="node" x="490" y="190" width="110" height="50"/>
-      <text class="label" x="545" y="213">PostgreSQL</text>
-      <text class="sub" x="545" y="228">bookings</text>
+      <rect class="tm-node" x="490" y="190" width="110" height="50"/>
+      <text class="tm-label" x="545" y="213">PostgreSQL</text>
+      <text class="tm-sub" x="545" y="228">bookings</text>
 
       <!-- Notification -->
-      <rect class="node" x="660" y="145" width="120" height="50"/>
-      <text class="label" x="720" y="168">Notify Svc</text>
-      <text class="sub" x="720" y="183">email/SMS</text>
+      <rect class="tm-node" x="660" y="145" width="120" height="50"/>
+      <text class="tm-label" x="720" y="168">Notify Svc</text>
+      <text class="tm-sub" x="720" y="183">email/SMS</text>
 
       <!-- CDN -->
-      <rect class="node" x="140" y="60" width="110" height="50"/>
-      <text class="label" x="195" y="83">CDN</text>
-      <text class="sub" x="195" y="98">seat maps</text>
+      <rect class="tm-node" x="140" y="60" width="110" height="50"/>
+      <text class="tm-label" x="195" y="83">CDN</text>
+      <text class="tm-sub" x="195" y="98">seat maps</text>
 
       <!-- Arrows -->
-      <line class="arrow flow" x1="100" y1="160" x2="135" y2="160"/>
-      <line class="arrow flow" x1="100" y1="155" x2="135" y2="90"/>
-      <line class="arrow flow" x1="250" y1="170" x2="295" y2="170"/>
-      <line class="arrow flow" x1="250" y1="85" x2="295" y2="85"/>
-      <line class="arrow flow" x1="430" y1="170" x2="485" y2="130"/>
-      <line class="arrow flow" x1="430" y1="175" x2="485" y2="210"/>
-      <line class="arrow flow" x1="365" y1="195" x2="365" y2="235"/>
-      <line class="arrow flow" x1="600" y1="210" x2="655" y2="175"/>
+      <line class="tm-arrow tm-flow" x1="100" y1="160" x2="135" y2="160"/>
+      <line class="tm-arrow tm-flow" x1="100" y1="155" x2="135" y2="90"/>
+      <line class="tm-arrow tm-flow" x1="250" y1="170" x2="295" y2="170"/>
+      <line class="tm-arrow tm-flow" x1="250" y1="85" x2="295" y2="85"/>
+      <line class="tm-arrow tm-flow" x1="430" y1="170" x2="485" y2="130"/>
+      <line class="tm-arrow tm-flow" x1="430" y1="175" x2="485" y2="210"/>
+      <line class="tm-arrow tm-flow" x1="365" y1="195" x2="365" y2="235"/>
+      <line class="tm-arrow tm-flow" x1="600" y1="210" x2="655" y2="175"/>
     </svg>`,
   },
 

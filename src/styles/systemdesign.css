@@ -491,10 +491,10 @@
 
 /* ===== SD ARCHITECTURE DIAGRAM ===== */
 .sd-diagram {
-  background: var(--bg2);
+  background: #0c0e14;
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 24px;
+  border-radius: 6px;
+  padding: 32px;
   margin-bottom: 20px;
   overflow-x: auto;
 }
@@ -503,6 +503,26 @@
   width: 100%;
   height: auto;
   display: block;
+  min-height: 200px;
+}
+
+/* ===== SVG READABILITY OVERRIDES ===== */
+/* These ensure SVG text and nodes are always readable,
+   overriding any inline <style> conflicts between multiple SVGs */
+
+.sd-diagram svg text,
+.sd-walk-diagram svg text {
+  font-family: 'Space Mono', monospace !important;
+  paint-order: stroke;
+  stroke: #0c0e14;
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sd-diagram svg rect,
+.sd-walk-diagram svg rect {
+  rx: 8;
 }
 
 .sd-components-list {

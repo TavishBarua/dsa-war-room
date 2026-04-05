@@ -70,13 +70,13 @@ export const WHATSAPP: SDProblem = {
     dataFlow: 'Online delivery: Sender\'s Chat Gateway receives the message via WebSocket, Message Service looks up recipient in Connection Registry, forwards to recipient\'s Chat Gateway, which pushes it over WebSocket. Offline delivery: If recipient is not in Connection Registry, message is persisted to Cassandra. When recipient reconnects, their Chat Gateway pulls all pending messages from the Message Store and delivers them.',
     svgDiagram: `<svg viewBox="0 0 820 380" fill="none" xmlns="http://www.w3.org/2000/svg">
       <style>
-        .node { fill: #111318; stroke: #1e2230; stroke-width: 1.5; rx: 8; }
-        .node-accent { fill: #111318; stroke: #25D366; stroke-width: 1.5; stroke-opacity: 0.5; rx: 8; }
-        .label { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; text-anchor: middle; }
-        .sub { font-family: 'Space Mono', monospace; font-size: 8px; fill: #5a5f70; text-anchor: middle; }
-        .arrow { stroke: #25D366; stroke-width: 1.5; marker-end: url(#ahWA); }
+        .wa-node { fill: #1a1e2a; stroke: #2e3446; stroke-width: 1.5; rx: 8; }
+        .wa-node-accent { fill: #1a1e2a; stroke: #25D366; stroke-width: 1.5; stroke-opacity: 0.8; rx: 8; }
+        .wa-label { font-family: 'Space Mono', monospace; font-size: 12px; fill: #e8eaf0; text-anchor: middle; }
+        .wa-sub { font-family: 'Space Mono', monospace; font-size: 10px; fill: #5a5f70; text-anchor: middle; }
+        .wa-arrow { stroke: #25D366; stroke-width: 1.5; marker-end: url(#ahWA); }
         @keyframes flowWA { 0% { stroke-dashoffset: 20; } 100% { stroke-dashoffset: 0; } }
-        .flow { stroke-dasharray: 10 10; animation: flowWA 1s linear infinite; }
+        .wa-flow { stroke-dasharray: 10 10; animation: flowWA 1s linear infinite; }
       </style>
       <defs>
         <marker id="ahWA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -85,65 +85,65 @@ export const WHATSAPP: SDProblem = {
       </defs>
 
       <!-- Sender -->
-      <rect class="node" x="10" y="140" width="100" height="50"/>
-      <text class="label" x="60" y="163">Sender</text>
-      <text class="sub" x="60" y="178">Alice</text>
+      <rect class="wa-node" x="10" y="140" width="100" height="50"/>
+      <text class="wa-label" x="60" y="163">Sender</text>
+      <text class="wa-sub" x="60" y="178">Alice</text>
 
       <!-- Chat Gateway A -->
-      <rect class="node-accent" x="160" y="140" width="120" height="50"/>
-      <text class="label" x="220" y="163">Chat GW A</text>
-      <text class="sub" x="220" y="178">WebSocket</text>
+      <rect class="wa-node-accent" x="160" y="140" width="120" height="50"/>
+      <text class="wa-label" x="220" y="163">Chat GW A</text>
+      <text class="wa-sub" x="220" y="178">WebSocket</text>
 
       <!-- Message Service -->
-      <rect class="node" x="340" y="140" width="130" height="50"/>
-      <text class="label" x="405" y="163">Message Svc</text>
-      <text class="sub" x="405" y="178">route + queue</text>
+      <rect class="wa-node" x="340" y="140" width="130" height="50"/>
+      <text class="wa-label" x="405" y="163">Message Svc</text>
+      <text class="wa-sub" x="405" y="178">route + queue</text>
 
       <!-- Connection Registry -->
-      <rect class="node" x="340" y="55" width="130" height="50"/>
-      <text class="label" x="405" y="78">Conn Registry</text>
-      <text class="sub" x="405" y="93">Redis: user→GW</text>
+      <rect class="wa-node" x="340" y="55" width="130" height="50"/>
+      <text class="wa-label" x="405" y="78">Conn Registry</text>
+      <text class="wa-sub" x="405" y="93">Redis: user→GW</text>
 
       <!-- Chat Gateway B -->
-      <rect class="node-accent" x="530" y="140" width="120" height="50"/>
-      <text class="label" x="590" y="163">Chat GW B</text>
-      <text class="sub" x="590" y="178">WebSocket</text>
+      <rect class="wa-node-accent" x="530" y="140" width="120" height="50"/>
+      <text class="wa-label" x="590" y="163">Chat GW B</text>
+      <text class="wa-sub" x="590" y="178">WebSocket</text>
 
       <!-- Recipient -->
-      <rect class="node" x="700" y="140" width="100" height="50"/>
-      <text class="label" x="750" y="163">Recipient</text>
-      <text class="sub" x="750" y="178">Bob</text>
+      <rect class="wa-node" x="700" y="140" width="100" height="50"/>
+      <text class="wa-label" x="750" y="163">Recipient</text>
+      <text class="wa-sub" x="750" y="178">Bob</text>
 
       <!-- Message Store -->
-      <rect class="node" x="340" y="240" width="130" height="50"/>
-      <text class="label" x="405" y="263">Msg Store</text>
-      <text class="sub" x="405" y="278">Cassandra</text>
+      <rect class="wa-node" x="340" y="240" width="130" height="50"/>
+      <text class="wa-label" x="405" y="263">Msg Store</text>
+      <text class="wa-sub" x="405" y="278">Cassandra</text>
 
       <!-- Group Service -->
-      <rect class="node" x="530" y="240" width="120" height="50"/>
-      <text class="label" x="590" y="263">Group Svc</text>
-      <text class="sub" x="590" y="278">fan-out</text>
+      <rect class="wa-node" x="530" y="240" width="120" height="50"/>
+      <text class="wa-label" x="590" y="263">Group Svc</text>
+      <text class="wa-sub" x="590" y="278">fan-out</text>
 
       <!-- Presence -->
-      <rect class="node" x="160" y="55" width="120" height="50"/>
-      <text class="label" x="220" y="78">Presence</text>
-      <text class="sub" x="220" y="93">online/offline</text>
+      <rect class="wa-node" x="160" y="55" width="120" height="50"/>
+      <text class="wa-label" x="220" y="78">Presence</text>
+      <text class="wa-sub" x="220" y="93">online/offline</text>
 
       <!-- Arrows: Online path -->
-      <line class="arrow flow" x1="110" y1="165" x2="155" y2="165"/>
-      <line class="arrow flow" x1="280" y1="165" x2="335" y2="165"/>
-      <line class="arrow flow" x1="405" y1="140" x2="405" y2="110"/>
-      <line class="arrow flow" x1="470" y1="165" x2="525" y2="165"/>
-      <line class="arrow flow" x1="650" y1="165" x2="695" y2="165"/>
+      <line class="wa-arrow wa-flow" x1="110" y1="165" x2="155" y2="165"/>
+      <line class="wa-arrow wa-flow" x1="280" y1="165" x2="335" y2="165"/>
+      <line class="wa-arrow wa-flow" x1="405" y1="140" x2="405" y2="110"/>
+      <line class="wa-arrow wa-flow" x1="470" y1="165" x2="525" y2="165"/>
+      <line class="wa-arrow wa-flow" x1="650" y1="165" x2="695" y2="165"/>
 
       <!-- Arrows: Offline path -->
-      <line class="arrow flow" x1="405" y1="190" x2="405" y2="235"/>
+      <line class="wa-arrow wa-flow" x1="405" y1="190" x2="405" y2="235"/>
 
       <!-- Arrows: Group -->
-      <line class="arrow flow" x1="470" y1="175" x2="525" y2="255"/>
+      <line class="wa-arrow wa-flow" x1="470" y1="175" x2="525" y2="255"/>
 
       <!-- Arrows: Presence -->
-      <line class="arrow flow" x1="220" y1="140" x2="220" y2="110"/>
+      <line class="wa-arrow wa-flow" x1="220" y1="140" x2="220" y2="110"/>
     </svg>`,
   },
 

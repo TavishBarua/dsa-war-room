@@ -70,13 +70,13 @@ export const URL_SHORTENER: SDProblem = {
     dataFlow: 'Write path: Client sends long URL to API, which generates a Base62 key and writes to DB. Read path: Client hits short URL, Redirect Service checks Redis cache first, falls back to DB, then issues a 301/302 redirect and publishes a click event to Kafka.',
     svgDiagram: `<svg viewBox="0 0 800 350" fill="none" xmlns="http://www.w3.org/2000/svg">
       <style>
-        .node { fill: #111318; stroke: #1e2230; stroke-width: 1.5; rx: 8; }
-        .node-accent { fill: #111318; stroke: #00ff88; stroke-width: 1.5; stroke-opacity: 0.5; rx: 8; }
-        .label { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; text-anchor: middle; }
-        .sub { font-family: 'Space Mono', monospace; font-size: 8px; fill: #5a5f70; text-anchor: middle; }
-        .arrow { stroke: #00ff88; stroke-width: 1.5; marker-end: url(#ahG); }
+        .us-node { fill: #1a1e2a; stroke: #2e3446; stroke-width: 1.5; rx: 8; }
+        .us-node-accent { fill: #1a1e2a; stroke: #00ff88; stroke-width: 1.5; stroke-opacity: 0.8; rx: 8; }
+        .us-label { font-family: 'Space Mono', monospace; font-size: 12px; fill: #e8eaf0; text-anchor: middle; }
+        .us-sub { font-family: 'Space Mono', monospace; font-size: 10px; fill: #5a5f70; text-anchor: middle; }
+        .us-arrow { stroke: #00ff88; stroke-width: 1.5; marker-end: url(#ahG); }
         @keyframes flowG { 0% { stroke-dashoffset: 20; } 100% { stroke-dashoffset: 0; } }
-        .flow { stroke-dasharray: 10 10; animation: flowG 1s linear infinite; }
+        .us-flow { stroke-dasharray: 10 10; animation: flowG 1s linear infinite; }
       </style>
       <defs>
         <marker id="ahG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -85,51 +85,51 @@ export const URL_SHORTENER: SDProblem = {
       </defs>
 
       <!-- Client -->
-      <rect class="node" x="10" y="140" width="100" height="50"/>
-      <text class="label" x="60" y="170">Client</text>
+      <rect class="us-node" x="10" y="140" width="100" height="50"/>
+      <text class="us-label" x="60" y="170">Client</text>
 
       <!-- LB -->
-      <rect class="node-accent" x="160" y="140" width="100" height="50"/>
-      <text class="label" x="210" y="165">Load</text>
-      <text class="label" x="210" y="180">Balancer</text>
+      <rect class="us-node-accent" x="160" y="140" width="100" height="50"/>
+      <text class="us-label" x="210" y="165">Load</text>
+      <text class="us-label" x="210" y="180">Balancer</text>
 
       <!-- API / Redirect -->
-      <rect class="node" x="310" y="80" width="130" height="50"/>
-      <text class="label" x="375" y="105">Shorten API</text>
-      <text class="sub" x="375" y="120">write path</text>
+      <rect class="us-node" x="310" y="80" width="130" height="50"/>
+      <text class="us-label" x="375" y="105">Shorten API</text>
+      <text class="us-sub" x="375" y="120">write path</text>
 
-      <rect class="node" x="310" y="200" width="130" height="50"/>
-      <text class="label" x="375" y="225">Redirect Svc</text>
-      <text class="sub" x="375" y="240">read path</text>
+      <rect class="us-node" x="310" y="200" width="130" height="50"/>
+      <text class="us-label" x="375" y="225">Redirect Svc</text>
+      <text class="us-sub" x="375" y="240">read path</text>
 
       <!-- Cache -->
-      <rect class="node-accent" x="500" y="200" width="100" height="50"/>
-      <text class="label" x="550" y="225" fill="#00ff88">Redis</text>
-      <text class="sub" x="550" y="240">cache</text>
+      <rect class="us-node-accent" x="500" y="200" width="100" height="50"/>
+      <text class="us-label" x="550" y="225" fill="#00ff88">Redis</text>
+      <text class="us-sub" x="550" y="240">cache</text>
 
       <!-- DB -->
-      <rect class="node" x="660" y="140" width="120" height="50"/>
-      <text class="label" x="720" y="165">DynamoDB</text>
-      <text class="sub" x="720" y="180">sharded</text>
+      <rect class="us-node" x="660" y="140" width="120" height="50"/>
+      <text class="us-label" x="720" y="165">DynamoDB</text>
+      <text class="us-sub" x="720" y="180">sharded</text>
 
       <!-- Analytics -->
-      <rect class="node" x="500" y="60" width="100" height="50"/>
-      <text class="label" x="550" y="85">Kafka</text>
-      <text class="sub" x="550" y="100">click events</text>
+      <rect class="us-node" x="500" y="60" width="100" height="50"/>
+      <text class="us-label" x="550" y="85">Kafka</text>
+      <text class="us-sub" x="550" y="100">click events</text>
 
-      <rect class="node" x="660" y="60" width="120" height="50"/>
-      <text class="label" x="720" y="85">Analytics</text>
-      <text class="sub" x="720" y="100">ClickHouse</text>
+      <rect class="us-node" x="660" y="60" width="120" height="50"/>
+      <text class="us-label" x="720" y="85">Analytics</text>
+      <text class="us-sub" x="720" y="100">ClickHouse</text>
 
       <!-- Arrows -->
-      <line class="arrow flow" x1="110" y1="165" x2="155" y2="165"/>
-      <line class="arrow flow" x1="260" y1="155" x2="305" y2="110"/>
-      <line class="arrow flow" x1="260" y1="175" x2="305" y2="225"/>
-      <line class="arrow flow" x1="440" y1="105" x2="655" y2="160"/>
-      <line class="arrow flow" x1="440" y1="225" x2="495" y2="225"/>
-      <line class="arrow flow" x1="600" y1="225" x2="655" y2="175"/>
-      <line class="arrow flow" x1="440" y1="215" x2="495" y2="90"/>
-      <line class="arrow flow" x1="600" y1="85" x2="655" y2="85"/>
+      <line class="us-arrow us-flow" x1="110" y1="165" x2="155" y2="165"/>
+      <line class="us-arrow us-flow" x1="260" y1="155" x2="305" y2="110"/>
+      <line class="us-arrow us-flow" x1="260" y1="175" x2="305" y2="225"/>
+      <line class="us-arrow us-flow" x1="440" y1="105" x2="655" y2="160"/>
+      <line class="us-arrow us-flow" x1="440" y1="225" x2="495" y2="225"/>
+      <line class="us-arrow us-flow" x1="600" y1="225" x2="655" y2="175"/>
+      <line class="us-arrow us-flow" x1="440" y1="215" x2="495" y2="90"/>
+      <line class="us-arrow us-flow" x1="600" y1="85" x2="655" y2="85"/>
     </svg>`,
   },
 

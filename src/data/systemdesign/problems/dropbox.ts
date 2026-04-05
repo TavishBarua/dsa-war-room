@@ -70,13 +70,13 @@ export const DROPBOX: SDProblem = {
     dataFlow: 'Upload: Client chunks the file, hashes each chunk, asks Metadata Service which chunks are new, uploads new chunks directly to S3 via presigned URLs, then confirms to Metadata Service. Download: Client receives a change notification, fetches the new chunk manifest from Metadata Service, downloads only missing chunks from S3, and reconstructs the file locally.',
     svgDiagram: `<svg viewBox="0 0 800 370" fill="none" xmlns="http://www.w3.org/2000/svg">
       <style>
-        .node { fill: #111318; stroke: #1e2230; stroke-width: 1.5; rx: 8; }
-        .node-accent { fill: #111318; stroke: #00cfff; stroke-width: 1.5; stroke-opacity: 0.5; rx: 8; }
-        .label { font-family: 'Space Mono', monospace; font-size: 11px; fill: #e8eaf0; text-anchor: middle; }
-        .sub { font-family: 'Space Mono', monospace; font-size: 8px; fill: #5a5f70; text-anchor: middle; }
-        .arrow { stroke: #00cfff; stroke-width: 1.5; marker-end: url(#ahB); }
+        .db-node { fill: #1a1e2a; stroke: #2e3446; stroke-width: 1.5; rx: 8; }
+        .db-node-accent { fill: #1a1e2a; stroke: #00cfff; stroke-width: 1.5; stroke-opacity: 0.8; rx: 8; }
+        .db-label { font-family: 'Space Mono', monospace; font-size: 12px; fill: #e8eaf0; text-anchor: middle; }
+        .db-sub { font-family: 'Space Mono', monospace; font-size: 10px; fill: #5a5f70; text-anchor: middle; }
+        .db-arrow { stroke: #00cfff; stroke-width: 1.5; marker-end: url(#ahB); }
         @keyframes flowB { 0% { stroke-dashoffset: 20; } 100% { stroke-dashoffset: 0; } }
-        .flow { stroke-dasharray: 10 10; animation: flowB 1s linear infinite; }
+        .db-flow { stroke-dasharray: 10 10; animation: flowB 1s linear infinite; }
       </style>
       <defs>
         <marker id="ahB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -85,57 +85,57 @@ export const DROPBOX: SDProblem = {
       </defs>
 
       <!-- Client -->
-      <rect class="node" x="10" y="140" width="110" height="55"/>
-      <text class="label" x="65" y="165">Client App</text>
-      <text class="sub" x="65" y="180">file watcher</text>
+      <rect class="db-node" x="10" y="140" width="110" height="55"/>
+      <text class="db-label" x="65" y="165">Client App</text>
+      <text class="db-sub" x="65" y="180">file watcher</text>
 
       <!-- API Gateway -->
-      <rect class="node-accent" x="170" y="140" width="100" height="55"/>
-      <text class="label" x="220" y="165">API</text>
-      <text class="label" x="220" y="180">Gateway</text>
+      <rect class="db-node-accent" x="170" y="140" width="100" height="55"/>
+      <text class="db-label" x="220" y="165">API</text>
+      <text class="db-label" x="220" y="180">Gateway</text>
 
       <!-- Metadata Service -->
-      <rect class="node" x="320" y="60" width="140" height="55"/>
-      <text class="label" x="390" y="85">Metadata Svc</text>
-      <text class="sub" x="390" y="100">versions, chunks</text>
+      <rect class="db-node" x="320" y="60" width="140" height="55"/>
+      <text class="db-label" x="390" y="85">Metadata Svc</text>
+      <text class="db-sub" x="390" y="100">versions, chunks</text>
 
       <!-- Metadata DB -->
-      <rect class="node" x="520" y="60" width="110" height="55"/>
-      <text class="label" x="575" y="85">PostgreSQL</text>
-      <text class="sub" x="575" y="100">metadata</text>
+      <rect class="db-node" x="520" y="60" width="110" height="55"/>
+      <text class="db-label" x="575" y="85">PostgreSQL</text>
+      <text class="db-sub" x="575" y="100">metadata</text>
 
       <!-- S3 -->
-      <rect class="node-accent" x="320" y="220" width="140" height="55"/>
-      <text class="label" x="390" y="245" fill="#00cfff">S3 Blob Store</text>
-      <text class="sub" x="390" y="260">chunks</text>
+      <rect class="db-node-accent" x="320" y="220" width="140" height="55"/>
+      <text class="db-label" x="390" y="245" fill="#00cfff">S3 Blob Store</text>
+      <text class="db-sub" x="390" y="260">chunks</text>
 
       <!-- Sync Service -->
-      <rect class="node" x="320" y="140" width="140" height="55"/>
-      <text class="label" x="390" y="165">Sync Service</text>
-      <text class="sub" x="390" y="180">WebSocket push</text>
+      <rect class="db-node" x="320" y="140" width="140" height="55"/>
+      <text class="db-label" x="390" y="165">Sync Service</text>
+      <text class="db-sub" x="390" y="180">WebSocket push</text>
 
       <!-- Queue -->
-      <rect class="node" x="520" y="220" width="110" height="55"/>
-      <text class="label" x="575" y="245">Kafka</text>
-      <text class="sub" x="575" y="260">async tasks</text>
+      <rect class="db-node" x="520" y="220" width="110" height="55"/>
+      <text class="db-label" x="575" y="245">Kafka</text>
+      <text class="db-sub" x="575" y="260">async tasks</text>
 
       <!-- Redis PubSub -->
-      <rect class="node" x="520" y="140" width="110" height="55"/>
-      <text class="label" x="575" y="165">Redis</text>
-      <text class="sub" x="575" y="180">pub/sub</text>
+      <rect class="db-node" x="520" y="140" width="110" height="55"/>
+      <text class="db-label" x="575" y="165">Redis</text>
+      <text class="db-sub" x="575" y="180">pub/sub</text>
 
       <!-- Arrows -->
-      <line class="arrow flow" x1="120" y1="167" x2="165" y2="167"/>
-      <line class="arrow flow" x1="270" y1="150" x2="315" y2="90"/>
-      <line class="arrow flow" x1="270" y1="167" x2="315" y2="167"/>
-      <line class="arrow flow" x1="270" y1="185" x2="315" y2="240"/>
-      <line class="arrow flow" x1="460" y1="87" x2="515" y2="87"/>
-      <line class="arrow flow" x1="460" y1="167" x2="515" y2="167"/>
-      <line class="arrow flow" x1="460" y1="247" x2="515" y2="247"/>
+      <line class="db-arrow db-flow" x1="120" y1="167" x2="165" y2="167"/>
+      <line class="db-arrow db-flow" x1="270" y1="150" x2="315" y2="90"/>
+      <line class="db-arrow db-flow" x1="270" y1="167" x2="315" y2="167"/>
+      <line class="db-arrow db-flow" x1="270" y1="185" x2="315" y2="240"/>
+      <line class="db-arrow db-flow" x1="460" y1="87" x2="515" y2="87"/>
+      <line class="db-arrow db-flow" x1="460" y1="167" x2="515" y2="167"/>
+      <line class="db-arrow db-flow" x1="460" y1="247" x2="515" y2="247"/>
 
       <!-- Direct upload arrow from Client to S3 -->
-      <path class="arrow flow" d="M65,195 Q65,310 315,255" fill="none"/>
-      <text class="sub" x="140" y="300">presigned URL upload</text>
+      <path class="db-arrow db-flow" d="M65,195 Q65,310 315,255" fill="none"/>
+      <text class="db-sub" x="140" y="300">presigned URL upload</text>
     </svg>`,
   },
 
