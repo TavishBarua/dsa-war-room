@@ -622,7 +622,30 @@ export const DNA_PATTERNS: DnaPattern[] = [
         char_set.add(s[right])
         max_len = <span class="fn">max</span>(max_len, right - left + <span class="nm">1</span>)
 
-    <span class="kw">return</span> max_len`,
+    <span class="kw">return</span> max_len
+
+<span class="cm"># ─── EXAMPLE 2: Longest Repeating Character Replacement ───</span>
+<span class="cm"># Input: s="AABABBA", k=1  Output: 4 ("AABA")</span>
+<span class="cm"># TRICK: Keep most frequent char, replace rest. Valid if (size - maxFreq) ≤ k</span>
+
+<span class="kw">def</span> <span class="fn">characterReplacement</span>(s, k):
+    count = {}
+    max_freq = <span class="nm">0</span>
+    left = <span class="nm">0</span>
+    result = <span class="nm">0</span>
+
+    <span class="kw">for</span> right <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s)):
+        count[s[right]] = count.get(s[right], <span class="nm">0</span>) + <span class="nm">1</span>
+        max_freq = <span class="fn">max</span>(max_freq, count[s[right]])
+
+        <span class="cm"># If (window_size - max_freq) &gt; k: too many replacements needed</span>
+        <span class="kw">while</span> (right - left + <span class="nm">1</span>) - max_freq &gt; k:
+            count[s[left]] -= <span class="nm">1</span>
+            left += <span class="nm">1</span>
+
+        result = <span class="fn">max</span>(result, right - left + <span class="nm">1</span>)
+
+    <span class="kw">return</span> result`,
       csharp: `<span class="cm">// SLIDING WINDOW TEMPLATE — O(n)</span>
 
 <span class="kw">public</span> <span class="tp">int</span> <span class="fn">SlidingWindowTemplate</span>(<span class="tp">int</span>[] arr, <span class="tp">int</span> k) {
@@ -645,6 +668,25 @@ export const DNA_PATTERNS: DnaPattern[] = [
         maxLen = Math.Max(maxLen, right - left + <span class="nm">1</span>);
     }
     <span class="kw">return</span> maxLen;
+}
+
+<span class="cm">// ─── Example 2: Longest Repeating Character Replacement ───</span>
+<span class="cm">// Input: s="AABABBA", k=1  Output: 4 ("AABA")</span>
+<span class="cm">// TRICK: Keep most frequent char, replace rest. Valid if (size - maxFreq) ≤ k</span>
+
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">CharacterReplacement</span>(<span class="tp">string</span> s, <span class="tp">int</span> k) {
+    <span class="tp">int</span>[] count = <span class="kw">new</span> <span class="tp">int</span>[<span class="nm">26</span>];
+    <span class="tp">int</span> maxFreq = <span class="nm">0</span>, left = <span class="nm">0</span>, result = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> right = <span class="nm">0</span>; right &lt; s.Length; right++) {
+        count[s[right] - <span class="st">'A'</span>]++;
+        maxFreq = Math.Max(maxFreq, count[s[right] - <span class="st">'A'</span>]);
+        <span class="kw">while</span> ((right - left + <span class="nm">1</span>) - maxFreq &gt; k) {
+            count[s[left] - <span class="st">'A'</span>]--;
+            left++;
+        }
+        result = Math.Max(result, right - left + <span class="nm">1</span>);
+    }
+    <span class="kw">return</span> result;
 }`,
       java: `<span class="cm">// ═══════════════════════════════</span>
 <span class="cm">// SLIDING WINDOW — THE TEMPLATE</span>
@@ -690,6 +732,31 @@ export const DNA_PATTERNS: DnaPattern[] = [
         maxLen = Math.max(maxLen, right - left + <span class="nm">1</span>);
     }
     <span class="kw">return</span> maxLen;
+}
+
+<span class="cm">// ─── EXAMPLE 2: Longest Repeating Character Replacement ───</span>
+<span class="cm">// Input: s="AABABBA", k=1  Output: 4 ("AABA")</span>
+<span class="cm">// TRICK: Keep most frequent char, replace rest. Valid if (size - maxFreq) ≤ k</span>
+
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">characterReplacement</span>(<span class="tp">String</span> s, <span class="tp">int</span> k) {
+    <span class="tp">int</span>[] count = <span class="kw">new</span> <span class="tp">int</span>[<span class="nm">26</span>];  <span class="cm">// frequency array for A-Z</span>
+    <span class="tp">int</span> maxFreq = <span class="nm">0</span>, left = <span class="nm">0</span>, result = <span class="nm">0</span>;
+
+    <span class="kw">for</span> (<span class="tp">int</span> right = <span class="nm">0</span>; right &lt; s.length(); right++) {
+        <span class="cm">// EXPAND: Add right char and track max frequency</span>
+        count[s.charAt(right) - <span class="st">'A'</span>]++;
+        maxFreq = Math.max(maxFreq, count[s.charAt(right) - <span class="st">'A'</span>]);
+
+        <span class="cm">// SHRINK: If (window_size - maxFreq) &gt; k → too many replacements</span>
+        <span class="kw">while</span> ((right - left + <span class="nm">1</span>) - maxFreq &gt; k) {
+            count[s.charAt(left) - <span class="st">'A'</span>]--;
+            left++;
+        }
+
+        <span class="cm">// UPDATE: Track max valid window size</span>
+        result = Math.max(result, right - left + <span class="nm">1</span>);
+    }
+    <span class="kw">return</span> result;
 }`
     },
     memoryHack: {
