@@ -739,7 +739,36 @@ export const DNA_PATTERNS: DnaPattern[] = [
       ],
       variations: [
         { name: 'Longest Unique Substring', desc: 'Grow right, shrink left on duplicate, track max window size', problem: 'Longest Substring Without Repeating (#3)' },
-        { name: 'Longest Repeating Character Replacement', desc: 'Track max frequency; valid when (window_size - max_freq) ≤ k', problem: 'Longest Repeating Character Replacement (#424)' },
+        {
+          name: 'Longest Repeating Character Replacement',
+          desc: `🎯 THE TRICK: Track max_frequency in window. Window is VALID when (window_size - max_freq) ≤ k.
+
+WHY? In any window, you want to KEEP the most frequent character and REPLACE everything else. If you need to replace more than k characters, shrink the window.
+
+FORMULA: replacements_needed = (right - left + 1) - max_freq
+• If replacements_needed ≤ k → window is VALID ✅
+• If replacements_needed > k → SHRINK from left ❌
+
+EXAMPLE: s="AABABBA", k=1
+Window [AABA]: size=4, maxFreq('A')=3 → need 4-3=1 replacement ✅
+Window [AABAB]: size=5, maxFreq('A')=3 → need 5-3=2 replacements ❌ (shrink!)
+
+CODE PATTERN:
+int[] count = new int[26];
+int maxFreq = 0, left = 0, result = 0;
+for (int right = 0; right < s.length(); right++) {
+    count[s.charAt(right) - 'A']++;
+    maxFreq = Math.max(maxFreq, count[s.charAt(right) - 'A']);
+
+    // If invalid window: too many replacements needed
+    while ((right - left + 1) - maxFreq > k) {
+        count[s.charAt(left) - 'A']--;
+        left++;
+    }
+    result = Math.max(result, right - left + 1);
+}`,
+          problem: 'Longest Repeating Character Replacement (#424)'
+        },
         { name: 'Minimum Window Substring', desc: 'Expand to satisfy all chars, then shrink to minimize', problem: 'Minimum Window Substring (#76)' },
         { name: 'Best Time to Buy/Sell', desc: 'Track min price (left) while scanning for max profit', problem: 'Best Time to Buy and Sell Stock (#121)' }
       ],
