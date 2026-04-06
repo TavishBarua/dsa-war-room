@@ -89,8 +89,8 @@ export const PROBLEM_DESCRIPTIONS: Record<string, { desc: string; examples: stri
   },
 
   'Longest Repeating Character Replacement': {
-    desc: 'Given a string s and integer k, find the length of the longest substring with the same letter after replacing at most k characters.',
-    examples: 'Input: s = "AABABBA", k = 1\nOutput: 4  ("AABA" -> "AAAA")'
+    desc: 'Given a string s and integer k, find the length of the longest substring with the same letter after replacing at most k characters.\n\n🎯 TRICK: Track max frequency in window. Valid when (window_size - max_freq) ≤ k. Why? Keep the most frequent char, replace everything else.',
+    examples: 'Input: s = "AABABBA", k = 1\nOutput: 4  ("AABA" -> "AAAA")\n\nWindow [AABA]: size=4, maxFreq(A)=3, need 4-3=1 replacement ✅'
   },
 
   'Permutation in String': {

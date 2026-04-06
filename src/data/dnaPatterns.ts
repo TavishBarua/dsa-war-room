@@ -739,6 +739,7 @@ export const DNA_PATTERNS: DnaPattern[] = [
       ],
       variations: [
         { name: 'Longest Unique Substring', desc: 'Grow right, shrink left on duplicate, track max window size', problem: 'Longest Substring Without Repeating (#3)' },
+        { name: 'Longest Repeating Character Replacement', desc: 'Track max frequency; valid when (window_size - max_freq) ≤ k', problem: 'Longest Repeating Character Replacement (#424)' },
         { name: 'Minimum Window Substring', desc: 'Expand to satisfy all chars, then shrink to minimize', problem: 'Minimum Window Substring (#76)' },
         { name: 'Best Time to Buy/Sell', desc: 'Track min price (left) while scanning for max profit', problem: 'Best Time to Buy and Sell Stock (#121)' }
       ],
