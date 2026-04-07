@@ -645,7 +645,88 @@ export const DNA_PATTERNS: DnaPattern[] = [
 
         result = <span class="fn">max</span>(result, right - left + <span class="nm">1</span>)
 
-    <span class="kw">return</span> result`,
+    <span class="kw">return</span> result
+
+<span class="cm"># ─── EXAMPLE 3: Permutation in String (#567) ───</span>
+<span class="cm"># Input: s1="ab", s2="eidbaooo"  Output: True ("ba" is permutation)</span>
+<span class="cm"># TRICK: FIXED window size = len(s1). Compare frequency maps at each position.</span>
+
+<span class="kw">def</span> <span class="fn">checkInclusion</span>(s1, s2):
+    <span class="kw">if</span> <span class="fn">len</span>(s1) &gt; <span class="fn">len</span>(s2):
+        <span class="kw">return False</span>
+
+    <span class="cm"># Count target frequency (s1)</span>
+    s1_count = {}
+    <span class="kw">for</span> char <span class="kw">in</span> s1:
+        s1_count[char] = s1_count.get(char, <span class="nm">0</span>) + <span class="nm">1</span>
+
+    <span class="cm"># Build first window of size len(s1)</span>
+    window_count = {}
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s1)):
+        char = s2[i]
+        window_count[char] = window_count.get(char, <span class="nm">0</span>) + <span class="nm">1</span>
+
+    <span class="kw">if</span> window_count == s1_count:
+        <span class="kw">return True</span>
+
+    <span class="cm"># Slide window: add right, remove left</span>
+    <span class="kw">for</span> right <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s1), <span class="fn">len</span>(s2)):
+        window_count[s2[right]] = window_count.get(s2[right], <span class="nm">0</span>) + <span class="nm">1</span>
+
+        left = right - <span class="fn">len</span>(s1)
+        window_count[s2[left]] -= <span class="nm">1</span>
+        <span class="kw">if</span> window_count[s2[left]] == <span class="nm">0</span>:
+            <span class="kw">del</span> window_count[s2[left]]
+
+        <span class="kw">if</span> window_count == s1_count:
+            <span class="kw">return True</span>
+
+    <span class="kw">return False</span>
+
+<span class="cm"># ─── EXAMPLE 4: Minimum Window Substring (#76) ───</span>
+<span class="cm"># Input: s="ADOBECODEBANC", t="ABC"  Output: "BANC"</span>
+<span class="cm"># TRICK: Expand to satisfy all chars in t, then SHRINK to minimize window.</span>
+
+<span class="kw">def</span> <span class="fn">minWindow</span>(s, t):
+    <span class="kw">if not</span> t <span class="kw">or not</span> s:
+        <span class="kw">return</span> <span class="st">""</span>
+
+    <span class="cm"># Count chars in t (target)</span>
+    t_count = {}
+    <span class="kw">for</span> char <span class="kw">in</span> t:
+        t_count[char] = t_count.get(char, <span class="nm">0</span>) + <span class="nm">1</span>
+
+    required = <span class="fn">len</span>(t_count)  <span class="cm"># unique chars we need</span>
+    formed = <span class="nm">0</span>  <span class="cm"># unique chars currently satisfied</span>
+
+    window_count = {}
+    left = <span class="nm">0</span>
+    min_len = <span class="fn">float</span>(<span class="st">'inf'</span>)
+    result = (<span class="nm">0</span>, <span class="nm">0</span>)
+
+    <span class="kw">for</span> right <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s)):
+        <span class="cm"># EXPAND: Add right char</span>
+        char = s[right]
+        window_count[char] = window_count.get(char, <span class="nm">0</span>) + <span class="nm">1</span>
+
+        <span class="kw">if</span> char <span class="kw">in</span> t_count <span class="kw">and</span> window_count[char] == t_count[char]:
+            formed += <span class="nm">1</span>
+
+        <span class="cm"># SHRINK: When all chars satisfied, try to minimize</span>
+        <span class="kw">while</span> left &lt;= right <span class="kw">and</span> formed == required:
+            <span class="cm"># Update result if smaller</span>
+            <span class="kw">if</span> right - left + <span class="nm">1</span> &lt; min_len:
+                min_len = right - left + <span class="nm">1</span>
+                result = (left, right)
+
+            <span class="cm"># Remove left char and shrink</span>
+            char = s[left]
+            window_count[char] -= <span class="nm">1</span>
+            <span class="kw">if</span> char <span class="kw">in</span> t_count <span class="kw">and</span> window_count[char] &lt; t_count[char]:
+                formed -= <span class="nm">1</span>
+            left += <span class="nm">1</span>
+
+    <span class="kw">return</span> <span class="st">""</span> <span class="kw">if</span> min_len == <span class="fn">float</span>(<span class="st">'inf'</span>) <span class="kw">else</span> s[result[<span class="nm">0</span>]:result[<span class="nm">1</span>] + <span class="nm">1</span>]`,
       csharp: `<span class="cm">// SLIDING WINDOW TEMPLATE — O(n)</span>
 
 <span class="kw">public</span> <span class="tp">int</span> <span class="fn">SlidingWindowTemplate</span>(<span class="tp">int</span>[] arr, <span class="tp">int</span> k) {
@@ -687,6 +768,84 @@ export const DNA_PATTERNS: DnaPattern[] = [
         result = Math.Max(result, right - left + <span class="nm">1</span>);
     }
     <span class="kw">return</span> result;
+}
+
+<span class="cm">// ─── Example 3: Permutation in String (#567) ───</span>
+<span class="cm">// Input: s1="ab", s2="eidbaooo"  Output: true ("ba" is permutation)</span>
+<span class="cm">// TRICK: FIXED window size = s1.Length. Compare frequency maps at each position.</span>
+
+<span class="kw">public</span> <span class="tp">bool</span> <span class="fn">CheckInclusion</span>(<span class="tp">string</span> s1, <span class="tp">string</span> s2) {
+    <span class="kw">if</span> (s1.Length &gt; s2.Length) <span class="kw">return false</span>;
+
+    <span class="cm">// Count target frequency (s1)</span>
+    <span class="kw">var</span> s1Count = <span class="kw">new</span> <span class="tp">Dictionary</span>&lt;<span class="tp">char</span>, <span class="tp">int</span>&gt;();
+    <span class="kw">foreach</span> (<span class="tp">char</span> c <span class="kw">in</span> s1) {
+        s1Count[c] = s1Count.GetValueOrDefault(c, <span class="nm">0</span>) + <span class="nm">1</span>;
+    }
+
+    <span class="cm">// Build first window</span>
+    <span class="kw">var</span> windowCount = <span class="kw">new</span> <span class="tp">Dictionary</span>&lt;<span class="tp">char</span>, <span class="tp">int</span>&gt;();
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; s1.Length; i++) {
+        windowCount[s2[i]] = windowCount.GetValueOrDefault(s2[i], <span class="nm">0</span>) + <span class="nm">1</span>;
+    }
+
+    <span class="kw">if</span> (DictEquals(windowCount, s1Count)) <span class="kw">return true</span>;
+
+    <span class="cm">// Slide window</span>
+    <span class="kw">for</span> (<span class="tp">int</span> right = s1.Length; right &lt; s2.Length; right++) {
+        windowCount[s2[right]] = windowCount.GetValueOrDefault(s2[right], <span class="nm">0</span>) + <span class="nm">1</span>;
+        <span class="tp">int</span> left = right - s1.Length;
+        windowCount[s2[left]]--;
+        <span class="kw">if</span> (windowCount[s2[left]] == <span class="nm">0</span>) windowCount.Remove(s2[left]);
+        <span class="kw">if</span> (DictEquals(windowCount, s1Count)) <span class="kw">return true</span>;
+    }
+    <span class="kw">return false</span>;
+}
+
+<span class="cm">// ─── Example 4: Minimum Window Substring (#76) ───</span>
+<span class="cm">// Input: s="ADOBECODEBANC", t="ABC"  Output: "BANC"</span>
+<span class="cm">// TRICK: Expand to satisfy all chars in t, then SHRINK to minimize window.</span>
+
+<span class="kw">public</span> <span class="tp">string</span> <span class="fn">MinWindow</span>(<span class="tp">string</span> s, <span class="tp">string</span> t) {
+    <span class="kw">if</span> (<span class="tp">string</span>.IsNullOrEmpty(t) || <span class="tp">string</span>.IsNullOrEmpty(s)) <span class="kw">return</span> <span class="st">""</span>;
+
+    <span class="cm">// Count chars in t</span>
+    <span class="kw">var</span> tCount = <span class="kw">new</span> <span class="tp">Dictionary</span>&lt;<span class="tp">char</span>, <span class="tp">int</span>&gt;();
+    <span class="kw">foreach</span> (<span class="tp">char</span> c <span class="kw">in</span> t) {
+        tCount[c] = tCount.GetValueOrDefault(c, <span class="nm">0</span>) + <span class="nm">1</span>;
+    }
+
+    <span class="tp">int</span> required = tCount.Count;
+    <span class="tp">int</span> formed = <span class="nm">0</span>;
+    <span class="kw">var</span> windowCount = <span class="kw">new</span> <span class="tp">Dictionary</span>&lt;<span class="tp">char</span>, <span class="tp">int</span>&gt;();
+    <span class="tp">int</span> left = <span class="nm">0</span>, minLen = <span class="tp">int</span>.MaxValue;
+    <span class="tp">int</span> resultLeft = <span class="nm">0</span>, resultRight = <span class="nm">0</span>;
+
+    <span class="kw">for</span> (<span class="tp">int</span> right = <span class="nm">0</span>; right &lt; s.Length; right++) {
+        <span class="tp">char</span> c = s[right];
+        windowCount[c] = windowCount.GetValueOrDefault(c, <span class="nm">0</span>) + <span class="nm">1</span>;
+
+        <span class="kw">if</span> (tCount.ContainsKey(c) &amp;&amp; windowCount[c] == tCount[c]) {
+            formed++;
+        }
+
+        <span class="kw">while</span> (left &lt;= right &amp;&amp; formed == required) {
+            <span class="kw">if</span> (right - left + <span class="nm">1</span> &lt; minLen) {
+                minLen = right - left + <span class="nm">1</span>;
+                resultLeft = left;
+                resultRight = right;
+            }
+
+            <span class="tp">char</span> leftChar = s[left];
+            windowCount[leftChar]--;
+            <span class="kw">if</span> (tCount.ContainsKey(leftChar) &amp;&amp; windowCount[leftChar] &lt; tCount[leftChar]) {
+                formed--;
+            }
+            left++;
+        }
+    }
+
+    <span class="kw">return</span> minLen == <span class="tp">int</span>.MaxValue ? <span class="st">""</span> : s.Substring(resultLeft, minLen);
 }`,
       java: `<span class="cm">// ═══════════════════════════════</span>
 <span class="cm">// SLIDING WINDOW — THE TEMPLATE</span>
@@ -757,6 +916,99 @@ export const DNA_PATTERNS: DnaPattern[] = [
         result = Math.max(result, right - left + <span class="nm">1</span>);
     }
     <span class="kw">return</span> result;
+}
+
+<span class="cm">// ─── EXAMPLE 3: Permutation in String (#567) ───</span>
+<span class="cm">// Input: s1="ab", s2="eidbaooo"  Output: true ("ba" is permutation)</span>
+<span class="cm">// TRICK: FIXED window size = s1.length(). Compare frequency maps at each position.</span>
+
+<span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">checkInclusion</span>(<span class="tp">String</span> s1, <span class="tp">String</span> s2) {
+    <span class="kw">if</span> (s1.length() &gt; s2.length()) <span class="kw">return false</span>;
+
+    <span class="cm">// Count target frequency (s1)</span>
+    <span class="tp">Map</span>&lt;<span class="tp">Character</span>, <span class="tp">Integer</span>&gt; s1Count = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">char</span> c : s1.toCharArray()) {
+        s1Count.put(c, s1Count.getOrDefault(c, <span class="nm">0</span>) + <span class="nm">1</span>);
+    }
+
+    <span class="cm">// Build first window of size s1.length()</span>
+    <span class="tp">Map</span>&lt;<span class="tp">Character</span>, <span class="tp">Integer</span>&gt; windowCount = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; s1.length(); i++) {
+        <span class="tp">char</span> c = s2.charAt(i);
+        windowCount.put(c, windowCount.getOrDefault(c, <span class="nm">0</span>) + <span class="nm">1</span>);
+    }
+
+    <span class="kw">if</span> (windowCount.equals(s1Count)) <span class="kw">return true</span>;
+
+    <span class="cm">// Slide window: add right, remove left</span>
+    <span class="kw">for</span> (<span class="tp">int</span> right = s1.length(); right &lt; s2.length(); right++) {
+        <span class="cm">// ADD right char</span>
+        <span class="tp">char</span> rightChar = s2.charAt(right);
+        windowCount.put(rightChar, windowCount.getOrDefault(rightChar, <span class="nm">0</span>) + <span class="nm">1</span>);
+
+        <span class="cm">// REMOVE left char</span>
+        <span class="tp">int</span> left = right - s1.length();
+        <span class="tp">char</span> leftChar = s2.charAt(left);
+        windowCount.put(leftChar, windowCount.get(leftChar) - <span class="nm">1</span>);
+        <span class="kw">if</span> (windowCount.get(leftChar) == <span class="nm">0</span>) {
+            windowCount.remove(leftChar);
+        }
+
+        <span class="kw">if</span> (windowCount.equals(s1Count)) <span class="kw">return true</span>;
+    }
+
+    <span class="kw">return false</span>;
+}
+
+<span class="cm">// ─── EXAMPLE 4: Minimum Window Substring (#76) ───</span>
+<span class="cm">// Input: s="ADOBECODEBANC", t="ABC"  Output: "BANC"</span>
+<span class="cm">// TRICK: Expand to satisfy all chars in t, then SHRINK to minimize window.</span>
+
+<span class="kw">public</span> <span class="tp">String</span> <span class="fn">minWindow</span>(<span class="tp">String</span> s, <span class="tp">String</span> t) {
+    <span class="kw">if</span> (t.isEmpty() || s.isEmpty()) <span class="kw">return</span> <span class="st">""</span>;
+
+    <span class="cm">// Count chars in t (target)</span>
+    <span class="tp">Map</span>&lt;<span class="tp">Character</span>, <span class="tp">Integer</span>&gt; tCount = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">char</span> c : t.toCharArray()) {
+        tCount.put(c, tCount.getOrDefault(c, <span class="nm">0</span>) + <span class="nm">1</span>);
+    }
+
+    <span class="tp">int</span> required = tCount.size();  <span class="cm">// unique chars we need</span>
+    <span class="tp">int</span> formed = <span class="nm">0</span>;  <span class="cm">// unique chars currently satisfied</span>
+
+    <span class="tp">Map</span>&lt;<span class="tp">Character</span>, <span class="tp">Integer</span>&gt; windowCount = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+    <span class="tp">int</span> left = <span class="nm">0</span>, minLen = Integer.MAX_VALUE;
+    <span class="tp">int</span> resultLeft = <span class="nm">0</span>, resultRight = <span class="nm">0</span>;
+
+    <span class="kw">for</span> (<span class="tp">int</span> right = <span class="nm">0</span>; right &lt; s.length(); right++) {
+        <span class="cm">// EXPAND: Add right char</span>
+        <span class="tp">char</span> c = s.charAt(right);
+        windowCount.put(c, windowCount.getOrDefault(c, <span class="nm">0</span>) + <span class="nm">1</span>);
+
+        <span class="kw">if</span> (tCount.containsKey(c) &amp;&amp; windowCount.get(c).intValue() == tCount.get(c).intValue()) {
+            formed++;
+        }
+
+        <span class="cm">// SHRINK: When all chars satisfied, try to minimize</span>
+        <span class="kw">while</span> (left &lt;= right &amp;&amp; formed == required) {
+            <span class="cm">// Update result if smaller</span>
+            <span class="kw">if</span> (right - left + <span class="nm">1</span> &lt; minLen) {
+                minLen = right - left + <span class="nm">1</span>;
+                resultLeft = left;
+                resultRight = right;
+            }
+
+            <span class="cm">// Remove left char and shrink</span>
+            <span class="tp">char</span> leftChar = s.charAt(left);
+            windowCount.put(leftChar, windowCount.get(leftChar) - <span class="nm">1</span>);
+            <span class="kw">if</span> (tCount.containsKey(leftChar) &amp;&amp; windowCount.get(leftChar) &lt; tCount.get(leftChar)) {
+                formed--;
+            }
+            left++;
+        }
+    }
+
+    <span class="kw">return</span> minLen == Integer.MAX_VALUE ? <span class="st">""</span> : s.substring(resultLeft, resultRight + <span class="nm">1</span>);
 }`
     },
     memoryHack: {
