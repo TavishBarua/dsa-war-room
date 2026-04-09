@@ -572,7 +572,7 @@ export const DNA_PATTERNS: DnaPattern[] = [
     icon: '🪟', name: 'Sliding Window', accent: '#a78bfa',
     tagline: 'A subarray/substring that moves forward',
     hook: "Imagine a train with exactly 3 windows. As the train moves forward, the back window closes and a new front window opens. The 'view' (your subarray) always has 3 windows, but you see new scenery each time. You never have to go BACK to look — just keep sliding forward. That's why it's O(n) instead of checking every possible group!",
-    svg: `<svg viewBox="0 0 600 280" style="max-height:280px;width:100%"><style>@keyframes sw-slide{0%,15%{x:65}25%,40%{x:125}50%,65%{x:185}75%,90%{x:245}100%{x:65}} @keyframes sw-sum{0%,15%{opacity:1}16%,24%{opacity:0}25%,40%{opacity:1}41%,49%{opacity:0}50%,65%{opacity:1}66%,74%{opacity:0}75%,90%{opacity:1}91%,100%{opacity:0}}</style><rect width="600" height="280" fill="#0e1018" rx="8"/><text x="300" y="28" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Sliding Window: Max sum of size k=3</text><text x="300" y="48" fill="#4a5268" text-anchor="middle" font-size="11" font-family="monospace">Array: [2, 1, 5, 1, 3, 2]</text><rect x="75" y="65" width="50" height="45" fill="#1a1d2e" stroke="#1e2230" rx="4"/><text x="100" y="93" fill="#e8eaf0" text-anchor="middle" font-size="18">2</text><rect x="135" y="65" width="50" height="45" fill="#1a1d2e" stroke="#1e2230" rx="4"/><text x="160" y="93" fill="#e8eaf0" text-anchor="middle" font-size="18">1</text><rect x="195" y="65" width="50" height="45" fill="#1a1d2e" stroke="#1e2230" rx="4"/><text x="220" y="93" fill="#e8eaf0" text-anchor="middle" font-size="18">5</text><rect x="255" y="65" width="50" height="45" fill="#1a1d2e" stroke="#1e2230" rx="4"/><text x="280" y="93" fill="#e8eaf0" text-anchor="middle" font-size="18">1</text><rect x="315" y="65" width="50" height="45" fill="#1a1d2e" stroke="#1e2230" rx="4"/><text x="340" y="93" fill="#e8eaf0" text-anchor="middle" font-size="18">3</text><rect x="375" y="65" width="50" height="45" fill="#1a1d2e" stroke="#1e2230" rx="4"/><text x="400" y="93" fill="#e8eaf0" text-anchor="middle" font-size="18">2</text><rect style="animation:sw-slide 6s ease-in-out infinite" y="60" width="170" height="55" fill="none" stroke="#a78bfa" stroke-width="3" rx="8"/><rect x="50" y="140" width="500" height="120" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="300" y="165" fill="#a78bfa" text-anchor="middle" font-size="13" font-weight="bold" font-family="monospace">Window slides → add right, remove left</text><text x="70" y="190" fill="#00ff88" font-size="12" font-family="monospace">Window [2,1,5] → sum=8</text><text x="70" y="210" fill="#ffd600" font-size="12" font-family="monospace">Window [1,5,1] → sum=7  (removed 2, added 1)</text><text x="70" y="230" fill="#00cfff" font-size="12" font-family="monospace">Window [5,1,3] → sum=9  ← MAX! ✓</text><text x="70" y="250" fill="#a78bfa" font-size="12" font-family="monospace">Window [1,3,2] → sum=6</text></svg>`,
+    svg: `<svg viewBox="0 0 700 420" style="max-height:420px;width:100%"><style>@keyframes sw-slide{0%,15%{x:65}25%,40%{x:125}50%,65%{x:185}75%,90%{x:245}100%{x:65}} @keyframes sw-expand{0%,100%{x:65;width:50}25%{x:65;width:110}50%{x:65;width:170}75%{x:125;width:110}}</style><rect width="700" height="420" fill="#0e1018" rx="8"/><text x="350" y="25" fill="#fff" text-anchor="middle" font-size="15" font-weight="bold" font-family="monospace">🎯 Two Types of Sliding Window</text><rect x="50" y="45" width="290" height="165" fill="#1a1d2e" stroke="#00ff88" stroke-width="2" rx="6"/><text x="195" y="68" fill="#00ff88" text-anchor="middle" font-size="13" font-weight="bold" font-family="monospace">📏 STATIC (Fixed Size)</text><text x="195" y="88" fill="#4a5268" text-anchor="middle" font-size="10" font-family="monospace">Array: [2,1,5,1,3,2]  k=3</text><rect x="75" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="92" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">2</text><rect x="115" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="132" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">1</text><rect x="155" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="172" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">5</text><rect x="195" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="212" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">1</text><rect x="235" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="252" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">3</text><rect x="275" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="292" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">2</text><rect style="animation:sw-slide 6s ease-in-out infinite" y="96" width="115" height="38" fill="none" stroke="#00ff88" stroke-width="2.5" rx="5"/><text x="195" y="153" fill="#00ff88" text-anchor="middle" font-size="11" font-family="monospace">Window size = CONSTANT (k=3)</text><text x="195" y="169" fill="#4a5268" text-anchor="middle" font-size="10" font-family="monospace">Slide: remove left, add right</text><text x="195" y="195" fill="#ffd600" text-anchor="middle" font-size="10" font-weight="bold" font-family="monospace">✅ "Max sum of K elements"</text><rect x="360" y="45" width="290" height="165" fill="#1a1d2e" stroke="#a78bfa" stroke-width="2" rx="6"/><text x="505" y="68" fill="#a78bfa" text-anchor="middle" font-size="13" font-weight="bold" font-family="monospace">🎢 DYNAMIC (Flexible Size)</text><text x="505" y="88" fill="#4a5268" text-anchor="middle" font-size="10" font-family="monospace">String: "abcabcbb"</text><rect x="385" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="402" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">a</text><rect x="425" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="442" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">b</text><rect x="465" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="482" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">c</text><rect x="505" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="522" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">a</text><rect x="545" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="562" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">b</text><rect x="585" y="100" width="35" height="30" fill="#1a1d2e" stroke="#1e2230" rx="3"/><text x="602" y="120" fill="#e8eaf0" text-anchor="middle" font-size="14">c</text><rect style="animation:sw-expand 8s ease-in-out infinite" y="96" width="115" height="38" fill="none" stroke="#a78bfa" stroke-width="2.5" rx="5"/><text x="505" y="153" fill="#a78bfa" text-anchor="middle" font-size="11" font-family="monospace">Window size = CHANGES (grows/shrinks)</text><text x="505" y="169" fill="#4a5268" text-anchor="middle" font-size="10" font-family="monospace">Expand right, shrink left conditionally</text><text x="505" y="195" fill="#ffd600" text-anchor="middle" font-size="10" font-weight="bold" font-family="monospace">✅ "Longest/Shortest substring..."</text><rect x="50" y="230" width="600" height="170" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="350" y="255" fill="#00cfff" text-anchor="middle" font-size="13" font-weight="bold" font-family="monospace">🔑 THE MASTER TRICK</text><rect x="80" y="270" width="260" height="110" fill="#0e1018" stroke="#00ff88" stroke-width="1.5" rx="4"/><text x="210" y="290" fill="#00ff88" text-anchor="middle" font-size="11" font-weight="bold" font-family="monospace">STATIC: Size K given</text><text x="210" y="310" fill="#e8eaf0" text-anchor="middle" font-size="10" font-family="monospace">if (right >= K-1) {</text><text x="210" y="326" fill="#e8eaf0" text-anchor="middle" font-size="10" font-family="monospace">  process(); // window complete</text><text x="210" y="342" fill="#e8eaf0" text-anchor="middle" font-size="10" font-family="monospace">  sum -= arr[left]; // remove</text><text x="210" y="358" fill="#e8eaf0" text-anchor="middle" font-size="10" font-family="monospace">  left++;</text><text x="210" y="374" fill="#e8eaf0" text-anchor="middle" font-size="10" font-family="monospace">}</text><rect x="360" y="270" width="260" height="110" fill="#0e1018" stroke="#a78bfa" stroke-width="1.5" rx="4"/><text x="490" y="290" fill="#a78bfa" text-anchor="middle" font-size="11" font-weight="bold" font-family="monospace">DYNAMIC: Flexible</text><text x="490" y="310" fill="#00ff88" text-anchor="middle" font-size="10" font-family="monospace">LONGEST: while(INVALID) left++</text><text x="490" y="326" fill="#ff4d6d" text-anchor="middle" font-size="10" font-family="monospace">SHORTEST: while(VALID) {</text><text x="490" y="342" fill="#ff4d6d" text-anchor="middle" font-size="10" font-family="monospace">  updateMin();</text><text x="490" y="358" fill="#ff4d6d" text-anchor="middle" font-size="10" font-family="monospace">  left++;</text><text x="490" y="374" fill="#ff4d6d" text-anchor="middle" font-size="10" font-family="monospace">}</text></svg>`,
     complexity: [
       {badge:'red', big:'O(n²)', label:'BRUTE FORCE', desc:'Check every possible subarray'},
       {badge:'green', big:'O(n)', label:'SLIDING WINDOW', desc:'Single pass, expand right, shrink left'}
@@ -1012,7 +1012,7 @@ export const DNA_PATTERNS: DnaPattern[] = [
 }`
     },
     memoryHack: {
-      oneSentence: 'Expand the window right to explore, shrink it left to restore the invariant, and track the best seen so far.',
+      oneSentence: '🎯 Two patterns: STATIC (fixed size K) slides like a ruler, DYNAMIC expands/shrinks—LONGEST removes when invalid, SHORTEST squeezes while valid.',
       flowchart: {
         nodes: [
           { id: 'start', label: 'Init L=0 seen={}', type: 'start', x: 290, y: 20 },
@@ -1057,7 +1057,233 @@ export const DNA_PATTERNS: DnaPattern[] = [
         { label: 'Step 5', art: 's="abcabcbb"  R=3  window=[b,c,a]   seen={b,c,a}   max=3', annotation: 'Add "a" back — window valid, still max=3' }
       ],
       variations: [
-        { name: 'Longest Unique Substring', desc: 'Grow right, shrink left on duplicate, track max window size', problem: 'Longest Substring Without Repeating (#3)' },
+        {
+          name: '📏 Pattern 1: STATIC Window (Fixed Size)',
+          desc: `🎯 THE GOLDEN RULE: Ask yourself - "Is the window size FIXED or FLEXIBLE?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔸 WHEN TO USE: Problem gives you a fixed size K
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ "Maximum sum of K elements"
+✅ "Average of subarrays size K"
+✅ "First negative in every window of size K"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 THE TRICK: Move 1 step → Remove LEFT, Add RIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Think of it like a FIXED-SIZE RULER sliding across the array:
+• Window size NEVER changes (always = K)
+• Slide forward: remove old left element, add new right element
+• Update answer when window is complete
+
+TEMPLATE:
+for (int right = 0; right < arr.length; right++) {
+    // 1. ADD the new element on RIGHT
+    windowSum += arr[right];
+
+    // 2. Check if window is complete (size = K)
+    if (right >= K - 1) {
+        // 3. Process current window (calculate answer)
+        maxSum = Math.max(maxSum, windowSum);
+
+        // 4. REMOVE the LEFT element before sliding
+        windowSum -= arr[right - K + 1];
+    }
+}
+
+📐 FORMULA: LEFT pointer = right - K + 1
+
+EXAMPLE: arr=[2,1,5,1,3,2], K=3
+Step 1: [2,1,5] → sum=8
+Step 2: [1,5,1] → sum=7 (removed 2, added 1)
+Step 3: [5,1,3] → sum=9 ← MAX!
+Step 4: [1,3,2] → sum=6`,
+          problem: 'Maximum Sum Subarray of Size K'
+        },
+        {
+          name: '🎢 Pattern 2A: DYNAMIC - LONGEST Window',
+          desc: `🎯 THE TRICK: EXPAND until INVALID → SHRINK until VALID
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔸 WHEN TO USE: Find the BIGGEST valid window
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ "LONGEST substring with K distinct chars"
+✅ "MAXIMUM consecutive 1s after flipping K 0s"
+✅ "Longest substring without repeating chars"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 THE MENTAL MODEL: The Greedy Accordion
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Think: "Keep expanding greedily. Only shrink when forced!"
+
+TEMPLATE:
+int left = 0, maxLength = 0;
+
+for (int right = 0; right < arr.length; right++) {
+    // 1. EXPAND: Add right element to window
+    addToWindow(arr[right]);
+
+    // 2. SHRINK: While window is INVALID, remove from left
+    while (windowIsINVALID()) {  // ❌ Bad? Fix it!
+        removeFromWindow(arr[left]);
+        left++;
+    }
+
+    // 3. UPDATE answer (window is valid now)
+    maxLength = Math.max(maxLength, right - left + 1);
+}
+
+🔑 KEY INSIGHT: Shrink ONLY when window becomes INVALID
+   (while INVALID) → make it valid again
+
+EXAMPLE: s="eceba", K=2 distinct chars allowed
+[e] → distinct=1 ✅
+[e,c] → distinct=2 ✅
+[e,c,e] → distinct=2 ✅
+[e,c,e,b] → distinct=3 ❌ TOO MANY! Shrink...
+[c,e,b] → distinct=3 ❌ Still bad...
+[e,b] → distinct=2 ✅ VALID! Answer=3 ("ece")`,
+          problem: 'Longest Substring with K Distinct Characters'
+        },
+        {
+          name: '🎯 Pattern 2B: DYNAMIC - SHORTEST Window',
+          desc: `🎯 THE TRICK: EXPAND until VALID → SHRINK while VALID
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔸 WHEN TO USE: Find the SMALLEST valid window
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ "SHORTEST substring containing all chars"
+✅ "MINIMUM window substring"
+✅ "Smallest subarray with sum ≥ K"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 THE MENTAL MODEL: Find Perfect Fit
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Think: "Expand to get valid, then squeeze to minimize!"
+
+TEMPLATE:
+int left = 0, minLength = Integer.MAX_VALUE;
+
+for (int right = 0; right < arr.length; right++) {
+    // 1. EXPAND: Add right element
+    addToWindow(arr[right]);
+
+    // 2. SHRINK: While window is VALID, try to minimize
+    while (windowIsVALID()) {  // ✅ Good? Make it smaller!
+        // Update answer BEFORE shrinking
+        minLength = Math.min(minLength, right - left + 1);
+
+        removeFromWindow(arr[left]);
+        left++;
+    }
+}
+
+🔑 KEY INSIGHT: Shrink while window is STILL VALID
+   (while VALID) → find the smallest valid window
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ THE MASTER TRICK TO REMEMBER:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LONGEST  → while (INVALID) shrink  // Remove bad stuff
+SHORTEST → while (VALID) shrink    // Keep good, minimize size`,
+          problem: 'Minimum Size Subarray Sum'
+        },
+        {
+          name: '🏆 Example: Minimum Window Substring (#76)',
+          desc: `🎯 YOUR CODE EXPLAINED: This is Pattern 2B - SHORTEST Window!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 PROBLEM: s="ADOBECODEBANC", t="ABC"
+Find the SMALLEST substring of s containing ALL chars of t
+Answer: "BANC"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧠 THE TRICK: Expand to satisfy all chars, then SHRINK to minimize
+
+STEP-BY-STEP WALKTHROUGH:
+
+1️⃣ SETUP - Count what we need:
+   tCount = {A:1, B:1, C:1}
+   required = 3 (we need 3 unique chars)
+   formed = 0 (how many we've satisfied)
+
+2️⃣ KEY VARIABLES:
+   • required = tCount.size()  // How many UNIQUE chars (3 for "ABC")
+   • formed = 0                // How many we've satisfied (0→1→2→3)
+
+   💡 When formed == required → "I have ALL the chars I need!"
+
+3️⃣ EXPAND Phase - Add right character:
+   char c = s.charAt(right);
+   windowCount.put(c, windowCount.getOrDefault(c, 0) + 1);
+
+   // If this char is now satisfied (count matches target)
+   if (tCount.containsKey(c) &&
+       windowCount.get(c).equals(tCount.get(c))) {
+       formed++;  // One more char type satisfied!
+   }
+
+4️⃣ SHRINK Phase - When window is VALID:
+   while (left <= right && formed == required) {
+       // Window is VALID! Try to make it SMALLER
+
+       // Save this as potential answer
+       if (right - left + 1 < minLen) {
+           minLen = right - left + 1;
+           resultLeft = left;
+           resultRight = right;
+       }
+
+       // Remove left char and move left pointer
+       char leftChar = s.charAt(left);
+       windowCount.put(leftChar, windowCount.get(leftChar) - 1);
+
+       // If removing this char breaks the condition
+       if (tCount.containsKey(leftChar) &&
+           windowCount.get(leftChar) < tCount.get(leftChar)) {
+           formed--;  // No longer satisfied
+       }
+       left++;
+   }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 ANIMATION IN YOUR MIND:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A D O B E C O D E B A N C
+↑ ↑ ↑ ↑ ↑ ↑
+L   formed=1 (have A)
+  R     formed=2 (have A,B)
+      R   formed=3 (have A,B,C) ✅ VALID!
+
+Now SHRINK to minimize:
+  D O B E C O D E B A N C
+  ↑         ↑
+  L         R   Still valid, keep shrinking...
+
+          E B A N C
+          ↑     ↑
+          L     R   "BANC" is the smallest!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 WHY THIS WORKS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• EXPAND: Keep adding until we have all required chars
+• SHRINK: Remove extras while keeping requirement satisfied
+• Each element enters (right++) and exits (left++) ONCE → O(n)
+
+🎓 REMEMBER: This is SHORTEST pattern because we:
+   while (VALID) → keep shrinking to find minimum`,
+          problem: 'Minimum Window Substring (#76)'
+        },
         {
           name: 'Longest Repeating Character Replacement',
           desc: `🎯 THE TRICK: Track max_frequency in window. Window is VALID when (window_size - max_freq) ≤ k.
@@ -1088,7 +1314,7 @@ for (int right = 0; right < s.length(); right++) {
 }`,
           problem: 'Longest Repeating Character Replacement (#424)'
         },
-        { name: 'Minimum Window Substring', desc: 'Expand to satisfy all chars, then shrink to minimize', problem: 'Minimum Window Substring (#76)' },
+        { name: 'Longest Unique Substring', desc: 'Grow right, shrink left on duplicate, track max window size', problem: 'Longest Substring Without Repeating (#3)' },
         { name: 'Best Time to Buy/Sell', desc: 'Track min price (left) while scanning for max profit', problem: 'Best Time to Buy and Sell Stock (#121)' }
       ],
       title: 'Sliding Window — Expand & Shrink',
