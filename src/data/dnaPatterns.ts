@@ -1058,339 +1058,220 @@ export const DNA_PATTERNS: DnaPattern[] = [
       ],
       variations: [
         {
-          name: '📏 Pattern 1: STATIC Window (Fixed Size)',
-          desc: `🎯 THE GOLDEN RULE: Ask yourself - "Is the window size FIXED or FLEXIBLE?"
+          name: '📏 STATIC Window',
+          desc: `THE GOLDEN RULE
+Ask: "Is window size FIXED or FLEXIBLE?"
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔸 WHEN TO USE: Problem gives you a fixed size K
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHEN TO USE
+• Problem gives you fixed size K
+• "Maximum sum of K elements"
+• "Average of subarrays size K"
 
-✅ "Maximum sum of K elements"
-✅ "Average of subarrays size K"
-✅ "First negative in every window of size K"
+THE TRICK
+Move 1 step → Remove LEFT, Add RIGHT
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧠 THE TRICK: Move 1 step → Remove LEFT, Add RIGHT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MENTAL MODEL
+Fixed-size ruler sliding across array:
+• Window size never changes (always K)
+• Slide: remove old left, add new right
+• Update answer when complete
 
-Think of it like a FIXED-SIZE RULER sliding across the array:
-• Window size NEVER changes (always = K)
-• Slide forward: remove old left element, add new right element
-• Update answer when window is complete
-
-TEMPLATE:
+TEMPLATE
 for (int right = 0; right < arr.length; right++) {
-    // 1. ADD the new element on RIGHT
     windowSum += arr[right];
 
-    // 2. Check if window is complete (size = K)
     if (right >= K - 1) {
-        // 3. Process current window (calculate answer)
         maxSum = Math.max(maxSum, windowSum);
-
-        // 4. REMOVE the LEFT element before sliding
         windowSum -= arr[right - K + 1];
     }
 }
 
-📐 FORMULA: LEFT pointer = right - K + 1
+KEY FORMULA
+LEFT = right - K + 1
 
-EXAMPLE: arr=[2,1,5,1,3,2], K=3
-Step 1: [2,1,5] → sum=8
-Step 2: [1,5,1] → sum=7 (removed 2, added 1)
-Step 3: [5,1,3] → sum=9 ← MAX!
-Step 4: [1,3,2] → sum=6`,
+EXAMPLE
+arr=[2,1,5,1,3,2], K=3
+[2,1,5] → sum=8
+[1,5,1] → sum=7
+[5,1,3] → sum=9 ← MAX!`,
           problem: 'Maximum Sum Subarray of Size K'
         },
         {
-          name: '🎢 Pattern 2A: DYNAMIC - LONGEST Window',
-          desc: `🎯 THE TRICK: EXPAND until INVALID → SHRINK until VALID
+          name: '🎢 LONGEST Window',
+          desc: `THE TRICK
+EXPAND until INVALID → SHRINK until VALID
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔸 WHEN TO USE: Find the BIGGEST valid window
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHEN TO USE
+• "LONGEST substring with K distinct"
+• "MAXIMUM consecutive 1s"
+• Find BIGGEST valid window
 
-✅ "LONGEST substring with K distinct chars"
-✅ "MAXIMUM consecutive 1s after flipping K 0s"
-✅ "Longest substring without repeating chars"
+MENTAL MODEL: The Greedy Accordion
+Keep expanding. Only shrink when forced!
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧠 THE MENTAL MODEL: The Greedy Accordion
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Think: "Keep expanding greedily. Only shrink when forced!"
-
-TEMPLATE:
+TEMPLATE
 int left = 0, maxLength = 0;
 
 for (int right = 0; right < arr.length; right++) {
-    // 1. EXPAND: Add right element to window
     addToWindow(arr[right]);
 
-    // 2. SHRINK: While window is INVALID, remove from left
-    while (windowIsINVALID()) {  // ❌ Bad? Fix it!
+    while (windowIsINVALID()) {  // Bad? Fix it!
         removeFromWindow(arr[left]);
         left++;
     }
 
-    // 3. UPDATE answer (window is valid now)
     maxLength = Math.max(maxLength, right - left + 1);
 }
 
-🔑 KEY INSIGHT: Shrink ONLY when window becomes INVALID
-   (while INVALID) → make it valid again
+KEY INSIGHT
+Shrink ONLY when invalid
+while (INVALID) → make valid
 
-EXAMPLE: s="eceba", K=2 distinct chars allowed
-[e] → distinct=1 ✅
-[e,c] → distinct=2 ✅
-[e,c,e] → distinct=2 ✅
-[e,c,e,b] → distinct=3 ❌ TOO MANY! Shrink...
-[c,e,b] → distinct=3 ❌ Still bad...
-[e,b] → distinct=2 ✅ VALID! Answer=3 ("ece")`,
+EXAMPLE
+s="eceba", K=2 distinct allowed
+[e] → distinct=1 ✓
+[e,c] → distinct=2 ✓
+[e,c,e,b] → distinct=3 ✗ Shrink!
+[e,b] → distinct=2 ✓ Answer=3`,
           problem: 'Longest Substring with K Distinct Characters'
         },
         {
-          name: '🎯 Pattern 2B: DYNAMIC - SHORTEST Window',
-          desc: `🎯 THE TRICK: EXPAND until VALID → SHRINK while VALID
+          name: '🎯 SHORTEST Window',
+          desc: `THE TRICK
+EXPAND until VALID → SHRINK while VALID
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔸 WHEN TO USE: Find the SMALLEST valid window
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHEN TO USE
+• "SHORTEST substring containing..."
+• "MINIMUM window substring"
+• Find SMALLEST valid window
 
-✅ "SHORTEST substring containing all chars"
-✅ "MINIMUM window substring"
-✅ "Smallest subarray with sum ≥ K"
+MENTAL MODEL: Find Perfect Fit
+Expand to get valid, squeeze to minimize!
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧠 THE MENTAL MODEL: Find Perfect Fit
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Think: "Expand to get valid, then squeeze to minimize!"
-
-TEMPLATE:
-int left = 0, minLength = Integer.MAX_VALUE;
+TEMPLATE
+int left = 0, minLength = MAX_VALUE;
 
 for (int right = 0; right < arr.length; right++) {
-    // 1. EXPAND: Add right element
     addToWindow(arr[right]);
 
-    // 2. SHRINK: While window is VALID, try to minimize
-    while (windowIsVALID()) {  // ✅ Good? Make it smaller!
-        // Update answer BEFORE shrinking
+    while (windowIsVALID()) {  // Good? Smaller!
         minLength = Math.min(minLength, right - left + 1);
-
         removeFromWindow(arr[left]);
         left++;
     }
 }
 
-🔑 KEY INSIGHT: Shrink while window is STILL VALID
-   (while VALID) → find the smallest valid window
+KEY INSIGHT
+Shrink while STILL valid
+while (VALID) → find smallest
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ THE MASTER TRICK TO REMEMBER:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-LONGEST  → while (INVALID) shrink  // Remove bad stuff
-SHORTEST → while (VALID) shrink    // Keep good, minimize size`,
+MASTER TRICK
+LONGEST  → while (INVALID) shrink
+SHORTEST → while (VALID) shrink`,
           problem: 'Minimum Size Subarray Sum'
         },
         {
-          name: '🏆 Example: Minimum Window Substring (#76)',
-          desc: `🎯 YOUR CODE EXPLAINED: This is Pattern 2B - SHORTEST Window!
+          name: '🏆 Minimum Window Substring',
+          desc: `Pattern 2B - SHORTEST Window in Action
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📝 PROBLEM: s="ADOBECODEBANC", t="ABC"
-Find the SMALLEST substring of s containing ALL chars of t
+PROBLEM
+s="ADOBECODEBANC", t="ABC"
+Find SMALLEST substring containing ALL chars
 Answer: "BANC"
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🎬 COMPLETE VISUAL FLOW WITH CODE EXECUTION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VISUAL FLOW
 
-String: s = "A D O B E C O D E B A N C"
-Target: t = "ABC"
-Need: {A:1, B:1, C:1}, required=3
+Step 1-5: EXPAND to find first valid
+[A D O B E C] L=0 R=5 formed=3 ✓
+CODE: windowCount[C]++ → formed=3 → enter while
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ITERATION 1-3: EXPAND to include A, B
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [A D O]
-L=0, R=2, formed=1 (have A only)
-📍 CODE: for(right=0→2) { add to window }
+Step 6: SHRINK - lost 'A'
+[D O B E C] L=1 R=5 formed=2 ✗
+CODE: windowCount[A]-- → formed-- → exit while
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ITERATION 4: Found B!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [A D O B]
-L=0, R=3, formed=2 (have A, B)
-📍 CODE: windowCount[B]++ → formed++ → still not valid
+Step 7-10: EXPAND again
+[D O B E C O D E B A] L=1 R=10 formed=3 ✓
+CODE: found A → formed=3 → enter while
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ITERATION 5-6: EXPAND ➡️ ➡️ First VALID window!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [A D O B E C]  ← found C!
-L=0, R=5, formed=3 ✅ (have A, B, C)
-📍 CODE:
-   windowCount[C]++ → formed=3
-   ✅ formed == required (enter SHRINK phase!)
-   while (formed == 3) {
-       minLen = 6, save [0,5]
+Step 11-15: SHRINK aggressively
+[O B E C O D E B A] still valid (has extras)
+[B E C O D E B A] still valid
+[E C O D E B A] still valid
+[C O D E B A] still valid len=6
+[O D E B A] formed=2 ✗ exit while
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SHRINK ⬅️ Step 1: Remove 'A'
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [D O B E C]
-L=1, R=5, formed=2 ❌ (lost A!)
-📍 CODE:
-       windowCount[A]-- → 0
-       windowCount[A] < tCount[A] → formed--
-   } // exit while, continue expanding
+Step 16-19: EXPAND + Final SHRINK
+[O D E B A N C] L=6 R=12 formed=3 ✓
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ITERATIONS 6-10: EXPAND ➡️ ➡️ ➡️ ➡️ ➡️
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [D O B E C O D E B A]
-L=1, R=10, formed=3 ✅ (found A again!)
-📍 CODE: windowCount[A]++ → formed=3 → enter SHRINK!
+SHRINK ⬅️⬅️⬅️
+[D E B A N C] len=6
+[E B A N C] len=5 NEW MIN!
+[B A N C] len=4 NEW MIN! ← ANSWER
+[A N C] formed=2 ✗ stop
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SHRINK ⬅️ Step 1: Remove 'D'
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [O B E C O D E B A]
-L=2, R=10, formed=3 ✅ (still valid!)
-📍 CODE:
-   while (formed == 3) {
-       len=9, update minLen=6→6 (no change)
-       remove D (not needed) → still formed=3
+CODE STRUCTURE
+1. SETUP: count target chars
+2. EXPAND: add right char (every iteration)
+3. SHRINK: when formed==required
+4. UPDATE: track minimum
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SHRINK ⬅️ Step 2: Remove 'O'
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [B E C O D E B A]
-L=3, R=10, formed=3 ✅ (still valid!)
-📍 CODE: len=8 → still > 6, keep shrinking
+KEY VARIABLES
+• required = unique chars needed (3 for "ABC")
+• formed = unique chars satisfied
+• When formed==required → window VALID
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SHRINK ⬅️ Step 3: Remove first 'B'
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [E C O D E B A]
-L=4, R=10, formed=3 ✅ (have 2nd B!)
-📍 CODE: len=7 → still > 6, keep shrinking
+SHRINK LOGIC
+while (formed == required) {
+    update minimum length
+    remove left char
+    if breaks condition: formed--
+    left++
+}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SHRINK ⬅️ Step 4: Remove 'E'
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [C O D E B A]
-L=5, R=10, formed=3 ✅ (still valid!)
-📍 CODE: len=6 → same as minLen, continue
+WHY O(n)
+Each char enters once (right++) and exits once (left++)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SHRINK ⬅️ Step 5: Remove first 'C'
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [O D E B A]
-L=6, R=10, formed=2 ❌ (lost C!)
-📍 CODE:
-       windowCount[C]-- → 0
-       formed-- → exit while
-   }
+PATTERN
+This is SHORTEST because:
+while (VALID) { shrink and update min }
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ITERATIONS 11-12: EXPAND ➡️ ➡️ Found C again!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Window: [O D E B A N C]
-L=6, R=12, formed=3 ✅ (complete again!)
-📍 CODE: windowCount[C]++ → formed=3 → SHRINK!
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SHRINK ⬅️⬅️⬅️⬅️⬅️ Aggressive shrinking!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Step 1: [D E B A N C]  L=7, len=6 (same as min)
-Step 2: [E B A N C]    L=8, len=5 ✅ NEW MIN!
-Step 3: [B A N C]      L=9, len=4 ✅ NEW MIN! 🔥
-📍 CODE:
-   while (formed == 3) {
-       minLen=4 ← UPDATE! save [9,12]
-
-Step 4: [A N C]        L=10, formed=2 ❌
-📍 CODE:
-       remove B → windowCount[B]=0
-       formed-- → exit while
-   }
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏆 FINAL ANSWER: s.substring(9, 13) = "BANC"
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 CODE-TO-EXECUTION MAPPING:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-1️⃣ SETUP (runs once):
-   Map<Character,Integer> tCount = count(t);
-   int required = tCount.size();  // 3
-   int formed = 0;
-
-2️⃣ MAIN LOOP (for each char):
-   for (int right = 0; right < s.length(); right++) {
-
-3️⃣ EXPAND (every iteration):
-       char c = s.charAt(right);
-       windowCount[c]++;
-       if (windowCount[c] == tCount[c]) formed++;
-
-4️⃣ SHRINK (when valid):
-       while (left <= right && formed == required) {
-           ✅ Update minimum
-           ⬅️ Remove left char
-           if (lost a required char) formed--;
-           left++;
-       }
-   }
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 KEY INSIGHTS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ EXPAND phase: right pointer moves EVERY iteration
-✅ SHRINK phase: left pointer moves ONLY when formed==required
-✅ Each char enters once (right++) and exits once (left++)
-✅ Total operations: O(2n) = O(n)
-
-🎓 PATTERN: This is SHORTEST because:
-   while (VALID) { shrink and update minimum }
-
-vs LONGEST would be:
-   while (INVALID) { shrink to restore validity }`,
+vs LONGEST:
+while (INVALID) { shrink to restore }`,
           problem: 'Minimum Window Substring (#76)'
         },
         {
-          name: 'Longest Repeating Character Replacement',
-          desc: `🎯 THE TRICK: Track max_frequency in window. Window is VALID when (window_size - max_freq) ≤ k.
+          name: 'Character Replacement',
+          desc: `THE TRICK
+Track max_frequency in window
+Window VALID when: (size - maxFreq) ≤ k
 
-WHY? In any window, you want to KEEP the most frequent character and REPLACE everything else. If you need to replace more than k characters, shrink the window.
+WHY IT WORKS
+Keep most frequent char, replace rest
+If need to replace > k chars → shrink
 
-FORMULA: replacements_needed = (right - left + 1) - max_freq
-• If replacements_needed ≤ k → window is VALID ✅
-• If replacements_needed > k → SHRINK from left ❌
+FORMULA
+replacements = (right - left + 1) - maxFreq
+• ≤ k → VALID ✓
+• > k → SHRINK ✗
 
-EXAMPLE: s="AABABBA", k=1
-Window [AABA]: size=4, maxFreq('A')=3 → need 4-3=1 replacement ✅
-Window [AABAB]: size=5, maxFreq('A')=3 → need 5-3=2 replacements ❌ (shrink!)
+EXAMPLE
+s="AABABBA", k=1
+[AABA] size=4, maxFreq=3 → need 1 ✓
+[AABAB] size=5, maxFreq=3 → need 2 ✗
 
-CODE PATTERN:
+CODE
 int[] count = new int[26];
 int maxFreq = 0, left = 0, result = 0;
+
 for (int right = 0; right < s.length(); right++) {
     count[s.charAt(right) - 'A']++;
     maxFreq = Math.max(maxFreq, count[s.charAt(right) - 'A']);
 
-    // If invalid window: too many replacements needed
     while ((right - left + 1) - maxFreq > k) {
         count[s.charAt(left) - 'A']--;
         left++;
     }
+
     result = Math.max(result, right - left + 1);
 }`,
           problem: 'Longest Repeating Character Replacement (#424)'
