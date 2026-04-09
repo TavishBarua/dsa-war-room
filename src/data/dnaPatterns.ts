@@ -1205,83 +1205,164 @@ Find the SMALLEST substring of s containing ALL chars of t
 Answer: "BANC"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🧠 THE TRICK: Expand to satisfy all chars, then SHRINK to minimize
+🎬 COMPLETE VISUAL FLOW WITH CODE EXECUTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-STEP-BY-STEP WALKTHROUGH:
+String: s = "A D O B E C O D E B A N C"
+Target: t = "ABC"
+Need: {A:1, B:1, C:1}, required=3
 
-1️⃣ SETUP - Count what we need:
-   tCount = {A:1, B:1, C:1}
-   required = 3 (we need 3 unique chars)
-   formed = 0 (how many we've satisfied)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ITERATION 1-3: EXPAND to include A, B
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [A D O]
+L=0, R=2, formed=1 (have A only)
+📍 CODE: for(right=0→2) { add to window }
 
-2️⃣ KEY VARIABLES:
-   • required = tCount.size()  // How many UNIQUE chars (3 for "ABC")
-   • formed = 0                // How many we've satisfied (0→1→2→3)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ITERATION 4: Found B!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [A D O B]
+L=0, R=3, formed=2 (have A, B)
+📍 CODE: windowCount[B]++ → formed++ → still not valid
 
-   💡 When formed == required → "I have ALL the chars I need!"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ITERATION 5-6: EXPAND ➡️ ➡️ First VALID window!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [A D O B E C]  ← found C!
+L=0, R=5, formed=3 ✅ (have A, B, C)
+📍 CODE:
+   windowCount[C]++ → formed=3
+   ✅ formed == required (enter SHRINK phase!)
+   while (formed == 3) {
+       minLen = 6, save [0,5]
 
-3️⃣ EXPAND Phase - Add right character:
-   char c = s.charAt(right);
-   windowCount.put(c, windowCount.getOrDefault(c, 0) + 1);
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHRINK ⬅️ Step 1: Remove 'A'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [D O B E C]
+L=1, R=5, formed=2 ❌ (lost A!)
+📍 CODE:
+       windowCount[A]-- → 0
+       windowCount[A] < tCount[A] → formed--
+   } // exit while, continue expanding
 
-   // If this char is now satisfied (count matches target)
-   if (tCount.containsKey(c) &&
-       windowCount.get(c).equals(tCount.get(c))) {
-       formed++;  // One more char type satisfied!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ITERATIONS 6-10: EXPAND ➡️ ➡️ ➡️ ➡️ ➡️
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [D O B E C O D E B A]
+L=1, R=10, formed=3 ✅ (found A again!)
+📍 CODE: windowCount[A]++ → formed=3 → enter SHRINK!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHRINK ⬅️ Step 1: Remove 'D'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [O B E C O D E B A]
+L=2, R=10, formed=3 ✅ (still valid!)
+📍 CODE:
+   while (formed == 3) {
+       len=9, update minLen=6→6 (no change)
+       remove D (not needed) → still formed=3
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHRINK ⬅️ Step 2: Remove 'O'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [B E C O D E B A]
+L=3, R=10, formed=3 ✅ (still valid!)
+📍 CODE: len=8 → still > 6, keep shrinking
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHRINK ⬅️ Step 3: Remove first 'B'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [E C O D E B A]
+L=4, R=10, formed=3 ✅ (have 2nd B!)
+📍 CODE: len=7 → still > 6, keep shrinking
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHRINK ⬅️ Step 4: Remove 'E'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [C O D E B A]
+L=5, R=10, formed=3 ✅ (still valid!)
+📍 CODE: len=6 → same as minLen, continue
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHRINK ⬅️ Step 5: Remove first 'C'
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [O D E B A]
+L=6, R=10, formed=2 ❌ (lost C!)
+📍 CODE:
+       windowCount[C]-- → 0
+       formed-- → exit while
    }
 
-4️⃣ SHRINK Phase - When window is VALID:
-   while (left <= right && formed == required) {
-       // Window is VALID! Try to make it SMALLER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ITERATIONS 11-12: EXPAND ➡️ ➡️ Found C again!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Window: [O D E B A N C]
+L=6, R=12, formed=3 ✅ (complete again!)
+📍 CODE: windowCount[C]++ → formed=3 → SHRINK!
 
-       // Save this as potential answer
-       if (right - left + 1 < minLen) {
-           minLen = right - left + 1;
-           resultLeft = left;
-           resultRight = right;
-       }
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHRINK ⬅️⬅️⬅️⬅️⬅️ Aggressive shrinking!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-       // Remove left char and move left pointer
-       char leftChar = s.charAt(left);
-       windowCount.put(leftChar, windowCount.get(leftChar) - 1);
+Step 1: [D E B A N C]  L=7, len=6 (same as min)
+Step 2: [E B A N C]    L=8, len=5 ✅ NEW MIN!
+Step 3: [B A N C]      L=9, len=4 ✅ NEW MIN! 🔥
+📍 CODE:
+   while (formed == 3) {
+       minLen=4 ← UPDATE! save [9,12]
 
-       // If removing this char breaks the condition
-       if (tCount.containsKey(leftChar) &&
-           windowCount.get(leftChar) < tCount.get(leftChar)) {
-           formed--;  // No longer satisfied
-       }
-       left++;
+Step 4: [A N C]        L=10, formed=2 ❌
+📍 CODE:
+       remove B → windowCount[B]=0
+       formed-- → exit while
    }
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎬 ANIMATION IN YOUR MIND:
+🏆 FINAL ANSWER: s.substring(9, 13) = "BANC"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-A D O B E C O D E B A N C
-↑ ↑ ↑ ↑ ↑ ↑
-L   formed=1 (have A)
-  R     formed=2 (have A,B)
-      R   formed=3 (have A,B,C) ✅ VALID!
-
-Now SHRINK to minimize:
-  D O B E C O D E B A N C
-  ↑         ↑
-  L         R   Still valid, keep shrinking...
-
-          E B A N C
-          ↑     ↑
-          L     R   "BANC" is the smallest!
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 WHY THIS WORKS:
+📊 CODE-TO-EXECUTION MAPPING:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-• EXPAND: Keep adding until we have all required chars
-• SHRINK: Remove extras while keeping requirement satisfied
-• Each element enters (right++) and exits (left++) ONCE → O(n)
+1️⃣ SETUP (runs once):
+   Map<Character,Integer> tCount = count(t);
+   int required = tCount.size();  // 3
+   int formed = 0;
 
-🎓 REMEMBER: This is SHORTEST pattern because we:
-   while (VALID) → keep shrinking to find minimum`,
+2️⃣ MAIN LOOP (for each char):
+   for (int right = 0; right < s.length(); right++) {
+
+3️⃣ EXPAND (every iteration):
+       char c = s.charAt(right);
+       windowCount[c]++;
+       if (windowCount[c] == tCount[c]) formed++;
+
+4️⃣ SHRINK (when valid):
+       while (left <= right && formed == required) {
+           ✅ Update minimum
+           ⬅️ Remove left char
+           if (lost a required char) formed--;
+           left++;
+       }
+   }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 KEY INSIGHTS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ EXPAND phase: right pointer moves EVERY iteration
+✅ SHRINK phase: left pointer moves ONLY when formed==required
+✅ Each char enters once (right++) and exits once (left++)
+✅ Total operations: O(2n) = O(n)
+
+🎓 PATTERN: This is SHORTEST because:
+   while (VALID) { shrink and update minimum }
+
+vs LONGEST would be:
+   while (INVALID) { shrink to restore validity }`,
           problem: 'Minimum Window Substring (#76)'
         },
         {
