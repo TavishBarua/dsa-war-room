@@ -1341,7 +1341,31 @@ for (int right = 0; right < s.length(); right++) {
                 <span class="kw">return False</span>
         <span class="kw">else</span>:
             stack.append(c)
-    <span class="kw">return</span> <span class="fn">len</span>(stack) == <span class="nm">0</span>`,
+    <span class="kw">return</span> <span class="fn">len</span>(stack) == <span class="nm">0</span>
+
+<span class="cm"># ─── REAL EXAMPLE: Min Stack ───</span>
+<span class="cm"># THE TRICK: Use TWO stacks — track minimum at each level</span>
+
+<span class="kw">class</span> <span class="tp">MinStack</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>):
+        <span class="kw">self</span>.stack = []
+        <span class="kw">self</span>.min_stack = []  <span class="cm"># THE TRICK!</span>
+
+    <span class="kw">def</span> <span class="fn">push</span>(<span class="kw">self</span>, val):
+        <span class="kw">self</span>.stack.append(val)
+        <span class="cm"># Push current min: either new val or previous min</span>
+        current_min = val <span class="kw">if not</span> <span class="kw">self</span>.min_stack <span class="kw">else</span> <span class="fn">min</span>(val, <span class="kw">self</span>.min_stack[-<span class="nm">1</span>])
+        <span class="kw">self</span>.min_stack.append(current_min)
+
+    <span class="kw">def</span> <span class="fn">pop</span>(<span class="kw">self</span>):
+        <span class="kw">self</span>.stack.pop()
+        <span class="kw">self</span>.min_stack.pop()  <span class="cm"># Keep both stacks in sync</span>
+
+    <span class="kw">def</span> <span class="fn">top</span>(<span class="kw">self</span>):
+        <span class="kw">return</span> <span class="kw">self</span>.stack[-<span class="nm">1</span>]
+
+    <span class="kw">def</span> <span class="fn">getMin</span>(<span class="kw">self</span>):
+        <span class="kw">return</span> <span class="kw">self</span>.min_stack[-<span class="nm">1</span>]  <span class="cm"># O(1) — the trick works!</span>`,
       csharp: `<span class="cm">// STACK TEMPLATE — O(n)</span>
 <span class="kw">public</span> <span class="tp">bool</span> <span class="fn">IsValid</span>(<span class="tp">string</span> s) {
     <span class="kw">var</span> pairs = <span class="kw">new</span> <span class="tp">Dictionary</span>&lt;<span class="tp">char</span>,<span class="tp">char</span>&gt;{
@@ -1353,6 +1377,34 @@ for (int right = 0; right < s.length(); right++) {
         } <span class="kw">else</span> stack.Push(c);
     }
     <span class="kw">return</span> stack.Count==<span class="nm">0</span>;
+}
+
+<span class="cm">// ─── REAL EXAMPLE: Min Stack ───</span>
+<span class="cm">// THE TRICK: Use TWO stacks — track minimum at each level</span>
+
+<span class="kw">public class</span> <span class="tp">MinStack</span> {
+    <span class="kw">private</span> <span class="tp">Stack</span>&lt;<span class="tp">int</span>&gt; stack = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">int</span>&gt;();
+    <span class="kw">private</span> <span class="tp">Stack</span>&lt;<span class="tp">int</span>&gt; minStack = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">int</span>&gt;(); <span class="cm">// THE TRICK!</span>
+
+    <span class="kw">public void</span> <span class="fn">Push</span>(<span class="tp">int</span> val) {
+        stack.Push(val);
+        <span class="cm">// Push current min: either new val or previous min</span>
+        <span class="tp">int</span> currentMin = minStack.Count==<span class="nm">0</span> ? val : Math.Min(val, minStack.Peek());
+        minStack.Push(currentMin);
+    }
+
+    <span class="kw">public void</span> <span class="fn">Pop</span>() {
+        stack.Pop();
+        minStack.Pop(); <span class="cm">// Keep both stacks in sync</span>
+    }
+
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">Top</span>() {
+        <span class="kw">return</span> stack.Peek();
+    }
+
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">GetMin</span>() {
+        <span class="kw">return</span> minStack.Peek(); <span class="cm">// O(1) — the trick works!</span>
+    }
 }`,
       java: `<span class="cm">// ═══════════════════════════════</span>
 <span class="cm">// STACK — THE TEMPLATE</span>
@@ -1397,6 +1449,35 @@ for (int right = 0; right < s.length(); right++) {
         stack.push(i);
     }
     <span class="kw">return</span> result;
+}
+
+<span class="cm">// ─── REAL EXAMPLE: Min Stack ───</span>
+<span class="cm">// THE TRICK: Use TWO stacks — track minimum at each level</span>
+<span class="cm">// Operations: push, pop, top, getMin — all O(1)</span>
+
+<span class="kw">class</span> <span class="tp">MinStack</span> {
+    <span class="kw">private</span> <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">private</span> <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; minStack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;(); <span class="cm">// THE TRICK!</span>
+
+    <span class="kw">public void</span> <span class="fn">push</span>(<span class="tp">int</span> val) {
+        stack.push(val);
+        <span class="cm">// Push current min: either new val or previous min</span>
+        <span class="tp">int</span> currentMin = minStack.isEmpty() ? val : Math.min(val, minStack.peek());
+        minStack.push(currentMin);
+    }
+
+    <span class="kw">public void</span> <span class="fn">pop</span>() {
+        stack.pop();
+        minStack.pop();  <span class="cm">// Keep both stacks in sync</span>
+    }
+
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">top</span>() {
+        <span class="kw">return</span> stack.peek();
+    }
+
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">getMin</span>() {
+        <span class="kw">return</span> minStack.peek();  <span class="cm">// O(1) — the trick works!</span>
+    }
 }`
     },
     memoryHack: {
@@ -1450,6 +1531,7 @@ for (int right = 0; right < s.length(); right++) {
       ],
       variations: [
         { name: 'Valid Parentheses', desc: 'Push openers, pop and match closers, check stack empty', problem: 'Valid Parentheses (#20)' },
+        { name: 'Min Stack', desc: 'Use two stacks: main stack + min stack to track minimum at each level', problem: 'Min Stack (#155)' },
         { name: 'Daily Temperatures', desc: 'Monotonic stack — pop smaller temps when warmer arrives', problem: 'Daily Temperatures (#739)' },
         { name: 'Largest Rectangle', desc: 'Monotonic stack tracks increasing heights for max area', problem: 'Largest Rectangle in Histogram (#84)' }
       ],
