@@ -1602,7 +1602,7 @@ merged.<span class="fn">add</span>(intervals[<span class="nm">0</span>]);
   {
     icon:'📊', name:'Prefix / Suffix Arrays', accent:'#fb923c',
     tagline:'Pre-compute cumulative answers from both directions',
-    hook:"Imagine you're in a line of kids and each kid holds a number. The teacher asks: 'What's the product of everyone EXCEPT you?' You could multiply everyone each time — slow! OR, before anyone asks, compute the running product from the LEFT and from the RIGHT. Then for each kid, just multiply left-product × right-product. That pre-computation trick is Prefix/Suffix!",
+    hook:"Imagine you're in a line of kids and each kid holds a number. The teacher asks: 'What's the product of everyone EXCEPT you?' You could multiply everyone each time — slow! OR, before anyone asks, compute the running product from the LEFT and from the RIGHT. Then for each kid, just multiply left-product × right-product. That pre-computation trick is Prefix/Suffix! WHEN TO RECOGNIZE: If you think 'I need info from BOTH sides' or see yourself scanning left AND right repeatedly, that's your cue. Trapping Rain Water? Water at position i depends on tallest bar on LEFT and tallest on RIGHT — both directions needed!",
     svg:`<svg viewBox="0 0 600 320" style="max-height:320px;width:100%"><rect width="600" height="320" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Prefix / Suffix: Product Except Self</text><text x="300" y="48" fill="#4a5268" text-anchor="middle" font-size="11" font-family="monospace">nums = [1, 2, 3, 4]</text><text x="60" y="80" fill="#fb923c" font-size="12" font-weight="bold" font-family="monospace">→ Prefix products (left to right)</text><rect x="80" y="90" width="50" height="35" fill="#1a1d2e" stroke="#fb923c" rx="4"/><text x="105" y="113" fill="#fb923c" text-anchor="middle" font-size="13">1</text><rect x="180" y="90" width="50" height="35" fill="#1a1d2e" stroke="#fb923c" rx="4"/><text x="205" y="113" fill="#fb923c" text-anchor="middle" font-size="13">1</text><rect x="280" y="90" width="50" height="35" fill="#1a1d2e" stroke="#fb923c" rx="4"/><text x="305" y="113" fill="#fb923c" text-anchor="middle" font-size="13">2</text><rect x="380" y="90" width="50" height="35" fill="#1a1d2e" stroke="#fb923c" rx="4"/><text x="405" y="113" fill="#fb923c" text-anchor="middle" font-size="13">6</text><text x="60" y="155" fill="#a78bfa" font-size="12" font-weight="bold" font-family="monospace">← Suffix products (right to left)</text><rect x="80" y="165" width="50" height="35" fill="#1a1d2e" stroke="#a78bfa" rx="4"/><text x="105" y="188" fill="#a78bfa" text-anchor="middle" font-size="13">24</text><rect x="180" y="165" width="50" height="35" fill="#1a1d2e" stroke="#a78bfa" rx="4"/><text x="205" y="188" fill="#a78bfa" text-anchor="middle" font-size="13">12</text><rect x="280" y="165" width="50" height="35" fill="#1a1d2e" stroke="#a78bfa" rx="4"/><text x="305" y="188" fill="#a78bfa" text-anchor="middle" font-size="13">4</text><rect x="380" y="165" width="50" height="35" fill="#1a1d2e" stroke="#a78bfa" rx="4"/><text x="405" y="188" fill="#a78bfa" text-anchor="middle" font-size="13">1</text><text x="60" y="230" fill="#00ff88" font-size="12" font-weight="bold" font-family="monospace">= prefix[i] × suffix[i]</text><rect x="80" y="240" width="50" height="35" fill="rgba(0,255,136,.15)" stroke="#00ff88" rx="4"/><text x="105" y="263" fill="#00ff88" text-anchor="middle" font-size="13">24</text><rect x="180" y="240" width="50" height="35" fill="rgba(0,255,136,.15)" stroke="#00ff88" rx="4"/><text x="205" y="263" fill="#00ff88" text-anchor="middle" font-size="13">12</text><rect x="280" y="240" width="50" height="35" fill="rgba(0,255,136,.15)" stroke="#00ff88" rx="4"/><text x="305" y="263" fill="#00ff88" text-anchor="middle" font-size="13">8</text><rect x="380" y="240" width="50" height="35" fill="rgba(0,255,136,.15)" stroke="#00ff88" rx="4"/><text x="405" y="263" fill="#00ff88" text-anchor="middle" font-size="13">6</text><text x="300" y="300" fill="#ffd600" text-anchor="middle" font-size="11" font-family="monospace">Result: [24, 12, 8, 6] — no division needed!</text></svg>`,
     complexity:[
       {badge:'red',big:'O(n²)',label:'BRUTE FORCE',desc:'For each element, multiply all others'},
@@ -1730,10 +1730,22 @@ merged.<span class="fn">add</span>(intervals[<span class="nm">0</span>]);
         {line:'    return result;',stepId:'done',note:'prefix × suffix = everything except self!',color:'#00ff88'}
       ],
       stateSnapshots:[
+        {label:'PATTERN RECOGNITION',art:`Position i needs info from:
+← LEFT side  [i]  RIGHT side →
+
+If BOTH arrows needed:
+→ Use Prefix/Suffix!`,annotation:'Key trigger: "I need data from both directions"'},
         {label:'Input',art:'nums = [1, 2, 3, 4]',annotation:'Goal: result[i] = product of all except nums[i]'},
         {label:'Left pass',art:'prefix: 1→1→2→6  result=[1,1,2,6]',annotation:'Each slot stores product of everything to its LEFT'},
         {label:'Right pass',art:'suffix: 1→4→12→24  result=[24,12,8,6]',annotation:'Multiply each slot by product of everything to its RIGHT'},
-        {label:'Result',art:'[24, 12, 8, 6] — no division used!',annotation:'prefix[i] × suffix[i] = product except self'}
+        {label:'Why it works',art:`Position 2 (value=3):
+prefix[2]=2  (1×2 from left)
+suffix[2]=4  (4 from right)
+Result: 2×4=8 (skipped 3!)`,annotation:'prefix × suffix = everything except self'},
+        {label:'Trapping Water Example',art:`height=[0,1,0,2,1,0,1,3]
+Position 5: needs leftMax
+           AND rightMax
+→ Both directions = Prefix/Suffix!`,annotation:'Same pattern, different operation (max instead of product)'}
       ],
       variations:[
         {name:'Product of Array Except Self',desc:'Prefix product from left, suffix product from right, multiply',problem:'Product of Array Except Self (#238)'},
@@ -1743,7 +1755,7 @@ merged.<span class="fn">add</span>(intervals[<span class="nm">0</span>]);
       title:'LEFT PASS → RIGHT PASS',
       mnemonic:'LEFT PASS → RIGHT PASS — scan both directions, combine at each index',
       steps:['Init result array with 1s','Left→Right: result[i] = running prefix product','Right→Left: result[i] *= running suffix product','Each index now has product of everything except itself'],
-      why:'By pre-computing cumulative values from both directions, each position can answer "everything except me" in O(1) without division.'
+      why:'WHEN TO USE: Ask "What does position i need?" If answer is "info from BOTH left AND right" → use this pattern! Examples: (1) Product Except Self: need leftProduct × rightProduct. (2) Trapping Rain Water: need leftMax AND rightMax to determine water level = min(leftMax, rightMax) - height. RECOGNITION TRIGGER: When naive solution scans left and right repeatedly (O(n²)), optimize by pre-computing once (O(n)). The "sandwich pattern" - position i needs left boundary AND right boundary. Keywords: "except current", "trapped between", "bounded by both sides".'
     },
     cheat:{
       trigger:'product except self, trapping rain water, left-right scan, prefix sum, range query',
