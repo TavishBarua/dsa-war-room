@@ -1787,15 +1787,21 @@ merged.<span class="fn">add</span>(intervals[<span class="nm">0</span>]);
         stack.append(i)
     <span class="kw">return</span> result
 
-<span class="cm"># ─── Car Fleet ───</span>
-<span class="kw">def</span> <span class="fn">carFleet</span>(target, position, speed):
-    pairs = <span class="fn">sorted</span>(<span class="fn">zip</span>(position, speed), reverse=<span class="nm">True</span>)
-    stack = []  <span class="cm"># arrival times, decreasing</span>
-    <span class="kw">for</span> pos, spd <span class="kw">in</span> pairs:
-        time = (target - pos) / spd
-        <span class="kw">if not</span> stack <span class="kw">or</span> time &gt; stack[-<span class="nm">1</span>]:
-            stack.append(time)  <span class="cm"># new fleet</span>
-    <span class="kw">return</span> <span class="fn">len</span>(stack)`,
+<span class="cm"># ─── Largest Rectangle in Histogram (#84) ───</span>
+<span class="kw">def</span> <span class="fn">largestRectangleArea</span>(heights):
+    stack = []  <span class="cm"># stores INDICES (increasing)</span>
+    max_area = <span class="nm">0</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(heights)):
+        <span class="kw">while</span> stack <span class="kw">and</span> heights[i] &lt; heights[stack[-<span class="nm">1</span>]]:
+            h = heights[stack.pop()]
+            w = i <span class="kw">if not</span> stack <span class="kw">else</span> i - stack[-<span class="nm">1</span>] - <span class="nm">1</span>
+            max_area = <span class="fn">max</span>(max_area, h * w)
+        stack.append(i)
+    <span class="kw">while</span> stack:
+        h = heights[stack.pop()]
+        w = <span class="fn">len</span>(heights) <span class="kw">if not</span> stack <span class="kw">else</span> <span class="fn">len</span>(heights) - stack[-<span class="nm">1</span>] - <span class="nm">1</span>
+        max_area = <span class="fn">max</span>(max_area, h * w)
+    <span class="kw">return</span> max_area`,
       java:`<span class="cm">// ═══════════════════════════════════════</span>
 <span class="cm">// MONOTONIC STACK — THE TEMPLATE</span>
 <span class="cm">// TIME: O(n) | SPACE: O(n)</span>
@@ -1813,6 +1819,26 @@ merged.<span class="fn">add</span>(intervals[<span class="nm">0</span>]);
         stack.push(i);
     }
     <span class="kw">return</span> result;
+}
+
+<span class="cm">// ─── Largest Rectangle in Histogram (#84) ───</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">largestRectangleArea</span>(<span class="tp">int</span>[] heights) {
+    <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+    <span class="tp">int</span> maxArea = <span class="nm">0</span>, n = heights.length;
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+        <span class="kw">while</span> (!stack.isEmpty() &amp;&amp; heights[i] &lt; heights[stack.peek()]) {
+            <span class="tp">int</span> h = heights[stack.pop()];
+            <span class="tp">int</span> w = stack.isEmpty() ? i : i - stack.peek() - <span class="nm">1</span>;
+            maxArea = Math.max(maxArea, h * w);
+        }
+        stack.push(i);  <span class="cm">// push INDEX not height!</span>
+    }
+    <span class="kw">while</span> (!stack.isEmpty()) {
+        <span class="tp">int</span> h = heights[stack.pop()];
+        <span class="tp">int</span> w = stack.isEmpty() ? n : n - stack.peek() - <span class="nm">1</span>;
+        maxArea = Math.max(maxArea, h * w);
+    }
+    <span class="kw">return</span> maxArea;
 }`,
       csharp:`<span class="cm">// MONOTONIC STACK — THE TEMPLATE</span>
 <span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">DailyTemperatures</span>(<span class="tp">int</span>[] temps) {
@@ -1826,6 +1852,26 @@ merged.<span class="fn">add</span>(intervals[<span class="nm">0</span>]);
         stack.Push(i);
     }
     <span class="kw">return</span> result;
+}
+
+<span class="cm">// ─── Largest Rectangle in Histogram (#84) ───</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">LargestRectangleArea</span>(<span class="tp">int</span>[] heights) {
+    <span class="kw">var</span> stack = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">int</span>&gt;();
+    <span class="tp">int</span> maxArea = <span class="nm">0</span>, n = heights.Length;
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+        <span class="kw">while</span> (stack.Count &gt; <span class="nm">0</span> &amp;&amp; heights[i] &lt; heights[stack.Peek()]) {
+            <span class="tp">int</span> h = heights[stack.Pop()];
+            <span class="tp">int</span> w = stack.Count == <span class="nm">0</span> ? i : i - stack.Peek() - <span class="nm">1</span>;
+            maxArea = Math.Max(maxArea, h * w);
+        }
+        stack.Push(i);
+    }
+    <span class="kw">while</span> (stack.Count &gt; <span class="nm">0</span>) {
+        <span class="tp">int</span> h = heights[stack.Pop()];
+        <span class="tp">int</span> w = stack.Count == <span class="nm">0</span> ? n : n - stack.Peek() - <span class="nm">1</span>;
+        maxArea = Math.Max(maxArea, h * w);
+    }
+    <span class="kw">return</span> maxArea;
 }`
     },
     memoryHack:{
@@ -3990,230 +4036,6 @@ nums.<span class="fn">sort</span>()
   } <span class="kw">else</span> stack.push(Integer.parseInt(t));
 }
 <span class="kw">return</span> stack.pop();`
-    }
-  },
-  {
-    icon:'🏛️', name:'Largest Rectangle in Histogram', accent:'#ef4444',
-    tagline:'Monotonic increasing stack — when shorter bar hits, calculate area',
-    hook:"Imagine standing in a histogram asking: 'What's the biggest rectangle I can draw?' For each bar, you want to know how far left and right it can extend before hitting a shorter bar. A monotonic increasing stack tracks potential left boundaries — when a shorter bar arrives, all taller bars in the stack can't extend further right. Time to pop them and calculate their max rectangles!",
-    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><style>@keyframes hist-glow{0%,100%{fill:rgba(239,68,68,0.2)}50%{fill:rgba(239,68,68,0.5)}}</style><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Largest Rectangle: [2,1,5,6,2,3] → Area=10</text><rect x="50" y="60" width="520" height="210" fill="#1a1d2e" rx="8" stroke="#1e2230"/><rect x="80" y="200" width="60" height="40" fill="#0e1018" stroke="#ef4444" stroke-width="2"/><text x="110" y="245" fill="#ef4444" text-anchor="middle" font-size="11" font-family="monospace">2</text><rect x="140" y="220" width="60" height="20" fill="#0e1018" stroke="#ef4444" stroke-width="2"/><text x="170" y="245" fill="#ef4444" text-anchor="middle" font-size="11" font-family="monospace">1</text><rect x="200" y="140" width="60" height="100" fill="rgba(239,68,68,0.3)" stroke="#ef4444" stroke-width="2" style="animation:hist-glow 2s ease infinite"/><text x="230" y="245" fill="#00ff88" text-anchor="middle" font-size="11" font-weight="bold" font-family="monospace">5</text><rect x="260" y="120" width="60" height="120" fill="rgba(239,68,68,0.3)" stroke="#ef4444" stroke-width="2" style="animation:hist-glow 2s ease infinite"/><text x="290" y="245" fill="#00ff88" text-anchor="middle" font-size="11" font-weight="bold" font-family="monospace">6</text><rect x="320" y="200" width="60" height="40" fill="#0e1018" stroke="#ef4444" stroke-width="2"/><text x="350" y="245" fill="#ef4444" text-anchor="middle" font-size="11" font-family="monospace">2</text><rect x="380" y="180" width="60" height="60" fill="#0e1018" stroke="#ef4444" stroke-width="2"/><text x="410" y="245" fill="#ef4444" text-anchor="middle" font-size="11" font-family="monospace">3</text><rect x="200" y="140" width="120" height="100" fill="rgba(0,255,136,0.15)" stroke="#00ff88" stroke-width="3" stroke-dasharray="5,5"/><text x="260" y="165" fill="#00ff88" text-anchor="middle" font-size="13" font-weight="bold" font-family="monospace">Area = 5×2 = 10</text><text x="300" y="75" fill="#ffd600" text-anchor="middle" font-size="11" font-family="monospace">Bar h=5 extends from idx 2-3 (width=2)</text></svg>`,
-    complexity:[
-      {badge:'red',big:'O(n²)',label:'BRUTE FORCE',desc:'For each bar, scan left & right for boundaries'},
-      {badge:'green',big:'O(n)',label:'MONOTONIC STACK',desc:'Each bar pushed/popped once'}
-    ],
-    meterWidth:'95%',
-    code:{
-      python:`<span class="cm"># ═══════════════════════════════════════</span>
-<span class="cm"># LARGEST RECTANGLE IN HISTOGRAM</span>
-<span class="cm"># ═══════════════════════════════════════</span>
-<span class="cm"># PATTERN: Monotonic INCREASING stack</span>
-<span class="cm"># TIME: O(n) | SPACE: O(n)</span>
-<span class="cm"># ═══════════════════════════════════════</span>
-
-<span class="kw">def</span> <span class="fn">largestRectangleArea</span>(heights):
-    stack = []  <span class="cm"># stores INDICES</span>
-    max_area = <span class="nm">0</span>
-
-    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(heights)):
-        <span class="cm"># When SHORTER bar arrives, taller bars can't extend</span>
-        <span class="kw">while</span> stack <span class="kw">and</span> heights[i] &lt; heights[stack[-<span class="nm">1</span>]]:
-            h = heights[stack.pop()]  <span class="cm"># Height of rectangle</span>
-
-            <span class="cm"># Width = right_boundary - left_boundary - 1</span>
-            w = i <span class="kw">if not</span> stack <span class="kw">else</span> i - stack[-<span class="nm">1</span>] - <span class="nm">1</span>
-
-            max_area = <span class="fn">max</span>(max_area, h * w)
-
-        stack.append(i)  <span class="cm"># Push index</span>
-
-    <span class="cm"># Process bars that extend to the end</span>
-    <span class="kw">while</span> stack:
-        h = heights[stack.pop()]
-        w = <span class="fn">len</span>(heights) <span class="kw">if not</span> stack <span class="kw">else</span> <span class="fn">len</span>(heights) - stack[-<span class="nm">1</span>] - <span class="nm">1</span>
-        max_area = <span class="fn">max</span>(max_area, h * w)
-
-    <span class="kw">return</span> max_area
-
-<span class="cm"># Example: [2,1,5,6,2,3]</span>
-<span class="cm"># When i=4 (h=2), pop 6 and 5</span>
-<span class="cm"># Bar h=5: width=2 (indices 2-3), area=5×2=10 ✅</span>`,
-      java:`<span class="cm">// ═══════════════════════════════════════</span>
-<span class="cm">// LARGEST RECTANGLE IN HISTOGRAM</span>
-<span class="cm">// TIME: O(n) | SPACE: O(n)</span>
-<span class="cm">// ═══════════════════════════════════════</span>
-
-<span class="kw">public</span> <span class="tp">int</span> <span class="fn">largestRectangleArea</span>(<span class="tp">int</span>[] heights) {
-    <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
-    <span class="tp">int</span> maxArea = <span class="nm">0</span>;
-    <span class="tp">int</span> n = heights.length;
-
-    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
-        <span class="cm">// ⚠️ SHORTER bar → pop taller bars</span>
-        <span class="kw">while</span> (!stack.isEmpty() &amp;&amp; heights[i] &lt; heights[stack.peek()]) {
-            <span class="tp">int</span> h = heights[stack.pop()];  <span class="cm">// Rectangle height</span>
-
-            <span class="cm">// ⚠️ WIDTH CALCULATION IS TRICKY!</span>
-            <span class="tp">int</span> w = stack.isEmpty() ? i : i - stack.peek() - <span class="nm">1</span>;
-
-            maxArea = Math.max(maxArea, h * w);
-        }
-        stack.push(i);  <span class="cm">// Always push index (not height!)</span>
-    }
-
-    <span class="cm">// Process bars that extend to end</span>
-    <span class="kw">while</span> (!stack.isEmpty()) {
-        <span class="tp">int</span> h = heights[stack.pop()];
-        <span class="tp">int</span> w = stack.isEmpty() ? n : n - stack.peek() - <span class="nm">1</span>;
-        maxArea = Math.max(maxArea, h * w);
-    }
-
-    <span class="kw">return</span> maxArea;
-}
-
-<span class="cm">// ─── WHY THIS WORKS ───</span>
-<span class="cm">// Stack keeps INCREASING heights (indices)</span>
-<span class="cm">// When shorter bar arrives: taller bars found their right limit</span>
-<span class="cm">// Pop each taller bar, calculate its max rectangle</span>
-<span class="cm">// Width = current_i (right) - stack.peek() (left) - 1</span>`,
-      csharp:`<span class="cm">// LARGEST RECTANGLE IN HISTOGRAM</span>
-<span class="kw">public</span> <span class="tp">int</span> <span class="fn">LargestRectangleArea</span>(<span class="tp">int</span>[] heights) {
-    <span class="kw">var</span> stack = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">int</span>&gt;();
-    <span class="tp">int</span> maxArea = <span class="nm">0</span>;
-    <span class="tp">int</span> n = heights.Length;
-
-    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
-        <span class="kw">while</span> (stack.Count &gt; <span class="nm">0</span> &amp;&amp; heights[i] &lt; heights[stack.Peek()]) {
-            <span class="tp">int</span> h = heights[stack.Pop()];
-            <span class="tp">int</span> w = stack.Count == <span class="nm">0</span> ? i : i - stack.Peek() - <span class="nm">1</span>;
-            maxArea = Math.Max(maxArea, h * w);
-        }
-        stack.Push(i);
-    }
-
-    <span class="kw">while</span> (stack.Count &gt; <span class="nm">0</span>) {
-        <span class="tp">int</span> h = heights[stack.Pop()];
-        <span class="tp">int</span> w = stack.Count == <span class="nm">0</span> ? n : n - stack.Peek() - <span class="nm">1</span>;
-        maxArea = Math.Max(maxArea, h * w);
-    }
-
-    <span class="kw">return</span> maxArea;
-}`
-    },
-    memoryHack:{
-      oneSentence:'Monotonic increasing stack — when a shorter bar arrives, pop all taller bars and calculate their max rectangle area.',
-      flowchart:{
-        nodes:[
-          {id:'start',label:'Init stack, maxArea',type:'start',x:290,y:20},
-          {id:'loop',label:'For each bar i',type:'action',x:290,y:75},
-          {id:'check',label:'heights[i] < stack.top?',type:'decision',x:290,y:135},
-          {id:'pop',label:'Pop h = heights[stack.pop()]',type:'action',x:100,y:135},
-          {id:'calc',label:'w = i - stack.peek() - 1',type:'action',x:100,y:195},
-          {id:'update',label:'maxArea = max(maxArea, h*w)',type:'action',x:100,y:255},
-          {id:'push',label:'Push i to stack',type:'action',x:480,y:135},
-          {id:'next',label:'Next bar',type:'action',x:290,y:255},
-          {id:'cleanup',label:'Process remaining stack',type:'action',x:290,y:315},
-          {id:'end',label:'Return maxArea',type:'end',x:290,y:375}
-        ],
-        edges:[
-          {from:'start',to:'loop',label:''},
-          {from:'loop',to:'check',label:''},
-          {from:'check',to:'pop',label:'YES (shorter)'},
-          {from:'pop',to:'calc',label:''},
-          {from:'calc',to:'update',label:''},
-          {from:'update',to:'check',label:'check again'},
-          {from:'check',to:'push',label:'NO'},
-          {from:'push',to:'next',label:''},
-          {from:'next',to:'loop',label:'more bars'},
-          {from:'next',to:'cleanup',label:'done'},
-          {from:'cleanup',to:'end',label:''}
-        ]
-      },
-      title:'WHEN SHORTER BAR HITS = CALCULATE AREA',
-      mnemonic:'INCREASING STACK — pop when SHORTER arrives, calc area using popped height',
-      steps:[
-        'Initialize stack (for indices) and maxArea',
-        'For each bar: while current is shorter than stack.top, pop and calculate',
-        'Width = current_index - stack.peek() - 1 (or current_index if stack empty)',
-        'Push current index to stack',
-        'After loop: process remaining bars in stack (they extend to end)'
-      ],
-      why:'Stack maintains increasing heights. When a shorter bar arrives, all taller bars in stack found their right boundary. Pop each and calculate max rectangle using that bar\'s height. Width is determined by current position (right) and the index below popped element (left).',
-      annotatedCode:[
-        {line:'    Deque<Integer> stack = new ArrayDeque<>();',stepId:'start',note:'Stack stores INDICES (not heights!)',color:'#ef4444'},
-        {line:'    for (int i = 0; i < n; i++) {',stepId:'loop',note:'Process each bar left to right',color:'#4a5268'},
-        {line:'        while (!stack.isEmpty() && heights[i] < heights[stack.peek()]) {',stepId:'check',note:'Shorter bar = right boundary for taller bars',color:'#ffd600'},
-        {line:'            int h = heights[stack.pop()];',stepId:'pop',note:'This bar cannot extend further right',color:'#ef4444'},
-        {line:'            int w = stack.isEmpty() ? i : i - stack.peek() - 1;',stepId:'calc',note:'Width calculation is the TRICKY part!',color:'#00ff88'},
-        {line:'            maxArea = Math.max(maxArea, h * w);',stepId:'update',note:'Calculate area for this height',color:'#00cfff'},
-        {line:'        stack.push(i);',stepId:'push',note:'Save index for potential left boundary',color:'#a78bfa'},
-        {line:'    while (!stack.isEmpty()) {',stepId:'cleanup',note:'Remaining bars extend to the end',color:'#ffd600'},
-        {line:'        int h = heights[stack.pop()];',stepId:'cleanpop',note:'Process bars that reached end',color:'#ef4444'},
-        {line:'        int w = stack.isEmpty() ? n : n - stack.peek() - 1;',stepId:'cleanwidth',note:'Right boundary = n (end of array)',color:'#00ff88'}
-      ],
-      stateSnapshots:[
-        {label:'Input: [2,1,5,6,2,3]',art:`
-  i=0, h=2
-  Stack: []
-  → Push 0
-  Stack: [0]`,annotation:'First bar, just push index'},
-        {label:'i=1, h=1 (SHORTER!)',art:`
-  1 < 2 → POP!
-  Pop idx=0 (h=2)
-  w = 1 (stack empty)
-  area = 2×1 = 2
-
-  Stack: []
-  → Push 1
-  Stack: [1]`,annotation:'Shorter bar triggers pop & calculation'},
-        {label:'i=2,3 (INCREASING)',art:`
-  i=2, h=5 > 1 → push 2
-  i=3, h=6 > 5 → push 3
-
-  Stack: [1, 2, 3]
-         ↑  ↑  ↑
-         1  5  6
-  (increasing heights)`,annotation:'Stack maintains increasing order'},
-        {label:'i=4, h=2 (SHORTER!)',art:`
-  2 < 6 → Pop idx=3 (h=6)
-    w = 4-2-1 = 1
-    area = 6×1 = 6
-
-  2 < 5 → Pop idx=2 (h=5)
-    w = 4-1-1 = 2
-    area = 5×2 = 10 ✅
-
-  Stack: [1, 4]`,annotation:'Two bars popped, h=5 gives max area!'},
-        {label:'Final: Process remaining',art:`
-  i=5, h=3 → push 5
-
-  End of array:
-  Pop idx=5 (h=3): area=3×1=3
-  Pop idx=4 (h=2): area=2×4=8
-  Pop idx=1 (h=1): area=1×6=6
-
-  Max area = 10`,annotation:'Cleanup remaining bars'}
-      ],
-      variations:[
-        {name:'Maximal Rectangle',desc:'Apply histogram algorithm to each row of binary matrix',problem:'#85'},
-        {name:'Trapping Rain Water',desc:'Similar monotonic stack concept for water trapped between bars',problem:'#42'},
-        {name:'Maximum Score of Good Subarray',desc:'Monotonic stack to find max score with min element constraint',problem:'#1793'}
-      ]
-    },
-    cheat:{
-      trigger:'largest rectangle, histogram, max area',
-      firstLine:'Deque<Integer> stack = new ArrayDeque<>();  // stores INDICES',
-      gotcha:'Storing heights instead of indices — you need indices to calculate WIDTH! Also wrong width formula (forgetting the -1)',
-      pitch:"I'll use a monotonic increasing stack. When a shorter bar arrives, all taller bars in the stack have found their right boundary. I pop each one, calculate its max rectangle area using width = current_index - stack.peek() - 1. O(n) because each bar is pushed/popped once.",
-      snippet:`<span class="cm">// Monotonic INCREASING stack</span>
-<span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stk = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
-<span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
-  <span class="kw">while</span> (!stk.isEmpty() &amp;&amp; h[i] &lt; h[stk.peek()]) {
-    <span class="tp">int</span> height = h[stk.pop()];
-    <span class="tp">int</span> width = stk.isEmpty() ? i : i - stk.peek() - <span class="nm">1</span>;
-    maxArea = Math.max(maxArea, height * width);
-  }
-  stk.push(i);  <span class="cm">// push INDEX</span>
-}`
     }
   }
 ];
