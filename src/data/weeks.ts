@@ -243,18 +243,18 @@ export const WEEKS: Week[] = [
   },
   {
     num: '08', title: 'FINAL BOSS', color: '#f87171',
-    topics: ['Greedy', 'Intervals', 'Math & Geometry', 'Bit Manipulation'],
-    problems: 30, perDay: '4/day',
+    topics: ['Sorting & Greedy', 'Math & Geometry', 'Bit Manipulation'],
+    problems: 31, perDay: '4/day',
     schedule: [
-      {day:'MON', task:'Greedy\n#1–4'},
-      {day:'TUE', task:'Greedy\n#5–9'},
-      {day:'WED', task:'Intervals\n#1–6'},
+      {day:'MON', task:'Sorting & Greedy\n#1–5'},
+      {day:'TUE', task:'Sorting & Greedy\n#6–10'},
+      {day:'WED', task:'Sorting & Greedy\n#11–16'},
       {day:'THU', task:'Math & Geometry\n#1–8'},
       {day:'FRI', task:'Bit Manipulation\n#1–7'},
       {day:'SAT', task:'FINAL MOCK\n3 problems, timed'},
       {day:'SUN', task:'🏆 YOU DID IT', rest: true}
     ],
-    tip: '<strong>Senior tip:</strong> You\'re in the home stretch. Greedy + Intervals are highly patterned — sort by start time is the answer to 80% of interval problems. Bit manipulation: learn XOR properties cold. They show up as "trick" questions.',
+    tip: '<strong>Senior tip:</strong> You\'re in the home stretch. Sorting & Greedy is now unified — sort by the key dimension first (position, start time, end time), then make locally optimal choices. 80% of interval problems: sort by start time. Bit manipulation: learn XOR properties cold. They show up as "trick" questions.',
     problems_list: [
       {name:'Maximum Subarray', diff:'Medium', url:'https://leetcode.com/problems/maximum-subarray/'},
       {name:'Jump Game', diff:'Medium', url:'https://leetcode.com/problems/jump-game/'},
