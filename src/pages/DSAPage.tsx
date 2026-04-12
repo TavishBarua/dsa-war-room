@@ -5,6 +5,7 @@ import Hero from '../components/hero/Hero';
 import ProgressBar from '../components/progress/ProgressBar';
 import PatternsSection from '../components/patterns/PatternsSection';
 import DnaSection from '../components/dna/DnaSection';
+import ComplexityTable from '../components/complexity/ComplexityTable';
 import CollectionsSection from '../components/collections/CollectionsSection';
 import PlanSection from '../components/plan/PlanSection';
 import SimulatorSection from '../components/simulator/SimulatorSection';
@@ -20,6 +21,7 @@ export default function DSAPage() {
           <ProgressBar />
           <PatternsSection />
           <DnaSection />
+          <ComplexityTable />
           <CollectionsSection />
           <PlanSection />
           <SimulatorSection />
