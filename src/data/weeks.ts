@@ -32,7 +32,7 @@ export const WEEKS: Week[] = [
   {
     num: '02', title: 'WINDOW & STACK', color: '#00cfff',
     topics: ['Sliding Window', 'Stack'],
-    problems: 12, perDay: '2/day',
+    problems: 11, perDay: '2/day',
     schedule: [
       {day:'MON', task:'Sliding Window\n#1–2'},
       {day:'TUE', task:'Sliding Window\n#3–4'},
@@ -52,7 +52,6 @@ export const WEEKS: Week[] = [
       {name:'Min Stack', diff:'Medium', url:'https://leetcode.com/problems/min-stack/'},
       {name:'Evaluate Reverse Polish Notation', diff:'Medium', url:'https://leetcode.com/problems/evaluate-reverse-polish-notation/'},
       {name:'Daily Temperatures', diff:'Medium', url:'https://leetcode.com/problems/daily-temperatures/'},
-      {name:'Car Fleet', diff:'Medium', url:'https://leetcode.com/problems/car-fleet/'},
       {name:'Largest Rectangle in Histogram', diff:'Hard', url:'https://leetcode.com/problems/largest-rectangle-in-histogram/'},
       {name:'Trapping Rain Water', diff:'Hard', url:'https://leetcode.com/problems/trapping-rain-water/'},
       {name:'Sliding Window Maximum', diff:'Hard', url:'https://leetcode.com/problems/sliding-window-maximum/'}
