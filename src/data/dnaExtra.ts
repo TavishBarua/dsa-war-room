@@ -3794,5 +3794,202 @@ nums.<span class="fn">sort</span>()
         <span class="kw">if</span> nums[i]+nums[L]+nums[R] == <span class="nm">0</span>:
             result.<span class="fn">append</span>([nums[i],nums[L],nums[R]])`
     }
+  },
+  {
+    icon:'📚', name:'Reverse Polish Notation (RPN)', accent:'#fb923c',
+    tagline:'Stack evaluation: operands wait, operators compute',
+    hook:"Think of RPN like a calculator that remembers numbers. When you see '2 3 +', you store 2, store 3, then when '+' arrives, grab the last two numbers and add them. It's like a cafeteria tray stack — last tray in is first tray out (LIFO). Numbers pile up waiting, operators grab the top two, compute, and put the result back. Simple, no parentheses needed!",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><style>@keyframes rpn-push{0%{transform:translateY(-20px);opacity:0}100%{transform:translateY(0);opacity:1}} @keyframes rpn-pop{0%{opacity:1}100%{opacity:0;transform:translateY(-30px)}}</style><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">RPN: "2 1 + 3 *" = (2+1)*3 = 9</text><rect x="50" y="50" width="200" height="220" fill="#1a1d2e" rx="8" stroke="#fb923c"/><text x="150" y="75" fill="#fb923c" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Stack (LIFO)</text><rect x="75" y="230" width="150" height="30" fill="#0e1018" stroke="#fb923c" rx="4" opacity="0" style="animation:rpn-push 1.5s ease 0s forwards"/><text x="150" y="250" fill="#fb923c" text-anchor="middle" font-size="13">2</text><rect x="75" y="195" width="150" height="30" fill="#0e1018" stroke="#fb923c" rx="4" opacity="0" style="animation:rpn-push 1.5s ease 0.5s forwards"/><text x="150" y="215" fill="#fb923c" text-anchor="middle" font-size="13">1</text><rect x="75" y="160" width="150" height="30" fill="#0e1018" stroke="#00ff88" stroke-width="2" rx="4" opacity="0" style="animation:rpn-push 1.5s ease 1.5s forwards"/><text x="150" y="180" fill="#00ff88" text-anchor="middle" font-size="13" font-weight="bold">3</text><rect x="75" y="125" width="150" height="30" fill="#0e1018" stroke="#ffd600" rx="4" opacity="0" style="animation:rpn-push 1.5s ease 2s forwards"/><text x="150" y="145" fill="#ffd600" text-anchor="middle" font-size="13">3</text><rect x="75" y="90" width="150" height="30" fill="#0e1018" stroke="#00cfff" stroke-width="3" rx="4" opacity="0" style="animation:rpn-push 1.5s ease 2.5s forwards"/><text x="150" y="110" fill="#00cfff" text-anchor="middle" font-size="14" font-weight="bold">9</text><rect x="300" y="60" width="270" height="210" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="435" y="85" fill="#fb923c" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Timeline</text><text x="320" y="110" fill="#e8eaf0" font-size="11" font-family="monospace">① Read "2" → push(2)</text><text x="320" y="133" fill="#e8eaf0" font-size="11" font-family="monospace">② Read "1" → push(1)</text><text x="320" y="156" fill="#00ff88" font-size="11" font-family="monospace">③ Read "+" → pop 1,2 → 2+1=3</text><text x="345" y="173" fill="#00ff88" font-size="10" font-family="monospace">→ push(3)</text><text x="320" y="196" fill="#ffd600" font-size="11" font-family="monospace">④ Read "3" → push(3)</text><text x="320" y="219" fill="#00cfff" font-size="11" font-family="monospace">⑤ Read "*" → pop 3,3 → 3*3=9</text><text x="345" y="236" fill="#00cfff" font-size="10" font-family="monospace">→ push(9)</text><text x="435" y="258" fill="#00cfff" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Final answer: 9</text></svg>`,
+    complexity:[
+      {badge:'green',big:'O(n)',label:'TIME',desc:'Single pass through tokens'},
+      {badge:'green',big:'O(n)',label:'SPACE',desc:'Stack holds up to n operands'}
+    ],
+    meterWidth:'95%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># REVERSE POLISH NOTATION (RPN) — STACK</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Evaluate postfix expressions</span>
+<span class="cm"># TIME: O(n) | SPACE: O(n)</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="cm"># ─── Evaluate RPN ───</span>
+<span class="kw">def</span> <span class="fn">evalRPN</span>(tokens):
+    stack = []
+    <span class="kw">for</span> token <span class="kw">in</span> tokens:
+        <span class="kw">if</span> token <span class="kw">in</span> [<span class="st">'+'</span>, <span class="st">'-'</span>, <span class="st">'*'</span>, <span class="st">'/'</span>]:
+            <span class="cm"># ⚠️ ORDER MATTERS!</span>
+            right = stack.pop()  <span class="cm"># Second operand</span>
+            left = stack.pop()   <span class="cm"># First operand</span>
+
+            <span class="kw">if</span> token == <span class="st">'+'</span>: stack.append(left + right)
+            <span class="kw">elif</span> token == <span class="st">'-'</span>: stack.append(left - right)
+            <span class="kw">elif</span> token == <span class="st">'*'</span>: stack.append(left * right)
+            <span class="kw">elif</span> token == <span class="st">'/'</span>: stack.append(<span class="fn">int</span>(left / right))  <span class="cm"># truncate toward 0</span>
+        <span class="kw">else</span>:
+            stack.append(<span class="fn">int</span>(token))  <span class="cm"># Push operand</span>
+
+    <span class="kw">return</span> stack[<span class="nm">0</span>]  <span class="cm"># Final answer</span>
+
+<span class="cm"># Example: ["2","1","+","3","*"]</span>
+<span class="cm"># Stack: [2] → [2,1] → [3] → [3,3] → [9]</span>
+<span class="cm"># Result: 9 (because (2+1)*3 = 9)</span>`,
+      java:`<span class="cm">// ═══════════════════════════════════════</span>
+<span class="cm">// REVERSE POLISH NOTATION — STACK PATTERN</span>
+<span class="cm">// TIME: O(n) | SPACE: O(n)</span>
+<span class="cm">// ═══════════════════════════════════════</span>
+
+<span class="cm">// ─── Evaluate RPN ───</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">evalRPN</span>(<span class="tp">String</span>[] tokens) {
+    <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+
+    <span class="kw">for</span> (<span class="tp">String</span> token : tokens) {
+        <span class="kw">if</span> (token.length() == <span class="nm">1</span> &amp;&amp; <span class="st">"+-*/"</span>.contains(token)) {
+            <span class="cm">// ⚠️ POP ORDER CRITICAL!</span>
+            <span class="tp">int</span> right = stack.pop();  <span class="cm">// Second operand (top)</span>
+            <span class="tp">int</span> left = stack.pop();   <span class="cm">// First operand (below)</span>
+
+            <span class="kw">switch</span> (token.charAt(<span class="nm">0</span>)) {
+                <span class="kw">case</span> <span class="st">'+'</span>: stack.push(left + right); <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="st">'-'</span>: stack.push(left - right); <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="st">'*'</span>: stack.push(left * right); <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="st">'/'</span>: stack.push(left / right); <span class="kw">break</span>;  <span class="cm">// Java truncates toward 0</span>
+            }
+        } <span class="kw">else</span> {
+            stack.push(Integer.parseInt(token));  <span class="cm">// Push operand</span>
+        }
+    }
+
+    <span class="kw">return</span> stack.pop();  <span class="cm">// Final answer</span>
+}
+
+<span class="cm">// ─── WHY STACK? ───</span>
+<span class="cm">// Operators come AFTER operands in RPN</span>
+<span class="cm">// Stack saves operands until operator arrives</span>
+<span class="cm">// Result becomes operand for next operation</span>
+<span class="cm">// LIFO = perfect match for nested evaluation</span>`,
+      csharp:`<span class="cm">// REVERSE POLISH NOTATION — STACK</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">EvalRPN</span>(<span class="tp">string</span>[] tokens) {
+    <span class="kw">var</span> stack = <span class="kw">new</span> <span class="tp">Stack</span>&lt;<span class="tp">int</span>&gt;();
+
+    <span class="kw">foreach</span> (<span class="kw">var</span> token <span class="kw">in</span> tokens) {
+        <span class="kw">if</span> (token.Length == <span class="nm">1</span> &amp;&amp; <span class="st">"+-*/"</span>.Contains(token)) {
+            <span class="tp">int</span> right = stack.Pop();
+            <span class="tp">int</span> left = stack.Pop();
+
+            <span class="kw">switch</span> (token[<span class="nm">0</span>]) {
+                <span class="kw">case</span> <span class="st">'+'</span>: stack.Push(left + right); <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="st">'-'</span>: stack.Push(left - right); <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="st">'*'</span>: stack.Push(left * right); <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="st">'/'</span>: stack.Push(left / right); <span class="kw">break</span>;
+            }
+        } <span class="kw">else</span> {
+            stack.Push(<span class="tp">int</span>.Parse(token));
+        }
+    }
+
+    <span class="kw">return</span> stack.Pop();
+}`
+    },
+    memoryHack:{
+      oneSentence:'Read left-to-right: operands get pushed, operators pop two & compute, result gets pushed back.',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'Init stack',type:'start',x:290,y:20},
+          {id:'loop',label:'For each token',type:'action',x:290,y:75},
+          {id:'check',label:'Is operator?',type:'decision',x:290,y:135},
+          {id:'push',label:'Push operand',type:'action',x:480,y:135},
+          {id:'pop',label:'Pop right, left',type:'action',x:100,y:135},
+          {id:'compute',label:'Compute result',type:'action',x:100,y:195},
+          {id:'pushback',label:'Push result',type:'action',x:100,y:255},
+          {id:'next',label:'Next token',type:'action',x:290,y:255},
+          {id:'end',label:'Return stack[0]',type:'end',x:290,y:315}
+        ],
+        edges:[
+          {from:'start',to:'loop',label:''},
+          {from:'loop',to:'check',label:''},
+          {from:'check',to:'push',label:'NO'},
+          {from:'check',to:'pop',label:'YES'},
+          {from:'pop',to:'compute',label:''},
+          {from:'compute',to:'pushback',label:''},
+          {from:'push',to:'next',label:''},
+          {from:'pushback',to:'next',label:''},
+          {from:'next',to:'loop',label:'more tokens'},
+          {from:'next',to:'end',label:'done'}
+        ]
+      },
+      title:'RPN Stack Evaluation',
+      mnemonic:'OPERAND = PUSH, OPERATOR = POP-COMPUTE-PUSH',
+      steps:[
+        'Initialize empty stack',
+        'Read tokens left to right',
+        'If operand (number): push to stack',
+        'If operator (+,-,*,/): pop 2, compute, push result',
+        'Final stack has one value: the answer'
+      ],
+      why:'RPN places operators AFTER operands, so stack naturally holds pending values until operator arrives. LIFO ensures most recent operands are used first.',
+      annotatedCode:[
+        {line:'    Deque<Integer> stack = new ArrayDeque<>();',stepId:'start',note:'Stack holds pending operands',color:'#fb923c'},
+        {line:'    for (String token : tokens) {',stepId:'loop',note:'Process each token left-to-right',color:'#4a5268'},
+        {line:'        if ("+-*/".contains(token)) {',stepId:'check',note:'Check if operator',color:'#ffd600'},
+        {line:'            int right = stack.pop();',stepId:'pop',note:'Pop order matters! Right first',color:'#ef4444'},
+        {line:'            int left = stack.pop();',stepId:'pop',note:'Then left operand',color:'#ef4444'},
+        {line:'            int result = compute(left, right, token);',stepId:'compute',note:'Perform operation',color:'#00ff88'},
+        {line:'            stack.push(result);',stepId:'pushback',note:'Result becomes next operand',color:'#00cfff'},
+        {line:'        } else {',stepId:'else',note:'',color:'#4a5268'},
+        {line:'            stack.push(Integer.parseInt(token));',stepId:'push',note:'Save operand for later',color:'#a78bfa'},
+        {line:'    return stack.pop();',stepId:'end',note:'Final answer',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'Input: ["2","1","+","3","*"]',art:`
+  ┌─────────────────┐
+  │ Tokens → Stack  │
+  └─────────────────┘
+     Read "2"
+     Stack: [2]`,annotation:'Push first operand'},
+        {label:'After "1"',art:`
+     Read "1"
+     Stack: [2, 1]
+            ↑  ↑
+            L  R`,annotation:'Stack holds both operands'},
+        {label:'After "+"',art:`
+     Operator "+"!
+     Pop 1 (right)
+     Pop 2 (left)
+     Compute: 2+1=3
+     Stack: [3]`,annotation:'Operator consumes 2, produces 1'},
+        {label:'After "3"',art:`
+     Read "3"
+     Stack: [3, 3]
+            ↑  ↑
+          prev new`,annotation:'Result + new operand'},
+        {label:'Final "*"',art:`
+     Operator "*"!
+     Pop 3 (right)
+     Pop 3 (left)
+     Compute: 3*3=9
+     Stack: [9] ← ANSWER`,annotation:'Final evaluation complete'}
+      ],
+      variations:[
+        {name:'Basic Calculator',desc:'Infix notation with parentheses — convert to RPN or use stack with operator precedence',problem:'#224'},
+        {name:'Basic Calculator II',desc:'Infix with +,-,*,/ — stack evaluation with precedence handling',problem:'#227'},
+        {name:'Expression Add Operators',desc:'Generate expressions with operators between digits that evaluate to target',problem:'#282'}
+      ]
+    },
+    cheat:{
+      trigger:'reverse polish, postfix notation, evaluate expression',
+      firstLine:'Deque<Integer> stack = new ArrayDeque<>();',
+      gotcha:'Forgetting pop order matters! For "5 3 -", first pop=3 (right), second pop=5 (left) → 5-3, NOT 3-5',
+      pitch:"I'll use a stack to evaluate RPN. Operands get pushed, operators pop two values, compute, and push the result back. The stack naturally handles the postfix order.",
+      snippet:`<span class="cm">// RPN Stack Pattern</span>
+<span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="tp">String</span> t : tokens) {
+  <span class="kw">if</span> (<span class="st">"+-*/"</span>.contains(t)) {
+    <span class="tp">int</span> b = stack.pop(), a = stack.pop();  <span class="cm">// ORDER!</span>
+    stack.push(compute(a, b, t));
+  } <span class="kw">else</span> stack.push(Integer.parseInt(t));
+}
+<span class="kw">return</span> stack.pop();`
+    }
   }
 ];
