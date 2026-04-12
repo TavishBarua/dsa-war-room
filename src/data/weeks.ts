@@ -265,6 +265,7 @@ export const WEEKS: Week[] = [
       {name:'Merge Triplets to Form Target', diff:'Medium', url:'https://leetcode.com/problems/merge-triplets-to-form-target-triplet/'},
       {name:'Partition Labels', diff:'Medium', url:'https://leetcode.com/problems/partition-labels/'},
       {name:'Valid Parenthesis String', diff:'Medium', url:'https://leetcode.com/problems/valid-parenthesis-string/'},
+      {name:'Car Fleet', diff:'Medium', url:'https://leetcode.com/problems/car-fleet/'},
       {name:'Insert Interval', diff:'Medium', url:'https://leetcode.com/problems/insert-interval/'},
       {name:'Merge Intervals', diff:'Medium', url:'https://leetcode.com/problems/merge-intervals/'},
       {name:'Non-overlapping Intervals', diff:'Medium', url:'https://leetcode.com/problems/non-overlapping-intervals/'},

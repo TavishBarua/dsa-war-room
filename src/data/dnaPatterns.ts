@@ -1908,5 +1908,214 @@ for (int right = 0; right < s.length(); right++) {
 }
 <span class="kw">return</span> prev;  <span class="cm">// new head</span>`
     }
+  },
+  {
+    icon: '⚡', name: 'Sorting & Greedy', accent: '#fbbf24',
+    tagline: 'Sort first, then make locally optimal choices',
+    hook: "Imagine you're at a buffet with limited time. A greedy person fills their plate with the BEST items first, always making the locally optimal choice at each step. Sorting is like organizing the buffet by tastiness before you start — it makes finding the best choice easier! In algorithms, greedy means: at each step, choose what looks best RIGHT NOW (without looking ahead). Often you need to SORT first to make the greedy choice obvious.",
+    svg: `<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><style>@keyframes sg-sort{0%{transform:translateY(0)}25%{transform:translateY(-10px)}50%{transform:translateY(0)}75%{transform:translateY(-10px)}100%{transform:translateY(0)}} @keyframes sg-pick{0%,40%{opacity:1}50%{opacity:0.3}100%{opacity:1}}</style><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="28" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Sorting + Greedy: Always Pick the Best Available</text><text x="150" y="58" fill="#ff4d6d" text-anchor="middle" font-size="12" font-family="monospace">BEFORE SORT: Chaos</text><rect x="60" y="70" width="45" height="40" fill="#1a1d2e" stroke="#ff4d6d" rx="4"/><text x="82" y="95" fill="#ff4d6d" text-anchor="middle" font-size="14">8</text><rect x="115" y="70" width="45" height="40" fill="#1a1d2e" stroke="#ff4d6d" rx="4"/><text x="137" y="95" fill="#ff4d6d" text-anchor="middle" font-size="14">3</text><rect x="170" y="70" width="45" height="40" fill="#1a1d2e" stroke="#ff4d6d" rx="4"/><text x="192" y="95" fill="#ff4d6d" text-anchor="middle" font-size="14">9</text><rect x="225" y="70" width="45" height="40" fill="#1a1d2e" stroke="#ff4d6d" rx="4"/><text x="247" y="95" fill="#ff4d6d" text-anchor="middle" font-size="14">1</text><text x="450" y="58" fill="#00ff88" text-anchor="middle" font-size="12" font-family="monospace">AFTER SORT: Ordered</text><rect x="360" y="70" width="45" height="40" fill="#1a1d2e" stroke="#00ff88" rx="4" style="animation:sg-sort 2s ease-in-out infinite"/><text x="382" y="95" fill="#00ff88" text-anchor="middle" font-size="14">1</text><rect x="415" y="70" width="45" height="40" fill="#1a1d2e" stroke="#00ff88" rx="4" style="animation:sg-sort 2s ease-in-out infinite;animation-delay:0.2s"/><text x="437" y="95" fill="#00ff88" text-anchor="middle" font-size="14">3</text><rect x="470" y="70" width="45" height="40" fill="#1a1d2e" stroke="#00ff88" rx="4" style="animation:sg-sort 2s ease-in-out infinite;animation-delay:0.4s"/><text x="492" y="95" fill="#00ff88" text-anchor="middle" font-size="14">8</text><rect x="525" y="70" width="45" height="40" fill="#1a1d2e" stroke="#00ff88" rx="4" style="animation:sg-sort 2s ease-in-out infinite;animation-delay:0.6s"/><text x="547" y="95" fill="#00ff88" text-anchor="middle" font-size="14">9</text><text x="300" y="140" fill="#fbbf24" text-anchor="middle" font-size="13" font-weight="bold" font-family="monospace">GREEDY: Pick Best at Each Step</text><rect x="50" y="160" width="500" height="120" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="70" y="185" fill="#fbbf24" font-size="12" font-weight="bold" font-family="monospace">Step 1: Pick 1 (smallest available)</text><rect x="180" y="170" width="40" height="30" fill="rgba(0,255,136,0.2)" stroke="#00ff88" rx="4" style="animation:sg-pick 3s infinite"/><text x="200" y="190" fill="#00ff88" text-anchor="middle" font-size="13">1 ✓</text><text x="70" y="215" fill="#fbbf24" font-size="12" font-weight="bold" font-family="monospace">Step 2: Pick 3 (best remaining)</text><rect x="230" y="200" width="40" height="30" fill="rgba(0,255,136,0.2)" stroke="#00ff88" rx="4" style="animation:sg-pick 3s infinite;animation-delay:1s"/><text x="250" y="220" fill="#00ff88" text-anchor="middle" font-size="13">3 ✓</text><text x="70" y="245" fill="#fbbf24" font-size="12" font-weight="bold" font-family="monospace">Step 3: Pick 8 (best remaining)</text><rect x="280" y="230" width="40" height="30" fill="rgba(0,255,136,0.2)" stroke="#00ff88" rx="4" style="animation:sg-pick 3s infinite;animation-delay:2s"/><text x="300" y="250" fill="#00ff88" text-anchor="middle" font-size="13">8 ✓</text><text x="450" y="210" fill="#4a5268" font-size="11" font-family="monospace">Greedy = Best choice NOW</text><text x="450" y="230" fill="#4a5268" font-size="11" font-family="monospace">No backtracking needed!</text><text x="450" y="250" fill="#4a5268" font-size="11" font-family="monospace">Works when locally optimal</text><text x="450" y="270" fill="#4a5268" font-size="11" font-family="monospace">= globally optimal</text></svg>`,
+    complexity: [
+      {badge:'red', big:'O(n²)', label:'BRUTE FORCE', desc:'Try all combinations without sorting'},
+      {badge:'yellow', big:'O(n log n)', label:'SORT FIRST', desc:'Sorting enables greedy choices'},
+      {badge:'green', big:'O(n)', label:'GREEDY PASS', desc:'Single pass after sorting to make optimal choices'}
+    ],
+    meterWidth: '88%',
+    code: {
+      python: `<span class="cm"># ═══════════════════════════════</span>
+<span class="cm"># SORTING & GREEDY — THE TEMPLATE</span>
+<span class="cm"># ═══════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Intervals, scheduling, locally optimal choices</span>
+<span class="cm"># TIME: O(n log n) for sort + O(n) for greedy | SPACE: O(1) or O(n)</span>
+<span class="cm"># ═══════════════════════════════</span>
+
+<span class="kw">def</span> <span class="fn">greedy_template</span>(items):
+    <span class="cm"># STEP 1: Sort by the key that makes greedy choice obvious</span>
+    items.sort(key=<span class="kw">lambda</span> x: x[<span class="nm">0</span>])
+
+    result = []
+    <span class="cm"># STEP 2: Make greedy choice at each step</span>
+    <span class="kw">for</span> item <span class="kw">in</span> items:
+        <span class="cm"># Choose what looks best RIGHT NOW</span>
+        <span class="kw">if</span> is_optimal(item):
+            result.append(item)
+
+    <span class="kw">return</span> result
+
+<span class="cm"># ─── REAL EXAMPLE: Merge Intervals ───</span>
+<span class="cm"># Input: [[1,3],[2,6],[8,10],[15,18]]  Output: [[1,6],[8,10],[15,18]]</span>
+
+<span class="kw">def</span> <span class="fn">merge</span>(intervals):
+    <span class="kw">if not</span> intervals: <span class="kw">return</span> []
+
+    <span class="cm"># Sort by start time</span>
+    intervals.sort(key=<span class="kw">lambda</span> x: x[<span class="nm">0</span>])
+    merged = [intervals[<span class="nm">0</span>]]
+
+    <span class="kw">for</span> curr <span class="kw">in</span> intervals[<span class="nm">1</span>:]:
+        last = merged[-<span class="nm">1</span>]
+        <span class="kw">if</span> curr[<span class="nm">0</span>] &lt;= last[<span class="nm">1</span>]:  <span class="cm"># Overlapping</span>
+            last[<span class="nm">1</span>] = <span class="fn">max</span>(last[<span class="nm">1</span>], curr[<span class="nm">1</span>])  <span class="cm"># Merge</span>
+        <span class="kw">else</span>:
+            merged.append(curr)  <span class="cm"># No overlap, add new</span>
+
+    <span class="kw">return</span> merged`,
+      csharp: `<span class="cm">// SORTING & GREEDY TEMPLATE — O(n log n)</span>
+<span class="kw">public</span> <span class="tp">int</span>[][] <span class="fn">Merge</span>(<span class="tp">int</span>[][] intervals) {
+    <span class="kw">if</span> (intervals.Length == <span class="nm">0</span>) <span class="kw">return</span> intervals;
+
+    <span class="cm">// Sort by start time</span>
+    Array.Sort(intervals, (a,b) =&gt; a[<span class="nm">0</span>].CompareTo(b[<span class="nm">0</span>]));
+
+    <span class="kw">var</span> merged = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>[]&gt; { intervals[<span class="nm">0</span>] };
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">1</span>; i &lt; intervals.Length; i++) {
+        <span class="kw">var</span> last = merged[merged.Count - <span class="nm">1</span>];
+        <span class="kw">var</span> curr = intervals[i];
+
+        <span class="kw">if</span> (curr[<span class="nm">0</span>] &lt;= last[<span class="nm">1</span>]) {
+            last[<span class="nm">1</span>] = Math.Max(last[<span class="nm">1</span>], curr[<span class="nm">1</span>]);
+        } <span class="kw">else</span> {
+            merged.Add(curr);
+        }
+    }
+    <span class="kw">return</span> merged.ToArray();
+}`,
+      java: `<span class="cm">// ═══════════════════════════════</span>
+<span class="cm">// SORTING & GREEDY — THE TEMPLATE</span>
+<span class="cm">// ═══════════════════════════════</span>
+<span class="cm">// WHEN TO USE: Intervals, scheduling, locally optimal = globally optimal</span>
+<span class="cm">// TIME: O(n log n) | SPACE: O(n)</span>
+<span class="cm">// ═══════════════════════════════</span>
+
+<span class="kw">public</span> <span class="tp">int</span>[][] <span class="fn">merge</span>(<span class="tp">int</span>[][] intervals) {
+    <span class="kw">if</span> (intervals.length == <span class="nm">0</span>) <span class="kw">return</span> intervals;
+
+    <span class="cm">// STEP 1: Sort by start time (makes greedy choice obvious)</span>
+    Arrays.sort(intervals, (a, b) -&gt; Integer.compare(a[<span class="nm">0</span>], b[<span class="nm">0</span>]));
+
+    <span class="tp">List</span>&lt;<span class="tp">int</span>[]&gt; merged = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    merged.add(intervals[<span class="nm">0</span>]);
+
+    <span class="cm">// STEP 2: Greedy merge — always extend current or start new</span>
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">1</span>; i &lt; intervals.length; i++) {
+        <span class="tp">int</span>[] last = merged.get(merged.size() - <span class="nm">1</span>);
+        <span class="tp">int</span>[] curr = intervals[i];
+
+        <span class="kw">if</span> (curr[<span class="nm">0</span>] &lt;= last[<span class="nm">1</span>]) {  <span class="cm">// Overlapping?</span>
+            last[<span class="nm">1</span>] = Math.max(last[<span class="nm">1</span>], curr[<span class="nm">1</span>]);  <span class="cm">// Greedy: extend</span>
+        } <span class="kw">else</span> {
+            merged.add(curr);  <span class="cm">// No overlap: new interval</span>
+        }
+    }
+
+    <span class="kw">return</span> merged.toArray(<span class="kw">new</span> <span class="tp">int</span>[merged.size()][]);
+}
+
+<span class="cm">// ─── REAL EXAMPLE: Car Fleet (#853) ───</span>
+<span class="cm">// Sort by position DESC, track max time — greedy count</span>
+<span class="cm">// Input: target=12, pos=[10,8,0,5,3], speed=[2,4,1,1,3]  Output: 3</span>
+
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">carFleet</span>(<span class="tp">int</span> target, <span class="tp">int</span>[] position, <span class="tp">int</span>[] speed) {
+    <span class="tp">int</span> n = position.length;
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">0</span>;
+
+    <span class="cm">// Create [position, time to target]</span>
+    <span class="tp">double</span>[][] cars = <span class="kw">new</span> <span class="tp">double</span>[n][<span class="nm">2</span>];
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+        cars[i][<span class="nm">0</span>] = position[i];
+        cars[i][<span class="nm">1</span>] = (<span class="tp">double</span>)(target - position[i]) / speed[i];
+    }
+
+    <span class="cm">// THE TRICK: Sort by position DESC (closest to target first)</span>
+    Arrays.sort(cars, (a, b) -&gt; Double.compare(b[<span class="nm">0</span>], a[<span class="nm">0</span>]));
+
+    <span class="cm">// Greedy: count fleets by tracking max time</span>
+    <span class="tp">int</span> fleets = <span class="nm">0</span>;
+    <span class="tp">double</span> prevTime = <span class="nm">0</span>;
+
+    <span class="kw">for</span> (<span class="tp">double</span>[] car : cars) {
+        <span class="kw">if</span> (car[<span class="nm">1</span>] &gt; prevTime) {  <span class="cm">// Slower than fleet ahead → new fleet</span>
+            fleets++;
+            prevTime = car[<span class="nm">1</span>];
+        }
+    }
+
+    <span class="kw">return</span> fleets;
+}`
+    },
+    memoryHack: {
+      oneSentence: 'Sort by the dimension that makes the greedy choice obvious, then make the locally best decision at each step.',
+      flowchart: {
+        nodes: [
+          { id: 'start', label: 'Sort intervals', type: 'start', x: 290, y: 20 },
+          { id: 'init', label: 'Init merged=[]', type: 'action', x: 290, y: 70 },
+          { id: 'loop', label: 'For each interval', type: 'action', x: 290, y: 120 },
+          { id: 'check', label: 'Overlaps last?', type: 'decision', x: 290, y: 180 },
+          { id: 'merge', label: 'Extend last.end', type: 'action', x: 100, y: 180 },
+          { id: 'add', label: 'Add new interval', type: 'action', x: 480, y: 180 },
+          { id: 'next', label: 'Next iteration', type: 'action', x: 290, y: 240 },
+          { id: 'done', label: 'Return merged', type: 'end', x: 290, y: 290 }
+        ],
+        edges: [
+          { from: 'start', to: 'init', label: '' },
+          { from: 'init', to: 'loop', label: '' },
+          { from: 'loop', to: 'check', label: '' },
+          { from: 'check', to: 'merge', label: 'YES' },
+          { from: 'check', to: 'add', label: 'NO' },
+          { from: 'merge', to: 'next', label: '' },
+          { from: 'add', to: 'next', label: '' },
+          { from: 'next', to: 'loop', label: '' },
+          { from: 'loop', to: 'done', label: 'DONE' }
+        ]
+      },
+      annotatedCode: [
+        { line: 'int[][] merge(int[][] intervals) {', stepId: 'start', note: 'Entry: merge overlapping intervals', color: '#5a5f70' },
+        { line: '    Arrays.sort(intervals, (a,b)->a[0]-b[0]);', stepId: 'start', note: 'Sort by start time — O(n log n)', color: '#fbbf24' },
+        { line: '    List<int[]> merged = new ArrayList<>();', stepId: 'init', note: 'Track merged intervals', color: '#00cfff' },
+        { line: '    merged.add(intervals[0]);', stepId: 'init', note: 'Add first interval', color: '#00cfff' },
+        { line: '    for (int i=1; i<intervals.length; i++) {', stepId: 'loop', note: 'Process each interval', color: '#a78bfa' },
+        { line: '        int[] last = merged.get(merged.size()-1);', stepId: 'loop', note: 'Get last merged interval', color: '#a78bfa' },
+        { line: '        if (curr[0] <= last[1]) {', stepId: 'check', note: 'Overlapping?', color: '#ffd600' },
+        { line: '            last[1] = Math.max(last[1], curr[1]);', stepId: 'merge', note: 'Greedy: extend end', color: '#00ff88' },
+        { line: '        } else { merged.add(curr); }', stepId: 'add', note: 'No overlap: add new', color: '#00cfff' },
+        { line: '    } return merged.toArray(...);', stepId: 'done', note: 'Return result', color: '#00ff88' }
+      ],
+      stateSnapshots: [
+        { label: 'Step 1', art: 'Sort: [[1,3],[2,6],[8,10],[15,18]]  merged=[[1,3]]', annotation: 'Start with first interval' },
+        { label: 'Step 2', art: '[2,6]: 2≤3 → OVERLAP  merged=[[1,6]]', annotation: 'Merge: extend end to 6' },
+        { label: 'Step 3', art: '[8,10]: 8>6 → NO OVERLAP  merged=[[1,6],[8,10]]', annotation: 'Add new interval' },
+        { label: 'Step 4', art: '[15,18]: 15>10 → NO OVERLAP  merged=[[1,6],[8,10],[15,18]]', annotation: 'Add final interval' }
+      ],
+      variations: [
+        { name: 'Car Fleet', desc: 'Sort by position DESC, track max time — if slower than ahead, new fleet', problem: 'Car Fleet (#853)' },
+        { name: 'Merge Intervals', desc: 'Sort by start, greedy merge overlapping intervals', problem: 'Merge Intervals (#56)' },
+        { name: 'Non-overlapping Intervals', desc: 'Sort by end time, greedy remove intervals that overlap earliest ending', problem: 'Non-overlapping Intervals (#435)' },
+        { name: 'Jump Game', desc: 'Greedy: track farthest reachable, update at each step', problem: 'Jump Game (#55)' },
+        { name: 'Jump Game II', desc: 'Greedy: count jumps by tracking current/next reach boundaries', problem: 'Jump Game II (#45)' },
+        { name: 'Maximum Subarray', desc: 'Kadane: greedy keep positive prefix sum, reset on negative', problem: 'Maximum Subarray (#53)' },
+        { name: 'Meeting Rooms II', desc: 'Sort starts & ends separately, greedy track simultaneous meetings', problem: 'Meeting Rooms II (#253)' },
+        { name: 'Partition Labels', desc: 'Track last index of each char, greedy extend partition until last occurrence', problem: 'Partition Labels (#763)' }
+      ],
+      title: 'SORT then GREEDY',
+      mnemonic: 'SORT by the key dimension, then make GREEDY locally optimal choices',
+      steps: ['Sort by key dimension (start, end, position)','Init result with first element','For each item: make greedy choice (merge/extend/add new)','Return result'],
+      why: 'Sorting reveals the natural order, making greedy choices obvious and provably optimal.'
+    },
+    cheat: {
+      trigger: 'intervals, scheduling, merge, jump, maximize/minimize with locally optimal choices',
+      firstLine: 'Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));',
+      gotcha: 'Forgetting to sort first — greedy only works when you process in the right order',
+      pitch: "I'll sort by the key dimension first, then make greedy locally optimal choices that lead to the global optimum.",
+      snippet: `<span class="cm">// WHY sort first? Makes greedy choice obvious (process in right order)</span>
+Arrays.<span class="fn">sort</span>(intervals, (a, b) -&gt; a[<span class="nm">0</span>] - b[<span class="nm">0</span>]);
+<span class="tp">List</span>&lt;<span class="tp">int</span>[]&gt; result = <span class="kw">new</span> <span class="fn">ArrayList</span>&lt;&gt;();
+result.<span class="fn">add</span>(intervals[<span class="nm">0</span>]);
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">1</span>; i &lt; intervals.length; i++) {
+    <span class="kw">if</span> (canMerge(result.<span class="fn">get</span>(result.size()-<span class="nm">1</span>), intervals[i]))
+        <span class="fn">merge</span>(result.<span class="fn">get</span>(result.size()-<span class="nm">1</span>), intervals[i]);  <span class="cm">// greedy extend</span>
+    <span class="kw">else</span> result.<span class="fn">add</span>(intervals[i]);  <span class="cm">// greedy add new</span>
+}`
+    }
   }
 ];
