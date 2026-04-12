@@ -4049,5 +4049,214 @@ nums.<span class="fn">sort</span>()
 }
 <span class="kw">return</span> stack.pop();`
     }
+  },
+  {
+    icon:'🎢', name:'Sliding Window Maximum (Monotonic Deque)', accent:'#ef4444',
+    tagline:'Deque maintains decreasing order — track potential max candidates',
+    hook:"Imagine a roller coaster with cars sliding through a tunnel that fits exactly 3 cars. At each moment, you want to know the tallest person in the tunnel. When a tall person enters, all shorter people behind them become irrelevant (they'll never be tallest while the tall person is there). This is a monotonic deque — keep only the 'candidates' who could become max, remove from both ends as window slides! WHEN TO RECOGNIZE: Sliding window + need min/max in each window → think monotonic deque, not heap (deque is O(n), heap is O(n log k)).",
+    svg:`<svg viewBox="0 0 600 300" style="max-height:300px;width:100%"><style>@keyframes slide-in{0%{transform:translateX(30px);opacity:0}100%{transform:translateX(0);opacity:1}}</style><rect width="600" height="300" fill="#0e1018" rx="8"/><text x="300" y="25" fill="#fff" text-anchor="middle" font-size="14" font-weight="bold" font-family="monospace">Sliding Window Maximum: [1,3,-1,-3,5,3,6,7] k=3</text><rect x="50" y="50" width="500" height="80" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="300" y="75" fill="#4a5268" text-anchor="middle" font-size="11" font-family="monospace">Array with sliding window</text><rect x="80" y="90" width="50" height="30" fill="#0e1018" stroke="#4a5268" rx="4"/><text x="105" y="110" fill="#4a5268" text-anchor="middle" font-size="12">1</text><rect x="135" y="90" width="50" height="30" fill="rgba(239,68,68,0.3)" stroke="#ef4444" stroke-width="2" rx="4"/><text x="160" y="110" fill="#ef4444" text-anchor="middle" font-size="12" font-weight="bold">3</text><rect x="190" y="90" width="50" height="30" fill="rgba(239,68,68,0.3)" stroke="#ef4444" stroke-width="2" rx="4"/><text x="215" y="110" fill="#ef4444" text-anchor="middle" font-size="12">-1</text><rect x="245" y="90" width="50" height="30" fill="rgba(239,68,68,0.3)" stroke="#ef4444" stroke-width="2" rx="4"/><text x="270" y="110" fill="#ef4444" text-anchor="middle" font-size="12">-3</text><rect x="300" y="90" width="50" height="30" fill="#0e1018" stroke="#4a5268" rx="4"/><text x="325" y="110" fill="#4a5268" text-anchor="middle" font-size="12">5</text><text x="300" y="68" fill="#ef4444" text-anchor="middle" font-size="10" font-family="monospace">← window size k=3</text><rect x="50" y="150" width="500" height="120" fill="#1a1d2e" rx="8" stroke="#1e2230"/><text x="300" y="175" fill="#00ff88" text-anchor="middle" font-size="12" font-weight="bold" font-family="monospace">Monotonic Deque (decreasing order)</text><text x="80" y="200" fill="#a78bfa" font-size="11" font-family="monospace">Front →</text><rect x="150" y="190" width="80" height="30" fill="rgba(0,255,136,0.2)" stroke="#00ff88" stroke-width="2" rx="4" style="animation:slide-in 1s ease"/><text x="190" y="210" fill="#00ff88" text-anchor="middle" font-size="12" font-weight="bold">idx:1 (3)</text><rect x="240" y="190" width="80" height="30" fill="rgba(167,139,250,0.2)" stroke="#a78bfa" rx="4" style="animation:slide-in 1.2s ease"/><text x="280" y="210" fill="#a78bfa" text-anchor="middle" font-size="11">idx:2 (-1)</text><rect x="330" y="190" width="80" height="30" fill="rgba(167,139,250,0.2)" stroke="#a78bfa" rx="4" style="animation:slide-in 1.4s ease"/><text x="370" y="210" fill="#a78bfa" text-anchor="middle" font-size="11">idx:3 (-3)</text><text x="470" y="210" fill="#4a5268" font-size="11" font-family="monospace">← Back</text><text x="80" y="245" fill="#ffd600" font-size="10" font-family="monospace">Max = deque.front() = 3</text><text x="80" y="260" fill="#4a5268" font-size="9" font-family="monospace">When 5 arrives: remove -1,-3,3</text><text x="80" y="273" fill="#4a5268" font-size="9" font-family="monospace">(all smaller, never be max)</text></svg>`,
+    complexity:[
+      {badge:'red',big:'O(nk)',label:'BRUTE FORCE',desc:'For each window, scan k elements to find max'},
+      {badge:'green',big:'O(n)',label:'MONOTONIC DEQUE',desc:'Each element added/removed once'}
+    ],
+    meterWidth:'95%',
+    code:{
+      python:`<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># SLIDING WINDOW MAXIMUM — MONOTONIC DEQUE</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+<span class="cm"># WHEN TO USE: Sliding window + need min/max</span>
+<span class="cm"># TIME: O(n) | SPACE: O(k)</span>
+<span class="cm"># ═══════════════════════════════════════</span>
+
+<span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">maxSlidingWindow</span>(nums, k):
+    dq = deque()  <span class="cm"># stores INDICES</span>
+    result = []
+
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(nums)):
+        <span class="cm"># Remove indices outside window (from FRONT)</span>
+        <span class="kw">while</span> dq <span class="kw">and</span> dq[<span class="nm">0</span>] &lt; i - k + <span class="nm">1</span>:
+            dq.popleft()
+
+        <span class="cm"># Remove smaller elements (from BACK)</span>
+        <span class="cm"># They'll NEVER be max while current exists</span>
+        <span class="kw">while</span> dq <span class="kw">and</span> nums[dq[-<span class="nm">1</span>]] &lt; nums[i]:
+            dq.pop()
+
+        dq.append(i)  <span class="cm"># Add current index</span>
+
+        <span class="cm"># Start recording when window is full</span>
+        <span class="kw">if</span> i &gt;= k - <span class="nm">1</span>:
+            result.append(nums[dq[<span class="nm">0</span>]])  <span class="cm"># Front = max</span>
+
+    <span class="kw">return</span> result
+
+<span class="cm"># Example: [1,3,-1,-3,5,3,6,7], k=3</span>
+<span class="cm"># Deque keeps decreasing order: [3,-1,-3]</span>
+<span class="cm"># When 5 arrives: remove all smaller → [5]</span>`,
+      java:`<span class="cm">// ═══════════════════════════════════════</span>
+<span class="cm">// SLIDING WINDOW MAXIMUM — MONOTONIC DEQUE</span>
+<span class="cm">// TIME: O(n) | SPACE: O(k)</span>
+<span class="cm">// ═══════════════════════════════════════</span>
+
+<span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">maxSlidingWindow</span>(<span class="tp">int</span>[] nums, <span class="tp">int</span> k) {
+    <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; deque = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+    <span class="tp">int</span>[] result = <span class="kw">new</span> <span class="tp">int</span>[nums.length - k + <span class="nm">1</span>];
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; nums.length; i++) {
+        <span class="cm">// Remove indices outside window</span>
+        <span class="kw">while</span> (!deque.isEmpty() &amp;&amp; deque.peekFirst() &lt; i - k + <span class="nm">1</span>) {
+            deque.pollFirst();
+        }
+
+        <span class="cm">// ⚠️ KEY: Remove smaller elements from back</span>
+        <span class="cm">// They can NEVER be max while current exists</span>
+        <span class="kw">while</span> (!deque.isEmpty() &amp;&amp; nums[deque.peekLast()] &lt; nums[i]) {
+            deque.pollLast();
+        }
+
+        deque.offerLast(i);  <span class="cm">// Add current index</span>
+
+        <span class="cm">// Record max when window is full</span>
+        <span class="kw">if</span> (i &gt;= k - <span class="nm">1</span>) {
+            result[i - k + <span class="nm">1</span>] = nums[deque.peekFirst()];
+        }
+    }
+
+    <span class="kw">return</span> result;
+}
+
+<span class="cm">// ─── WHY DEQUE NOT HEAP? ───</span>
+<span class="cm">// Heap: O(n log k) - can't remove arbitrary elements efficiently</span>
+<span class="cm">// Deque: O(n) - remove from both ends in O(1)</span>`,
+      csharp:`<span class="cm">// SLIDING WINDOW MAXIMUM — MONOTONIC DEQUE</span>
+<span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">MaxSlidingWindow</span>(<span class="tp">int</span>[] nums, <span class="tp">int</span> k) {
+    <span class="kw">var</span> deque = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;<span class="tp">int</span>&gt;();
+    <span class="tp">int</span>[] result = <span class="kw">new</span> <span class="tp">int</span>[nums.Length - k + <span class="nm">1</span>];
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; nums.Length; i++) {
+        <span class="kw">while</span> (deque.Count &gt; <span class="nm">0</span> &amp;&amp; deque.First.Value &lt; i - k + <span class="nm">1</span>) {
+            deque.RemoveFirst();
+        }
+
+        <span class="kw">while</span> (deque.Count &gt; <span class="nm">0</span> &amp;&amp; nums[deque.Last.Value] &lt; nums[i]) {
+            deque.RemoveLast();
+        }
+
+        deque.AddLast(i);
+
+        <span class="kw">if</span> (i &gt;= k - <span class="nm">1</span>) {
+            result[i - k + <span class="nm">1</span>] = nums[deque.First.Value];
+        }
+    }
+
+    <span class="kw">return</span> result;
+}`
+    },
+    memoryHack:{
+      oneSentence:'Deque stores indices in decreasing value order — remove smaller from back (useless), remove old from front (out of window).',
+      flowchart:{
+        nodes:[
+          {id:'start',label:'Init deque, result',type:'start',x:290,y:20},
+          {id:'loop',label:'For each index i',type:'action',x:290,y:75},
+          {id:'front',label:'Remove from front if outside window',type:'action',x:100,y:135},
+          {id:'back',label:'Remove from back if smaller',type:'action',x:290,y:135},
+          {id:'add',label:'Add i to deque',type:'action',x:480,y:135},
+          {id:'check',label:'Window full?',type:'decision',x:290,y:195},
+          {id:'record',label:'result[i-k+1] = nums[deque.front]',type:'action',x:480,y:255},
+          {id:'next',label:'Next i',type:'action',x:100,y:255},
+          {id:'end',label:'Return result',type:'end',x:290,y:315}
+        ],
+        edges:[
+          {from:'start',to:'loop',label:''},
+          {from:'loop',to:'front',label:''},
+          {from:'front',to:'back',label:''},
+          {from:'back',to:'add',label:''},
+          {from:'add',to:'check',label:''},
+          {from:'check',to:'record',label:'YES (i >= k-1)'},
+          {from:'check',to:'next',label:'NO'},
+          {from:'record',to:'next',label:''},
+          {from:'next',to:'loop',label:'more elements'},
+          {from:'next',to:'end',label:'done'}
+        ]
+      },
+      title:'DECREASING DEQUE = MAX TRACKER',
+      mnemonic:'FRONT = oldest candidate, BACK = newest candidate, always DECREASING',
+      steps:[
+        'Initialize deque (stores indices) and result array',
+        'For each element: remove old indices from front (outside window)',
+        'Remove smaller elements from back (they will never be max)',
+        'Add current index to back',
+        'Front of deque is always the max for current window'
+      ],
+      why:'WHEN TO USE: Sliding window + need min/max at each step. WHY DEQUE: Need to remove from BOTH ends - front for window boundary, back for maintaining decreasing order. Stack can only remove from one end. Heap is O(log k) per operation. Deque is O(1) for both ends, giving O(n) total. RECOGNITION: If you think "I need max in each sliding window" and see yourself scanning k elements repeatedly → monotonic deque optimizes from O(nk) to O(n).',
+      annotatedCode:[
+        {line:'    Deque<Integer> deque = new ArrayDeque<>();',stepId:'start',note:'Store INDICES in decreasing VALUE order',color:'#ef4444'},
+        {line:'    for (int i = 0; i < nums.length; i++) {',stepId:'loop',note:'Process each element once',color:'#4a5268'},
+        {line:'        while (!deque.isEmpty() && deque.peekFirst() < i-k+1)',stepId:'front',note:'FRONT removal: age check (out of window)',color:'#ffd600'},
+        {line:'            deque.pollFirst();',stepId:'front',note:'Too old, remove from front',color:'#ffd600'},
+        {line:'        while (!deque.isEmpty() && nums[deque.peekLast()] < nums[i])',stepId:'back',note:'BACK removal: value check (too small)',color:'#00ff88'},
+        {line:'            deque.pollLast();',stepId:'back',note:'Smaller element = useless, remove',color:'#00ff88'},
+        {line:'        deque.offerLast(i);',stepId:'add',note:'Add current index to back',color:'#a78bfa'},
+        {line:'        if (i >= k-1)',stepId:'check',note:'Window full? Start recording',color:'#00cfff'},
+        {line:'            result[i-k+1] = nums[deque.peekFirst()];',stepId:'record',note:'Front of deque = max for this window',color:'#00ff88'}
+      ],
+      stateSnapshots:[
+        {label:'PATTERN RECOGNITION',art:`Sliding window + need max/min?
+         ↓
+O(nk) naive vs O(n) deque
+         ↓
+   Use Monotonic Deque!`,annotation:'Key trigger: window + extrema (max/min)'},
+        {label:'Input: [1,3,-1,-3,5] k=3',art:`i=0: deque=[0]       (val=1)
+i=1: 3>1 → remove 0
+     deque=[1]       (val=3)
+i=2: deque=[1,2]    (3,-1)
+     Window full! max=3`,annotation:'Build decreasing deque'},
+        {label:'i=3: Adding -3',art:`deque=[1,2,3]  (3,-1,-3)
+All decreasing!
+Max = nums[1] = 3`,annotation:'Deque maintains decreasing order'},
+        {label:'i=4: Adding 5 (BIG!)',art:`5 > -3 → remove 3
+5 > -1 → remove 2
+5 > 3  → remove 1
+deque=[4]      (val=5)
+Max = 5 ✅`,annotation:'Bigger element clears smaller ones'},
+        {label:'Why Deque Not Stack?',art:`Need to remove from:
+- FRONT (old, out of window)
+- BACK (small, useless)
+
+Stack: only one end ❌
+Deque: both ends ✅`,annotation:'Two-ended removal is essential'},
+        {label:'Why Deque Not Heap?',art:`Heap: O(n log k)
+- Remove arbitrary: hard
+- Track window: complex
+
+Deque: O(n)
+- Remove both ends: O(1)
+- Track window: easy`,annotation:'Deque is faster and simpler'}
+      ],
+      variations:[
+        {name:'Sliding Window Median',desc:'Two heaps (or two deques) for median tracking',problem:'#480'},
+        {name:'Shortest Subarray with Sum ≥ K',desc:'Monotonic deque on prefix sums',problem:'#862'},
+        {name:'Jump Game VI',desc:'Sliding window DP with monotonic deque',problem:'#1696'},
+        {name:'Longest Subarray Absolute Diff ≤ Limit',desc:'Two deques (one for min, one for max)',problem:'#1438'}
+      ]
+    },
+    cheat:{
+      trigger:'sliding window maximum, min max in window, fixed size window extrema',
+      firstLine:'Deque<Integer> deque = new ArrayDeque<>();  // stores INDICES',
+      gotcha:'Storing values instead of indices (need indices for window check!), or using i > k instead of i >= k-1 for window full check',
+      pitch:"I'll use a monotonic decreasing deque. Remove old indices from front (out of window), remove smaller values from back (can't be max). Front of deque is always the max. O(n) since each element is added/removed at most once.",
+      snippet:`<span class="cm">// Monotonic DECREASING deque</span>
+<span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; dq = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+  <span class="kw">while</span> (!dq.isEmpty() &amp;&amp; dq.peekFirst() &lt; i-k+<span class="nm">1</span>)
+    dq.pollFirst();  <span class="cm">// remove old</span>
+  <span class="kw">while</span> (!dq.isEmpty() &amp;&amp; nums[dq.peekLast()] &lt; nums[i])
+    dq.pollLast();   <span class="cm">// remove smaller</span>
+  dq.offerLast(i);
+  <span class="kw">if</span> (i &gt;= k-<span class="nm">1</span>) res[i-k+<span class="nm">1</span>] = nums[dq.peekFirst()];
+}`
+    }
   }
 ];
