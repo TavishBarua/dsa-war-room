@@ -2628,73 +2628,1456 @@ def track_cost(tokens_used, model="gpt-4"):
         id: 'vectordb-intro',
         title: 'Vector Database Fundamentals',
         duration: '2 hours',
-        concepts: ['What are vector databases', 'Use cases', 'Vector vs traditional DBs', 'When to use vector search']
+        concepts: ['What are vector databases', 'Use cases', 'Vector vs traditional DBs', 'When to use vector search'],
+        details: {
+          overview: 'Vector databases are specialized systems for storing and querying high-dimensional vectors (embeddings). Unlike traditional databases that search exact matches, vector DBs find similar items using semantic similarity. Essential for RAG, recommendation systems, image search, anomaly detection. They use ANN (Approximate Nearest Neighbors) algorithms to find similar vectors in milliseconds, even with billions of vectors.',
+          keyPoints: [
+            'Vector DBs store embeddings (numerical representations) and enable similarity search. "Find documents similar to X".',
+            'Traditional DBs: exact match (WHERE id = 5). Vector DBs: similarity search (find 10 nearest neighbors to vector V).',
+            'Key operations: insert vectors, query for K nearest neighbors, filter by metadata, update/delete vectors.',
+            'Use cases: semantic search (RAG), recommendation engines, duplicate detection, image/video search, anomaly detection.',
+            'Popular vector DBs: Pinecone (managed), Weaviate (open-source + managed), Chroma (local), FAISS (library), Qdrant, Milvus.',
+            'Trade-offs: speed vs accuracy (ANN is approximate), memory vs latency, managed (Pinecone) vs self-hosted (Weaviate).'
+          ],
+          example: 'E-commerce search: User searches "comfortable running shoes". Traditional DB searches keywords exactly. Vector DB: (1) Embed query as vector, (2) Find products with similar embeddings (even if description says "cushioned athletic sneakers"), (3) Return semantically similar products.',
+          codeSnippet: `# Vector database comparison
+
+# Traditional SQL database
+SELECT * FROM products
+WHERE description LIKE '%comfortable%'
+  AND description LIKE '%running%'
+  AND description LIKE '%shoes%';
+# Returns only exact keyword matches
+
+# Vector database
+query_vector = embed("comfortable running shoes")  # [0.2, 0.5, -0.1, ...]
+
+results = vectordb.query(
+    vector=query_vector,
+    top_k=10,
+    filter={"category": "footwear"}
+)
+# Returns semantically similar products:
+# - "cushioned athletic sneakers"
+# - "soft jogging trainers"
+# - "padded sport shoes"
+
+# Pinecone example
+import pinecone
+from openai import OpenAI
+
+openai_client = OpenAI()
+pinecone.init(api_key="YOUR_KEY")
+index = pinecone.Index("products")
+
+# Embed and insert
+embedding = openai_client.embeddings.create(
+    input="Red leather wallet",
+    model="text-embedding-3-small"
+).data[0].embedding
+
+index.upsert([
+    ("product-1", embedding, {"name": "Red leather wallet", "price": 49.99})
+])
+
+# Query
+query_embedding = openai_client.embeddings.create(
+    input="crimson billfold",
+    model="text-embedding-3-small"
+).data[0].embedding
+
+results = index.query(
+    vector=query_embedding,
+    top_k=5,
+    include_metadata=True
+)
+
+for match in results['matches']:
+    print(f"{match['metadata']['name']}: {match['score']}")`,
+          resources: [
+            'Vector database primer (Pinecone)',
+            'Weaviate vector database guide',
+            'When to use vector search',
+            'Vector DB benchmarks'
+          ]
+        }
       },
       {
         id: 'similarity-metrics',
         title: 'Similarity Metrics Deep Dive',
         duration: '2 hours',
-        concepts: ['Cosine similarity', 'Euclidean distance', 'Dot product', 'Manhattan distance', 'Metric selection']
+        concepts: ['Cosine similarity', 'Euclidean distance', 'Dot product', 'Manhattan distance', 'Metric selection'],
+        details: {
+          overview: 'Similarity metrics quantify how "close" two vectors are. Choice of metric profoundly impacts search results. Cosine similarity: direction matters, magnitude doesn\'t (text). Euclidean distance: both direction and magnitude matter (images, coordinates). Dot product: fast but biased by magnitude. Each metric suits different use cases - understand trade-offs to pick the right one.',
+          keyPoints: [
+            'Cosine similarity: measures angle between vectors. Range: -1 to 1. Ignores magnitude. Best for text embeddings (normalized).',
+            'Euclidean distance (L2): measures straight-line distance. Sensitive to magnitude. Best for spatial data, images.',
+            'Dot product: fast (no square root). Biased toward larger vectors. Use when magnitude is meaningful (e.g., importance).',
+            'Manhattan distance (L1): sum of absolute differences. More robust to outliers. Used in sparse spaces.',
+            'Metric selection: Text/NLP → cosine. Images → euclidean or dot. Recommendation systems → dot or cosine.',
+            'Normalization: normalize vectors before dot product to get cosine similarity. OpenAI embeddings are pre-normalized.'
+          ],
+          example: 'Text similarity: "dog" embedding: [0.8, 0.2], "puppy" embedding: [0.75, 0.25]. Cosine similarity: 0.98 (very similar direction, minor magnitude difference). "cat": [0.6, 0.4]. Cosine with "dog": 0.88 (still similar, but less). "car": [-0.1, 0.9]. Cosine with "dog": -0.1 (different semantic meaning).',
+          codeSnippet: `import numpy as np
+from scipy.spatial.distance import cosine, euclidean
+
+# Example vectors
+vec_a = np.array([0.8, 0.2, 0.5])
+vec_b = np.array([0.75, 0.25, 0.52])
+vec_c = np.array([-0.1, 0.9, 0.1])
+
+# 1. Cosine similarity (1 - cosine distance)
+def cosine_sim(a, b):
+    return 1 - cosine(a, b)
+
+print(f"Cosine(A, B): {cosine_sim(vec_a, vec_b):.4f}")  # 0.9980 - very similar
+print(f"Cosine(A, C): {cosine_sim(vec_a, vec_c):.4f}")  # 0.1234 - dissimilar
+
+# 2. Euclidean distance (lower = more similar)
+print(f"Euclidean(A, B): {euclidean(vec_a, vec_b):.4f}")  # 0.0583 - close
+print(f"Euclidean(A, C): {euclidean(vec_a, vec_c):.4f}")  # 1.234 - far
+
+# 3. Dot product (higher = more similar, if normalized)
+def dot_product(a, b):
+    return np.dot(a, b)
+
+print(f"Dot(A, B): {dot_product(vec_a, vec_b):.4f}")  # 0.860
+print(f"Dot(A, C): {dot_product(vec_a, vec_c):.4f}")  # 0.145
+
+# 4. Manhattan distance
+def manhattan(a, b):
+    return np.sum(np.abs(a - b))
+
+print(f"Manhattan(A, B): {manhattan(vec_a, vec_b):.4f}")  # 0.09
+
+# For normalized vectors: dot product = cosine similarity
+vec_a_norm = vec_a / np.linalg.norm(vec_a)
+vec_b_norm = vec_b / np.linalg.norm(vec_b)
+print(f"Dot(norm A, norm B): {dot_product(vec_a_norm, vec_b_norm):.4f}")
+print(f"Cosine(A, B): {cosine_sim(vec_a, vec_b):.4f}")
+# These should be equal
+
+# Metric selection guide
+# Text embeddings (SBERT, OpenAI) → Cosine
+# Image embeddings (CLIP) → Cosine or Euclidean
+# User-item recommendations → Dot product
+# Geographic coordinates → Euclidean`,
+          resources: [
+            'Understanding similarity metrics',
+            'Cosine vs Euclidean comparison',
+            'Choosing the right metric',
+            'Normalized embeddings'
+          ]
+        }
       },
       {
         id: 'ann-algorithms',
         title: 'Approximate Nearest Neighbors (ANN)',
         duration: '3 hours',
-        concepts: ['KNN vs ANN', 'Trade-offs (speed vs accuracy)', 'HNSW algorithm', 'IVF (Inverted File Index)', 'Product Quantization']
+        concepts: ['KNN vs ANN', 'Trade-offs (speed vs accuracy)', 'HNSW algorithm', 'IVF (Inverted File Index)', 'Product Quantization'],
+        details: {
+          overview: 'ANN (Approximate Nearest Neighbors) is the core of vector databases. Exact KNN is too slow for large datasets (check every vector = O(n)). ANN trades accuracy for speed - finds "good enough" neighbors in sub-linear time. Key algorithms: HNSW (graph-based, best balance), IVF (partition space), Product Quantization (compress vectors). Modern vector DBs use combinations of these for billion-scale search.',
+          keyPoints: [
+            'Exact KNN: check every vector, guaranteed correct. O(n) time. Infeasible for millions+ vectors (seconds per query).',
+            'ANN: probabilistic search, finds nearest neighbors with 90-99% accuracy. O(log n) or O(√n). Milliseconds per query.',
+            'Trade-off: speed vs accuracy (recall). Tune parameters: more speed = lower recall, more accuracy = slower queries.',
+            'HNSW: graph-based. Build multi-layer graph, greedy search. State-of-the-art: fast + high recall. Used by Pinecone, Qdrant.',
+            'IVF: partition space into clusters (Voronoi cells). Search only relevant partitions. Faster build, slower search than HNSW.',
+            'Product Quantization: compress vectors to reduce memory. 8-16x compression. Slight accuracy loss. Essential for billion-scale.'
+          ],
+          example: '1M product vectors. Exact KNN: check all 1M = 500ms per query. HNSW ANN: check ~2000 vectors = 5ms, 98% recall. IVF with 1000 clusters: search 2-5 clusters = 10ms, 95% recall. PQ compression: 768D → 96 bytes, 8x smaller, 2ms query, 92% recall.',
+          codeSnippet: `# Comparing exact vs approximate search with FAISS
+
+import faiss
+import numpy as np
+import time
+
+# Generate random vectors
+d = 768  # Dimension
+n = 1_000_000  # 1 million vectors
+np.random.seed(42)
+vectors = np.random.random((n, d)).astype('float32')
+query = np.random.random((1, d)).astype('float32')
+
+# 1. Exact search (Flat index)
+index_flat = faiss.IndexFlatL2(d)
+index_flat.add(vectors)
+
+start = time.time()
+distances, indices = index_flat.search(query, k=10)
+print(f"Exact search: {(time.time() - start)*1000:.1f}ms")
+# Output: ~200-500ms
+
+# 2. HNSW (approximate)
+index_hnsw = faiss.IndexHNSWFlat(d, 32)  # 32 = M parameter
+index_hnsw.add(vectors)
+
+start = time.time()
+distances_hnsw, indices_hnsw = index_hnsw.search(query, k=10)
+print(f"HNSW search: {(time.time() - start)*1000:.1f}ms")
+# Output: ~5-10ms (50x faster!)
+
+# 3. IVF (inverted file index)
+nlist = 1000  # Number of clusters
+quantizer = faiss.IndexFlatL2(d)
+index_ivf = faiss.IndexIVFFlat(quantizer, d, nlist)
+
+index_ivf.train(vectors[:100000])  # Train on subset
+index_ivf.add(vectors)
+index_ivf.nprobe = 5  # Search 5 clusters
+
+start = time.time()
+distances_ivf, indices_ivf = index_ivf.search(query, k=10)
+print(f"IVF search: {(time.time() - start)*1000:.1f}ms")
+# Output: ~10-20ms
+
+# 4. Product Quantization (compressed)
+m = 96  # Number of subquantizers
+nbits = 8  # Bits per subquantizer
+index_pq = faiss.IndexPQ(d, m, nbits)
+
+index_pq.train(vectors[:100000])
+index_pq.add(vectors)
+
+start = time.time()
+distances_pq, indices_pq = index_pq.search(query, k=10)
+print(f"PQ search: {(time.time() - start)*1000:.1f}ms")
+print(f"Memory: Original {vectors.nbytes/1e9:.2f}GB, PQ {index_pq.ntotal * m / 1e9:.2f}GB")
+# Output: ~2-5ms, 8x less memory
+
+# Calculate recall (accuracy)
+def recall(true_indices, approx_indices, k=10):
+    return len(set(true_indices) & set(approx_indices)) / k
+
+print(f"HNSW recall: {recall(indices[0], indices_hnsw[0]):.2%}")  # ~98%
+print(f"IVF recall: {recall(indices[0], indices_ivf[0]):.2%}")    # ~95%
+print(f"PQ recall: {recall(indices[0], indices_pq[0]):.2%}")      # ~92%`,
+          resources: [
+            'ANN benchmarks',
+            'HNSW paper (Malkov & Yashunin)',
+            'Product Quantization tutorial',
+            'FAISS documentation'
+          ]
+        }
       },
       {
         id: 'hnsw-deep',
         title: 'HNSW (Hierarchical NSW) Algorithm',
         duration: '3 hours',
-        concepts: ['Graph-based search', 'Multi-layer structure', 'Construction algorithm', 'Search algorithm', 'Parameter tuning']
+        concepts: ['Graph-based search', 'Multi-layer structure', 'Construction algorithm', 'Search algorithm', 'Parameter tuning'],
+        details: {
+          overview: 'HNSW is the gold standard ANN algorithm - best speed/accuracy trade-off. It builds a multi-layer graph where each layer is a navigable small-world network. Search starts at top layer (few nodes, long jumps), descends through layers (more nodes, shorter jumps) until reaching bottom (all nodes). Greedy search at each layer. Fast construction, fast search, high recall. Used by Pinecone, Qdrant, Weaviate.',
+          keyPoints: [
+            'Multi-layer graph: Layer 0 (all vectors), Layer 1 (subset), Layer 2 (smaller subset)... Top layer (few entry points).',
+            'Each node connected to M neighbors per layer (M is key parameter). More M = better recall, more memory.',
+            'Construction: insert vector, start at top, greedy descent, add edges at each layer. O(log n) with high probability.',
+            'Search: start at entry point (top layer), greedy search for closest neighbor, descend layer, repeat until layer 0. Find K nearest.',
+            'Parameters: M (neighbors per node, 16-32 typical), efConstruction (build quality, 200 typical), ef (search quality, 100+ typical).',
+            'Trade-offs: Higher M = better recall, more memory. Higher ef = better recall, slower search. Tune based on dataset.'
+          ],
+          example: '10M vectors, M=32, efConstruction=200. Build time: 30 min. Search: 2ms, 98% recall @k=10. Memory: ~2GB overhead (edges). vs Flat index: 500ms search, 100% recall, no overhead.',
+          codeSnippet: `# HNSW implementation with FAISS and parameter tuning
+
+import faiss
+import numpy as np
+
+d = 768  # Dimension
+n = 1_000_000
+vectors = np.random.random((n, d)).astype('float32')
+
+# Build HNSW index with parameters
+M = 32  # Connections per node (16-64 range)
+        # Higher M = better recall, more memory
+        # M=16: fast build, M=64: better quality
+
+index = faiss.IndexHNSWFlat(d, M)
+
+# Set construction parameter
+index.hnsw.efConstruction = 200  # Build quality (100-500 range)
+                                  # Higher = better graph, slower build
+
+# Add vectors (builds the graph)
+print("Building HNSW index...")
+index.add(vectors)
+print(f"Index has {index.ntotal} vectors")
+
+# Search with different ef (search quality)
+query = np.random.random((1, d)).astype('float32')
+k = 10
+
+# Low ef = fast, lower recall
+index.hnsw.efSearch = 50
+distances_50, indices_50 = index.search(query, k)
+
+# Medium ef = balanced
+index.hnsw.efSearch = 100
+distances_100, indices_100 = index.search(query, k)
+
+# High ef = slower, higher recall
+index.hnsw.efSearch = 200
+distances_200, indices_200 = index.search(query, k)
+
+# Parameter tuning guide:
+# - M: Start with 32. Increase for better recall, decrease for less memory
+# - efConstruction: 200 is good default. Increase to 400 for critical applications
+# - efSearch: 100 is good default. Tune at query time based on latency budget
+
+# Memory usage
+print(f"Memory overhead: ~{M * n * 4 / 1e9:.2f}GB for edges")
+
+# Performance comparison
+import time
+
+for ef in [50, 100, 200, 400]:
+    index.hnsw.efSearch = ef
+    start = time.time()
+    for _ in range(100):
+        index.search(query, k)
+    latency = (time.time() - start) / 100 * 1000
+    print(f"ef={ef}: {latency:.2f}ms per query")
+
+# Output:
+# ef=50:  2ms (95% recall)
+# ef=100: 4ms (98% recall)
+# ef=200: 8ms (99% recall)
+# ef=400: 15ms (99.5% recall)
+
+# Production recommendation: M=32, efConstruction=200, efSearch=100`,
+          resources: [
+            'HNSW paper',
+            'HNSW parameter tuning guide',
+            'Navigable small world networks',
+            'FAISS HNSW implementation'
+          ]
+        }
       },
       {
         id: 'indexing-strategies',
         title: 'Indexing Strategies',
         duration: '2 hours',
-        concepts: ['Flat index', 'IVF index', 'HNSW index', 'Scalar quantization', 'Index building trade-offs']
+        concepts: ['Flat index', 'IVF index', 'HNSW index', 'Scalar quantization', 'Index building trade-offs'],
+        details: {
+          overview: 'Index strategy determines search performance, memory usage, and accuracy. Flat index: no optimization, exact search, slow at scale. IVF: partition space, search subset, balanced. HNSW: graph-based, fastest, most memory. Quantization: compress vectors, less memory, slight accuracy loss. Choice depends on dataset size, latency requirements, memory budget. Start simple (Flat < 100K vectors), scale up (HNSW/IVF for millions+).',
+          keyPoints: [
+            'Flat index: brute-force search every vector. Exact results, O(n) time. Use for < 100K vectors or when 100% accuracy required.',
+            'IVF index: partition into clusters, search relevant clusters only. O(√n) time. Good balance: faster than Flat, simpler than HNSW.',
+            'HNSW index: graph-based, O(log n) search. Fastest, highest recall, most memory. Best for production with millions+ vectors.',
+            'Scalar quantization: 32-bit → 8-bit per dimension. 4x memory reduction, 10% accuracy loss. Enables billion-scale on limited RAM.',
+            'Product quantization: compress 768D to 96 bytes (8x smaller). More lossy than scalar, but enables huge scales.',
+            'Index selection: < 10K → Flat. 10K-1M → IVF or HNSW. 1M+ → HNSW. Billions → HNSW + PQ.'
+          ],
+          example: '5M vectors, 768D. Flat: 15GB RAM, 2s per query. IVF (1000 clusters): 15GB + 100MB, 50ms query. HNSW (M=32): 15GB + 2GB, 5ms query, 98% recall. HNSW + SQ8: 4GB + 2GB, 3ms query, 95% recall.',
+          codeSnippet: `# Indexing strategies with FAISS
+
+import faiss
+import numpy as np
+
+d = 768
+n = 1_000_000
+vectors = np.random.random((n, d)).astype('float32')
+
+# 1. Flat index (exact, no optimization)
+index_flat = faiss.IndexFlatL2(d)
+index_flat.add(vectors)
+print(f"Flat: {index_flat.ntotal} vectors, ~{d*n*4/1e9:.1f}GB")
+# Use when: < 100K vectors, need 100% accuracy
+
+# 2. IVF index (clustering-based)
+nlist = 1000  # Number of clusters (sqrt(n) is good heuristic)
+quantizer = faiss.IndexFlatL2(d)
+index_ivf = faiss.IndexIVFFlat(quantizer, d, nlist)
+
+index_ivf.train(vectors[:100000])  # Train clustering
+index_ivf.add(vectors)
+index_ivf.nprobe = 10  # Search 10 clusters (tune for recall vs speed)
+print(f"IVF: {nlist} clusters, nprobe={index_ivf.nprobe}")
+# Use when: 10K-1M vectors, moderate latency OK
+
+# 3. HNSW index (graph-based)
+M = 32
+index_hnsw = faiss.IndexHNSWFlat(d, M)
+index_hnsw.hnsw.efConstruction = 200
+index_hnsw.add(vectors)
+print(f"HNSW: M={M}, ~{M*n*4/1e9:.1f}GB overhead")
+# Use when: 1M+ vectors, need low latency + high recall
+
+# 4. Scalar Quantization (compression)
+index_sq = faiss.IndexScalarQuantizer(d, faiss.ScalarQuantizer.QT_8bit)
+index_sq.train(vectors[:100000])
+index_sq.add(vectors)
+print(f"SQ8: {d*n/1e9:.1f}GB (4x smaller than FP32)")
+# Use when: memory constrained, can tolerate ~5% recall loss
+
+# 5. IVF + Product Quantization (max compression)
+m = 96  # Subquantizers
+nbits = 8
+index_ivf_pq = faiss.IndexIVFPQ(quantizer, d, nlist, m, nbits)
+index_ivf_pq.train(vectors[:100000])
+index_ivf_pq.add(vectors)
+index_ivf_pq.nprobe = 10
+print(f"IVF+PQ: {m*n/1e9:.2f}GB (64x smaller!)")
+# Use when: billions of vectors, memory critical
+
+# 6. HNSW + Scalar Quantization (best of both)
+index_hnsw_sq = faiss.IndexHNSWSQ(d, faiss.ScalarQuantizer.QT_8bit, M)
+index_hnsw_sq.train(vectors[:100000])
+index_hnsw_sq.add(vectors)
+print(f"HNSW+SQ: Fast search + 4x compression")
+# Use when: millions of vectors, need speed + memory efficiency
+
+# Decision matrix:
+# Vectors | Latency  | Memory  → Index
+# < 100K  | Any      | Any     → Flat
+# 100K-1M | < 50ms   | OK      → IVF
+# 1M+     | < 10ms   | OK      → HNSW
+# 1M+     | < 10ms   | Limited → HNSW + SQ
+# 10M+    | < 10ms   | Limited → HNSW + PQ
+# 100M+   | < 50ms   | Limited → IVF + PQ`,
+          resources: [
+            'FAISS index selection guide',
+            'Quantization techniques',
+            'Index performance comparison',
+            'Production index recommendations'
+          ]
+        }
       },
       {
         id: 'metadata-filtering',
         title: 'Metadata Filtering',
         duration: '2 hours',
-        concepts: ['Pre-filtering vs post-filtering', 'Hybrid search', 'Structured data + vectors', 'Filter performance']
+        concepts: ['Pre-filtering vs post-filtering', 'Hybrid search', 'Structured data + vectors', 'Filter performance'],
+        details: {
+          overview: 'Metadata filtering combines vector similarity with traditional filters (category, date, price, etc.). Real-world search needs both: "Find similar products in Electronics under $500". Two approaches: pre-filtering (filter then search vectors) and post-filtering (search vectors then filter). Pre-filtering is more accurate but slower. Hybrid search goes further: combines dense vectors (semantic) + sparse vectors (keywords) + metadata filters.',
+          keyPoints: [
+            'Metadata: structured attributes stored with vectors. {category: "electronics", price: 299, brand: "Sony", date: "2024"}.',
+            'Pre-filtering: filter by metadata first, then vector search on subset. Accurate but can be slow if filter is selective.',
+            'Post-filtering: vector search first, filter results. Fast but may miss relevant items if they\'re not in top K.',
+            'Hybrid search: dense embeddings (semantic similarity) + sparse embeddings (BM25 keywords) + metadata filters. Best results.',
+            'Performance: pre-filtering requires scanning filtered subset. Use indexes on metadata (B-tree). Post-filtering is faster.',
+            'Best practice: pre-filter for broad categories (< 50% of data), post-filter for narrow filters. Combine for complex queries.'
+          ],
+          example: 'Search "wireless headphones" in Electronics under $200. Pre-filter: Electronics + price < 200 (10K products) → vector search → 10 results. Post-filter: vector search all (1M products) → top 100 → filter → 8 results (might miss 2 relevant). Hybrid: best of both.',
+          codeSnippet: `# Metadata filtering in Pinecone
+
+import pinecone
+from openai import OpenAI
+
+openai_client = OpenAI()
+pinecone.init(api_key="YOUR_KEY")
+index = pinecone.Index("products")
+
+# Insert vectors with metadata
+embedding = openai_client.embeddings.create(
+    input="Wireless noise-cancelling headphones",
+    model="text-embedding-3-small"
+).data[0].embedding
+
+index.upsert([
+    ("product-1", embedding, {
+        "category": "Electronics",
+        "subcategory": "Audio",
+        "price": 299.99,
+        "brand": "Sony",
+        "rating": 4.5,
+        "in_stock": True,
+        "created_at": "2024-01-15"
+    })
+])
+
+# 1. Query with pre-filtering
+query_embedding = openai_client.embeddings.create(
+    input="comfortable over-ear headphones",
+    model="text-embedding-3-small"
+).data[0].embedding
+
+results = index.query(
+    vector=query_embedding,
+    top_k=10,
+    filter={
+        "category": {"$eq": "Electronics"},
+        "price": {"$lt": 300},
+        "in_stock": {"$eq": True}
+    },
+    include_metadata=True
+)
+
+# 2. Complex metadata filters
+results = index.query(
+    vector=query_embedding,
+    top_k=10,
+    filter={
+        "$and": [
+            {"category": {"$eq": "Electronics"}},
+            {"price": {"$gte": 100, "$lte": 500}},
+            {"rating": {"$gt": 4.0}},
+            {"brand": {"$in": ["Sony", "Bose", "Apple"]}}
+        ]
+    }
+)
+
+# 3. Hybrid search (Pinecone's sparse-dense)
+# Dense vector for semantic similarity
+# Sparse vector for keyword matching (BM25)
+sparse_vector = {
+    "indices": [123, 456, 789],  # Token IDs
+    "values": [0.5, 0.3, 0.2]    # BM25 scores
+}
+
+results = index.query(
+    vector=query_embedding,  # Dense (semantic)
+    sparse_vector=sparse_vector,  # Sparse (keywords)
+    top_k=10,
+    filter={"category": "Electronics"}  # Metadata
+)
+
+# Weaviate example with GraphQL
+import weaviate
+
+client = weaviate.Client("http://localhost:8080")
+
+# Hybrid search with metadata filter
+result = client.query.get(
+    "Product",
+    ["name", "price", "category"]
+).with_hybrid(
+    query="wireless headphones",
+    alpha=0.75  # 0=keyword, 1=vector, 0.75=balanced
+).with_where({
+    "operator": "And",
+    "operands": [
+        {"path": ["category"], "operator": "Equal", "valueString": "Electronics"},
+        {"path": ["price"], "operator": "LessThan", "valueNumber": 300}
+    ]
+}).with_limit(10).do()`,
+          resources: [
+            'Pinecone metadata filtering',
+            'Hybrid search explained',
+            'Pre vs post-filtering',
+            'Weaviate filters guide'
+          ]
+        }
       },
       {
         id: 'pinecone',
         title: 'Pinecone Deep Dive',
         duration: '2 hours',
-        concepts: ['Pinecone architecture', 'Namespaces', 'Metadata filtering', 'Sparse-dense hybrid', 'Production best practices']
+        concepts: ['Pinecone architecture', 'Namespaces', 'Metadata filtering', 'Sparse-dense hybrid', 'Production best practices'],
+        details: {
+          overview: 'Pinecone is the leading managed vector database - fully hosted, auto-scaling, production-ready. No infrastructure management. Key features: namespaces (logical partitions), metadata filtering, sparse-dense hybrid search, real-time updates, 99.9% uptime SLA. Pods (dedicated compute) or serverless. Simple API, fast queries (< 50ms), scales to billions of vectors. Best for teams that want to focus on building, not operating vector DBs.',
+          keyPoints: [
+            'Fully managed: no servers, no maintenance. Create index, insert vectors, query. Pinecone handles scaling, updates, backups.',
+            'Namespaces: partition index logically (per-user data, per-tenant). Query single namespace. Isolate data, faster queries.',
+            'Hybrid search: combine dense vectors (semantic) + sparse vectors (BM25 keywords). Better results than pure vector search.',
+            'Metadata filtering: filter by attributes (category, date, etc.) before/during vector search. No performance penalty.',
+            'Pods vs Serverless: Pods = dedicated, predictable performance. Serverless = pay-per-query, auto-scales. Choose based on traffic.',
+            'Production ready: 99.9% SLA, SOC 2, GDPR compliant. Monitoring, backup, disaster recovery built-in.'
+          ],
+          example: 'Multi-tenant SaaS app with 1000 customers. Create one index, use namespaces per customer. Customer A queries only see Customer A\'s data. No cross-tenant leakage. Scales to millions of vectors per customer. Serverless: $0.096 per million queries.',
+          codeSnippet: `# Pinecone production setup
+
+import pinecone
+from openai import OpenAI
+
+# Initialize
+pinecone.init(api_key="YOUR_KEY", environment="us-east-1-aws")
+
+# 1. Create index (one-time)
+pinecone.create_index(
+    name="production-search",
+    dimension=1536,  # OpenAI embedding size
+    metric="cosine",
+    pods=1,  # Or use serverless
+    pod_type="p1.x1"  # Pod type (p1=performance, s1=storage)
+)
+
+# 2. Connect to index
+index = pinecone.Index("production-search")
+
+# 3. Insert vectors with metadata and namespaces
+openai_client = OpenAI()
+
+vectors_to_upsert = []
+for doc_id, text in documents.items():
+    embedding = openai_client.embeddings.create(
+        input=text,
+        model="text-embedding-3-small"
+    ).data[0].embedding
+
+    vectors_to_upsert.append({
+        "id": doc_id,
+        "values": embedding,
+        "metadata": {
+            "text": text[:500],  # Store snippet
+            "category": "docs",
+            "created_at": "2024-01-15",
+            "user_id": "customer-123"
+        }
+    })
+
+# Batch upsert (up to 100 vectors per request)
+index.upsert(
+    vectors=vectors_to_upsert,
+    namespace="customer-123"  # Isolate by customer
+)
+
+# 4. Query with filters
+query_embedding = openai_client.embeddings.create(
+    input="How do I reset my password?",
+    model="text-embedding-3-small"
+).data[0].embedding
+
+results = index.query(
+    vector=query_embedding,
+    top_k=10,
+    namespace="customer-123",  # Query single customer
+    filter={
+        "category": {"$eq": "docs"},
+        "created_at": {"$gte": "2024-01-01"}
+    },
+    include_metadata=True
+)
+
+for match in results['matches']:
+    print(f"Score: {match['score']:.3f}")
+    print(f"Text: {match['metadata']['text']}")
+
+# 5. Hybrid search (sparse + dense)
+# Generate sparse vector (BM25 or learned)
+from pinecone_text.sparse import BM25Encoder
+
+bm25 = BM25Encoder()
+bm25.fit(corpus)  # Fit on your corpus
+sparse_vector = bm25.encode_queries("reset password")
+
+results = index.query(
+    vector=query_embedding,  # Dense
+    sparse_vector=sparse_vector,  # Sparse
+    top_k=10,
+    namespace="customer-123"
+)
+
+# 6. Delete vectors
+index.delete(ids=["doc-1", "doc-2"], namespace="customer-123")
+
+# Delete by filter
+index.delete(
+    filter={"category": {"$eq": "archived"}},
+    namespace="customer-123"
+)
+
+# 7. Production monitoring
+stats = index.describe_index_stats()
+print(f"Total vectors: {stats['total_vector_count']}")
+print(f"Namespaces: {stats['namespaces']}")
+
+# Batch operations for high throughput
+with pinecone.Index("production-search", pool_threads=30) as index:
+    # Parallel upserts
+    async_results = [
+        index.upsert(vectors=batch, async_req=True)
+        for batch in vector_batches
+    ]
+    [result.get() for result in async_results]`,
+          resources: [
+            'Pinecone documentation',
+            'Pinecone Learning Center',
+            'Hybrid search guide',
+            'Pinecone pricing calculator'
+          ]
+        }
       },
       {
         id: 'weaviate',
         title: 'Weaviate & Graph Capabilities',
         duration: '2 hours',
-        concepts: ['Weaviate schema', 'GraphQL queries', 'Cross-references', 'Modules & vectorizers', 'Generative search']
+        concepts: ['Weaviate schema', 'GraphQL queries', 'Cross-references', 'Modules & vectorizers', 'Generative search'],
+        details: {
+          overview: 'Weaviate is an open-source vector database with unique graph capabilities. Unlike pure vector DBs, Weaviate stores relationships between objects (cross-references). Query with GraphQL - flexible, powerful. Modules extend functionality: automatic vectorization, reranking, generative search (RAG built-in). Self-host or use Weaviate Cloud. Ideal when you need both vector search AND knowledge graph features.',
+          keyPoints: [
+            'Schema-based: define object classes (Product, User) with properties and references. Type-safe, validated.',
+            'GraphQL queries: flexible, expressive. Vector search + filters + aggregations + graph traversal in one query.',
+            'Cross-references: link objects. Product → Brand, Article → Author. Navigate relationships during search.',
+            'Modules: plug-in functionality. text2vec-openai (auto vectorize), reranker-cohere, generative-openai (RAG).',
+            'Generative search: vector search + LLM generation in one call. Query "explain quantum computing" → retrieves docs → generates answer.',
+            'Hybrid search: BM25 (keywords) + vector (semantic). Alpha parameter controls balance (0=keywords, 1=vectors).'
+          ],
+          example: 'E-commerce: Product has Brand, Category, Reviews. Query: "Find sustainable outdoor gear from European brands". Weaviate: vector search "sustainable outdoor gear" + filter region="Europe" + traverse Brand → products → aggregate ratings.',
+          codeSnippet: `# Weaviate setup and advanced queries
+
+import weaviate
+
+# Connect to Weaviate
+client = weaviate.Client(
+    url="http://localhost:8080",
+    additional_headers={"X-OpenAI-Api-Key": "YOUR_KEY"}
+)
+
+# 1. Define schema with cross-references
+schema = {
+    "classes": [
+        {
+            "class": "Article",
+            "description": "A blog article",
+            "vectorizer": "text2vec-openai",  # Auto-vectorize
+            "moduleConfig": {
+                "text2vec-openai": {
+                    "model": "text-embedding-3-small"
+                }
+            },
+            "properties": [
+                {"name": "title", "dataType": ["text"]},
+                {"name": "content", "dataType": ["text"]},
+                {"name": "category", "dataType": ["string"]},
+                {
+                    "name": "author",
+                    "dataType": ["Author"],  # Cross-reference
+                    "description": "The author of this article"
+                }
+            ]
+        },
+        {
+            "class": "Author",
+            "properties": [
+                {"name": "name", "dataType": ["string"]},
+                {"name": "expertise", "dataType": ["string[]"]}
+            ]
+        }
+    ]
+}
+
+client.schema.create(schema)
+
+# 2. Insert with auto-vectorization
+author_id = client.data_object.create(
+    {"name": "Jane Doe", "expertise": ["AI", "ML"]},
+    "Author"
+)
+
+client.data_object.create(
+    {
+        "title": "Introduction to RAG",
+        "content": "RAG combines retrieval with generation...",
+        "category": "AI",
+        "author": [{  # Cross-reference
+            "beacon": f"weaviate://localhost/Author/{author_id}"
+        }]
+    },
+    "Article"
+)
+
+# 3. Hybrid search (keywords + vectors)
+result = client.query.get(
+    "Article",
+    ["title", "content", "category"]
+).with_hybrid(
+    query="retrieval augmented generation",
+    alpha=0.75  # 0=pure BM25, 1=pure vector, 0.75=balanced
+).with_where({
+    "path": ["category"],
+    "operator": "Equal",
+    "valueString": "AI"
+}).with_limit(10).do()
+
+# 4. Generative search (RAG built-in)
+result = client.query.get(
+    "Article",
+    ["title", "content"]
+).with_near_text({
+    "concepts": ["machine learning basics"]
+}).with_generate(
+    single_prompt="Explain this article in simple terms: {content}",
+    grouped_prompt="Summarize these articles about machine learning"
+).with_limit(5).do()
+
+# Generated answer available in result
+print(result['data']['Get']['Article'][0]['_additional']['generate']['singleResult'])
+
+# 5. Graph traversal with cross-references
+result = client.query.get(
+    "Article",
+    [
+        "title",
+        "author {... on Author {name expertise}}"  # Traverse reference
+    ]
+).with_near_text({
+    "concepts": ["neural networks"]
+}).with_limit(5).do()
+
+# 6. Aggregations
+result = client.query.aggregate("Article").with_fields(
+    "meta { count }",
+    "groupedBy { path value }",
+    "title { count type topOccurrences { value occurs } }"
+).with_group_by_filter(["category"]).do()
+
+# 7. Multi-tenancy with namespaces
+client.data_object.create(
+    {"title": "Article 1", "content": "..."},
+    "Article",
+    tenant="customer-123"
+)
+
+# Query specific tenant
+result = client.query.get("Article", ["title"]).with_tenant("customer-123").do()`,
+          resources: [
+            'Weaviate documentation',
+            'Weaviate Academy',
+            'GraphQL for Weaviate',
+            'Generative search tutorial'
+          ]
+        }
       },
       {
         id: 'chroma-faiss',
         title: 'Chroma, FAISS, and Open Source Options',
         duration: '2 hours',
-        concepts: ['Chroma for local dev', 'FAISS library', 'Milvus', 'Qdrant', 'Self-hosting considerations']
+        concepts: ['Chroma for local dev', 'FAISS library', 'Milvus', 'Qdrant', 'Self-hosting considerations'],
+        details: {
+          overview: 'Open-source vector DBs give you full control, avoid vendor lock-in, run locally or self-host. Chroma: simple, Python-first, perfect for prototyping/local dev. FAISS: Facebook library, not a DB but building block - extremely fast. Milvus: production-grade, cloud-native, Kubernetes. Qdrant: Rust-based, fast, good API. Choose based on: ease of use (Chroma), performance (FAISS), production features (Milvus/Qdrant), or go managed (Pinecone/Weaviate Cloud).',
+          keyPoints: [
+            'Chroma: Python API, local persistence, zero config. `pip install chromadb` → ready. Perfect for development, demos, small projects.',
+            'FAISS: C++ library with Python bindings. Not a full DB (no persistence, metadata). Ultra-fast ANN. Use as engine for custom DB.',
+            'Milvus: production-grade, cloud-native. Kubernetes, horizontal scaling, GPU support. Complex setup, powerful for large scale.',
+            'Qdrant: Rust-based, fast, RESTful API. Docker deployment, filtering, clustering. Good balance: performance + ease of use.',
+            'Self-hosting pros: full control, no vendor lock-in, data privacy. Cons: ops overhead, scaling complexity, no SLA.',
+            'Decision: Prototype/small → Chroma. High perf research → FAISS. Production scale → Milvus/Qdrant self-hosted OR Pinecone managed.'
+          ],
+          example: 'Local RAG app development: Use Chroma (5 min setup) → prototype working → production: migrate to Pinecone (managed) or Qdrant (self-hosted). vs Starting with Pinecone: setup + billing + API keys upfront.',
+          codeSnippet: `# Comparing open-source vector DB options
+
+# 1. Chroma - Easiest, local development
+import chromadb
+from chromadb.utils import embedding_functions
+
+# Initialize (local, persistent)
+client = chromadb.PersistentClient(path="./chroma_db")
+openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+    api_key="YOUR_KEY",
+    model_name="text-embedding-3-small"
+)
+
+collection = client.get_or_create_collection(
+    name="docs",
+    embedding_function=openai_ef
+)
+
+# Add documents (auto-embeds)
+collection.add(
+    documents=["Document 1 text", "Document 2 text"],
+    ids=["doc1", "doc2"],
+    metadatas=[{"source": "web"}, {"source": "pdf"}]
+)
+
+# Query
+results = collection.query(
+    query_texts=["search query"],
+    n_results=5,
+    where={"source": "web"}
+)
+
+# 2. FAISS - Fastest, research/custom
+import faiss
+import numpy as np
+
+d = 768
+vectors = np.random.random((100000, d)).astype('float32')
+
+# Build index
+index = faiss.IndexHNSWFlat(d, 32)
+index.add(vectors)
+
+# Save/load
+faiss.write_index(index, "vectors.index")
+index = faiss.read_index("vectors.index")
+
+# Query
+query = np.random.random((1, d)).astype('float32')
+D, I = index.search(query, k=10)
+
+# Note: FAISS doesn't handle metadata or persistence
+# You need to build those layers yourself
+
+# 3. Qdrant - Production-ready, self-hosted
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+
+client = QdrantClient(host="localhost", port=6333)
+
+# Create collection
+client.create_collection(
+    collection_name="documents",
+    vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
+)
+
+# Insert
+client.upsert(
+    collection_name="documents",
+    points=[
+        PointStruct(
+            id=1,
+            vector=embedding_vector,
+            payload={"text": "Document content", "category": "AI"}
+        )
+    ]
+)
+
+# Query with filtering
+results = client.search(
+    collection_name="documents",
+    query_vector=query_vector,
+    query_filter={
+        "must": [
+            {"key": "category", "match": {"value": "AI"}}
+        ]
+    },
+    limit=10
+)
+
+# 4. Milvus - Cloud-native, large scale
+from pymilvus import connections, Collection, FieldSchema, CollectionSchema, DataType
+
+# Connect
+connections.connect(host="localhost", port="19530")
+
+# Define schema
+fields = [
+    FieldSchema(name="id", dtype=DataType.INT64, is_primary=True),
+    FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=768),
+    FieldSchema(name="text", dtype=DataType.VARCHAR, max_length=1000)
+]
+schema = CollectionSchema(fields)
+collection = Collection(name="documents", schema=schema)
+
+# Create index
+collection.create_index(
+    field_name="embedding",
+    index_params={"index_type": "HNSW", "metric_type": "L2", "params": {"M": 32}}
+)
+
+# Insert
+entities = [
+    [1, 2, 3],  # IDs
+    [[0.1] * 768, [0.2] * 768, [0.3] * 768],  # Embeddings
+    ["text1", "text2", "text3"]  # Text
+]
+collection.insert(entities)
+
+# Search
+results = collection.search(
+    data=[[0.15] * 768],
+    anns_field="embedding",
+    param={"metric_type": "L2", "params": {"ef": 64}},
+    limit=10
+)
+
+# Comparison:
+# Chroma: Easiest, local, no ops
+# FAISS: Fastest, but just a library
+# Qdrant: Balanced, Docker-friendly
+# Milvus: Most powerful, most complex`,
+          resources: [
+            'Chroma documentation',
+            'FAISS wiki',
+            'Qdrant documentation',
+            'Milvus documentation',
+            'Vector DB comparison'
+          ]
+        }
       },
       {
         id: 'query-optimization',
         title: 'Query Performance Optimization',
         duration: '3 hours',
-        concepts: ['Query latency', 'Batch queries', 'Caching strategies', 'Index warmup', 'Monitoring & profiling']
+        concepts: ['Query latency', 'Batch queries', 'Caching strategies', 'Index warmup', 'Monitoring & profiling'],
+        details: {
+          overview: 'Query performance determines user experience. Target: < 50ms for real-time search, < 200ms for background. Optimization strategies: batch queries (amortize overhead), cache frequent queries (90% hit rate typical), index warmup (preload hot data), tune ANN parameters (ef, nprobe), monitor P95/P99 latency. Profile slow queries, identify bottlenecks. Good performance = right index + tuned parameters + caching + monitoring.',
+          keyPoints: [
+            'Latency targets: < 50ms real-time (chat, autocomplete), < 200ms background (recommendations), < 1s batch (analytics).',
+            'Batch queries: send multiple queries in one request. 10 queries batched = 1 round-trip instead of 10. 5-10x throughput improvement.',
+            'Caching: cache query embeddings (repeated searches) + results (stable data). Redis for cache. 80-90% hit rate typical.',
+            'Index warmup: first queries after restart are slow (cold cache). Warm up: run dummy queries to load index into memory.',
+            'Parameter tuning: HNSW ef (higher = slower but better recall), IVF nprobe (more clusters = slower but better). Profile trade-offs.',
+            'Monitoring: track P50, P95, P99 latency (not just average). Alert on P99 > 200ms. Use distributed tracing for bottlenecks.'
+          ],
+          example: 'RAG app: 1000 QPS. Initial: 150ms P95. Optimizations: (1) Cache embeddings → 100ms P95, (2) Batch 5 queries → 60ms P95, (3) Tune ef=50→100 → 80ms P95 but +2% recall, (4) Index warmup on deploy → no cold starts. Final: 80ms P95, 98% recall.',
+          codeSnippet: `# Query performance optimization techniques
+
+import time
+import redis
+import hashlib
+from functools import lru_cache
+
+# 1. Caching query embeddings and results
+class VectorSearchCache:
+    def __init__(self, redis_client, ttl=3600):
+        self.cache = redis_client
+        self.ttl = ttl
+
+    def cache_key(self, query, filters=None):
+        key = f"{query}:{filters}"
+        return hashlib.md5(key.encode()).hexdigest()
+
+    def get_embedding(self, query):
+        key = f"emb:{self.cache_key(query)}"
+        cached = self.cache.get(key)
+        if cached:
+            return np.frombuffer(cached, dtype=np.float32)
+        return None
+
+    def set_embedding(self, query, embedding):
+        key = f"emb:{self.cache_key(query)}"
+        self.cache.setex(key, self.ttl, embedding.tobytes())
+
+    def get_results(self, query, filters):
+        key = f"res:{self.cache_key(query, filters)}"
+        return self.cache.get(key)
+
+    def set_results(self, query, filters, results):
+        key = f"res:{self.cache_key(query, filters)}"
+        self.cache.setex(key, self.ttl, json.dumps(results))
+
+# Usage
+redis_client = redis.Redis(host='localhost', port=6379)
+cache = VectorSearchCache(redis_client, ttl=1800)  # 30 min
+
+def search_with_cache(query, filters=None):
+    # Check results cache
+    cached_results = cache.get_results(query, filters)
+    if cached_results:
+        return json.loads(cached_results)
+
+    # Check embedding cache
+    embedding = cache.get_embedding(query)
+    if not embedding:
+        embedding = embed(query)
+        cache.set_embedding(query, embedding)
+
+    # Query vector DB
+    results = vectordb.search(embedding, filters)
+
+    # Cache results
+    cache.set_results(query, filters, results)
+    return results
+
+# 2. Batch queries for throughput
+def batch_search(queries, batch_size=10):
+    results = []
+
+    # Generate embeddings in batch (10x faster)
+    embeddings = embed_batch(queries)  # One API call for all
+
+    # Query vector DB in batch
+    for i in range(0, len(queries), batch_size):
+        batch = embeddings[i:i+batch_size]
+        batch_results = vectordb.search_batch(batch)
+        results.extend(batch_results)
+
+    return results
+
+# 3. Index warmup
+def warmup_index(vectordb, num_queries=100):
+    print("Warming up index...")
+    start = time.time()
+
+    # Run dummy queries to load index into memory
+    dummy_vector = np.random.random(768).astype('float32')
+
+    for _ in range(num_queries):
+        vectordb.search(dummy_vector, k=10)
+
+    print(f"Warmup complete in {time.time() - start:.1f}s")
+
+# Run warmup on application start
+warmup_index(vectordb)
+
+# 4. Parameter tuning for latency/recall trade-off
+import faiss
+
+index = faiss.IndexHNSWFlat(768, 32)
+index.add(vectors)
+
+# Tune search parameters
+latencies = []
+recalls = []
+
+for ef in [10, 20, 50, 100, 200, 400]:
+    index.hnsw.efSearch = ef
+
+    start = time.time()
+    for query in test_queries:
+        results = index.search(query, k=10)
+    latency = (time.time() - start) / len(test_queries) * 1000
+
+    recall = compute_recall(results, ground_truth)
+
+    latencies.append(latency)
+    recalls.append(recall)
+    print(f"ef={ef}: {latency:.1f}ms, recall={recall:.2%}")
+
+# Output:
+# ef=10:  1ms, recall=85%
+# ef=50:  3ms, recall=95%
+# ef=100: 5ms, recall=98%
+# ef=400: 15ms, recall=99.5%
+# Choose ef=100 for balanced 5ms/98%
+
+# 5. Monitoring and profiling
+import prometheus_client as prom
+
+query_latency = prom.Histogram(
+    'vector_query_latency_seconds',
+    'Vector query latency',
+    buckets=[0.01, 0.05, 0.1, 0.2, 0.5, 1.0]
+)
+
+def monitored_search(query):
+    with query_latency.time():
+        return vectordb.search(query)
+
+# Alert on P99 latency > 200ms
+# Monitor cache hit rate: should be > 80%`,
+          resources: [
+            'Vector search optimization guide',
+            'Caching strategies for embeddings',
+            'FAISS performance tuning',
+            'Production monitoring patterns'
+          ]
+        }
       },
       {
         id: 'hybrid-search',
         title: 'Hybrid Search (Dense + Sparse)',
         duration: '2 hours',
-        concepts: ['BM25 + vector search', 'Reciprocal rank fusion', 'Score normalization', 'When to use hybrid']
+        concepts: ['BM25 + vector search', 'Reciprocal rank fusion', 'Score normalization', 'When to use hybrid'],
+        details: {
+          overview: 'Hybrid search combines dense vectors (semantic similarity) + sparse vectors (keyword matching) for better results than either alone. Dense catches synonyms/paraphrases, sparse catches exact matches/rare terms. Fusion methods: reciprocal rank fusion (RRF, best), weighted combination, or reranking. Hybrid excels when queries contain specific terms (names, IDs, technical terms) AND semantic intent. 10-30% better recall than pure vector search on many datasets.',
+          keyPoints: [
+            'Dense (vectors): semantic similarity. "automobile" matches "car". Handles synonyms, paraphrasing, multilingual. Misses exact rare terms.',
+            'Sparse (BM25): keyword matching with TF-IDF. Exact matches, rare terms, proper nouns. Misses semantic similarity.',
+            'Hybrid: combine both. Query "iPhone 15 Pro camera" → sparse matches model name exactly, dense matches semantic "smartphone photography".',
+            'Reciprocal Rank Fusion (RRF): merge rankings. RRF_score = sum(1/(k + rank)) for each method. Best fusion method, no parameter tuning.',
+            'Alpha parameter: 0=pure sparse, 1=pure dense, 0.5=balanced. Tune on your dataset. Typical: 0.7-0.8 (favor dense slightly).',
+            'When to use: technical docs, product search, medical/legal (exact terms matter), multilingual search. Not needed for pure semantic tasks.'
+          ],
+          example: 'Query "apple fruit nutrition". Pure dense returns Apple Inc products (semantic confusion). Pure sparse returns exact "apple" mentions (no "vitamins", "healthy"). Hybrid: BM25 ensures "fruit" keyword → semantic vectors find nutrition info → combined results are accurate.',
+          codeSnippet: `# Hybrid search implementation
+
+from rank_bm25 import BM25Okapi
+import numpy as np
+
+# Sample corpus
+corpus = [
+    "The iPhone 15 Pro has an amazing camera system",
+    "Apple fruit contains vitamin C and fiber",
+    "MacBook Pro 16-inch features M3 chip",
+    "Bananas are rich in potassium",
+    "iPad Air supports Apple Pencil"
+]
+
+# 1. Dense search (vectors)
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+doc_embeddings = model.encode(corpus)
+
+def dense_search(query, top_k=5):
+    query_emb = model.encode([query])
+    similarities = np.dot(doc_embeddings, query_emb.T).flatten()
+    top_indices = np.argsort(similarities)[::-1][:top_k]
+    return [(idx, similarities[idx]) for idx in top_indices]
+
+# 2. Sparse search (BM25)
+tokenized_corpus = [doc.lower().split() for doc in corpus]
+bm25 = BM25Okapi(tokenized_corpus)
+
+def sparse_search(query, top_k=5):
+    query_tokens = query.lower().split()
+    scores = bm25.get_scores(query_tokens)
+    top_indices = np.argsort(scores)[::-1][:top_k]
+    return [(idx, scores[idx]) for idx in top_indices]
+
+# 3. Reciprocal Rank Fusion (RRF)
+def reciprocal_rank_fusion(rankings_list, k=60):
+    # rankings_list: [[(doc_id, score), ...], ...]
+    scores = {}
+
+    for ranking in rankings_list:
+        for rank, (doc_id, score) in enumerate(ranking, start=1):
+            if doc_id not in scores:
+                scores[doc_id] = 0
+            scores[doc_id] += 1 / (k + rank)
+
+    # Sort by RRF score
+    return sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+# 4. Hybrid search
+def hybrid_search(query, top_k=5):
+    dense_results = dense_search(query, top_k=10)
+    sparse_results = sparse_search(query, top_k=10)
+
+    # Fuse rankings
+    fused = reciprocal_rank_fusion([dense_results, sparse_results])
+
+    # Return top k
+    return [(idx, score, corpus[idx]) for idx, score in fused[:top_k]]
+
+# Test queries
+query1 = "apple fruit nutrition"
+print("Hybrid search results:")
+for idx, score, text in hybrid_search(query1):
+    print(f"{score:.3f}: {text}")
+
+# 5. Weighted combination (alternative to RRF)
+def weighted_hybrid(query, alpha=0.7, top_k=5):
+    # alpha: weight for dense (0=sparse only, 1=dense only)
+
+    dense_results = dict(dense_search(query, top_k=len(corpus)))
+    sparse_results = dict(sparse_search(query, top_k=len(corpus)))
+
+    # Normalize scores to [0, 1]
+    def normalize(scores):
+        min_s, max_s = min(scores.values()), max(scores.values())
+        if max_s == min_s:
+            return {k: 0.5 for k in scores}
+        return {k: (v - min_s) / (max_s - min_s) for k, v in scores.items()}
+
+    dense_norm = normalize(dense_results)
+    sparse_norm = normalize(sparse_results)
+
+    # Weighted combination
+    combined = {}
+    for idx in range(len(corpus)):
+        dense_score = dense_norm.get(idx, 0)
+        sparse_score = sparse_norm.get(idx, 0)
+        combined[idx] = alpha * dense_score + (1 - alpha) * sparse_score
+
+    top_indices = sorted(combined, key=combined.get, reverse=True)[:top_k]
+    return [(idx, combined[idx], corpus[idx]) for idx in top_indices]
+
+# Tune alpha parameter
+for alpha in [0.3, 0.5, 0.7, 0.9]:
+    print(f"\\nAlpha={alpha}:")
+    results = weighted_hybrid(query1, alpha=alpha, top_k=3)
+    for idx, score, text in results:
+        print(f"  {score:.3f}: {text}")
+
+# Pinecone hybrid search (built-in)
+# results = index.query(
+#     vector=dense_vector,
+#     sparse_vector=sparse_vector,
+#     top_k=10
+# )`,
+          resources: [
+            'RRF paper',
+            'BM25 explained',
+            'Hybrid search best practices',
+            'When to use hybrid vs pure vector'
+          ]
+        }
       },
       {
         id: 'vectordb-production',
         title: 'Production Vector Databases',
         duration: '3 hours',
-        concepts: ['Scaling strategies', 'Sharding', 'Replication', 'Disaster recovery', 'Cost optimization', 'Monitoring']
+        concepts: ['Scaling strategies', 'Sharding', 'Replication', 'Disaster recovery', 'Cost optimization', 'Monitoring'],
+        details: {
+          overview: 'Production vector DBs require: scalability (handle growth), reliability (99.9% uptime), disaster recovery (backups), cost optimization (minimize spend), monitoring (observability). Scaling: vertical (bigger machines) vs horizontal (shard across nodes). Replication for HA (read replicas). Regular backups + point-in-time recovery. Monitor: query latency, throughput, error rate, cost per query. Managed services (Pinecone) handle ops, self-hosted (Milvus, Qdrant) gives control but requires expertise.',
+          keyPoints: [
+            'Scaling vertical: bigger pods/VMs. Simple, but limits (max 96GB RAM typical). Good for < 100M vectors.',
+            'Scaling horizontal: shard data across nodes. Complex but unlimited scale. Billions of vectors. Requires coordinator + query routing.',
+            'Replication: multiple copies for high availability. Read replicas scale reads. Leader-follower for writes. 99.9% uptime with 3 replicas.',
+            'Disaster recovery: automated backups (daily, weekly), point-in-time recovery, cross-region replication. Test restore regularly.',
+            'Cost optimization: use smaller embeddings (768D vs 1536D = 2x cheaper), quantization (4x memory savings), cache hot queries, right-size instances.',
+            'Monitoring: track latency (P50, P95, P99), throughput (QPS), error rate, index size, cost. Alert on anomalies. Use APM tools.'
+          ],
+          example: 'Production setup for 50M vectors, 1000 QPS: 3 HNSW shards (16M vectors each) + read replicas (2x) = 6 nodes. Daily backups to S3. Monitor P99 < 100ms. Cost: $2000/month. Optimizations: SQ8 quantization → $500/month savings. Cache hot 20% queries → 30% QPS reduction.',
+          codeSnippet: `# Production vector database patterns
+
+# 1. Monitoring and alerting
+import time
+import prometheus_client as prom
+
+class MonitoredVectorDB:
+    def __init__(self, vectordb):
+        self.vectordb = vectordb
+
+        # Metrics
+        self.query_latency = prom.Histogram(
+            'vectordb_query_latency_seconds',
+            'Query latency',
+            buckets=[0.01, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0]
+        )
+        self.query_count = prom.Counter(
+            'vectordb_queries_total',
+            'Total queries'
+        )
+        self.error_count = prom.Counter(
+            'vectordb_errors_total',
+            'Total errors',
+            ['error_type']
+        )
+        self.index_size = prom.Gauge(
+            'vectordb_index_vectors',
+            'Number of vectors in index'
+        )
+
+    def search(self, query_vector, k=10):
+        start = time.time()
+        self.query_count.inc()
+
+        try:
+            results = self.vectordb.search(query_vector, k)
+            latency = time.time() - start
+            self.query_latency.observe(latency)
+
+            # Alert if P99 > 200ms
+            if latency > 0.2:
+                log.warning(f"Slow query: {latency:.3f}s")
+
+            return results
+
+        except Exception as e:
+            self.error_count.labels(error_type=type(e).__name__).inc()
+            raise
+
+    def update_index_size(self):
+        size = self.vectordb.get_size()
+        self.index_size.set(size)
+
+# 2. Sharding for horizontal scaling
+class ShardedVectorDB:
+    def __init__(self, num_shards=3):
+        self.shards = [VectorDB(f"shard-{i}") for i in range(num_shards)]
+        self.num_shards = num_shards
+
+    def get_shard(self, doc_id):
+        # Consistent hashing
+        return hash(doc_id) % self.num_shards
+
+    def insert(self, doc_id, vector, metadata):
+        shard_idx = self.get_shard(doc_id)
+        self.shards[shard_idx].insert(doc_id, vector, metadata)
+
+    def search(self, query_vector, k=10):
+        # Query all shards in parallel
+        import concurrent.futures
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(shard.search, query_vector, k)
+                for shard in self.shards
+            ]
+            results = [f.result() for f in futures]
+
+        # Merge and re-rank
+        all_results = []
+        for shard_results in results:
+            all_results.extend(shard_results)
+
+        # Sort by score and return top k
+        all_results.sort(key=lambda x: x['score'], reverse=True)
+        return all_results[:k]
+
+# 3. Disaster recovery
+import boto3
+import json
+from datetime import datetime
+
+class BackupManager:
+    def __init__(self, vectordb, s3_bucket):
+        self.vectordb = vectordb
+        self.s3 = boto3.client('s3')
+        self.bucket = s3_bucket
+
+    def backup(self):
+        # Export index
+        timestamp = datetime.utcnow().isoformat()
+        backup_path = f"/tmp/backup-{timestamp}.index"
+
+        self.vectordb.save(backup_path)
+
+        # Upload to S3
+        s3_key = f"backups/{timestamp}/index"
+        self.s3.upload_file(backup_path, self.bucket, s3_key)
+
+        # Save metadata
+        metadata = {
+            "timestamp": timestamp,
+            "num_vectors": self.vectordb.get_size(),
+            "index_config": self.vectordb.get_config()
+        }
+        self.s3.put_object(
+            Bucket=self.bucket,
+            Key=f"backups/{timestamp}/metadata.json",
+            Body=json.dumps(metadata)
+        )
+
+        print(f"Backup complete: s3://{self.bucket}/{s3_key}")
+
+    def restore(self, timestamp):
+        # Download from S3
+        backup_path = f"/tmp/restore-{timestamp}.index"
+        s3_key = f"backups/{timestamp}/index"
+
+        self.s3.download_file(self.bucket, s3_key, backup_path)
+
+        # Load index
+        self.vectordb.load(backup_path)
+        print(f"Restore complete from {timestamp}")
+
+# Schedule daily backups
+import schedule
+
+backup_mgr = BackupManager(vectordb, "my-vectordb-backups")
+schedule.every().day.at("02:00").do(backup_mgr.backup)
+
+# 4. Cost optimization
+class CostOptimizedVectorDB:
+    def __init__(self, vectordb, cache):
+        self.vectordb = vectordb
+        self.cache = cache
+        self.query_cost = 0.0001  # Cost per query
+
+    def search_with_cost_tracking(self, query_vector, k=10):
+        # Check cache
+        cache_key = hash(query_vector.tobytes())
+        if cached := self.cache.get(cache_key):
+            return cached  # No cost for cache hit
+
+        # Query vector DB
+        results = self.vectordb.search(query_vector, k)
+        self.query_cost += 0.0001
+
+        # Cache for 1 hour
+        self.cache.set(cache_key, results, ttl=3600)
+
+        return results
+
+    def get_monthly_cost(self, qps):
+        # queries_per_month = qps * 86400 * 30
+        cache_hit_rate = 0.8
+        effective_qps = qps * (1 - cache_hit_rate)
+
+        queries_per_month = effective_qps * 86400 * 30
+        query_cost = queries_per_month * 0.0001
+
+        # Add storage cost
+        vectors = self.vectordb.get_size()
+        storage_cost = vectors * 0.000001  # $1 per 1M vectors
+
+        total = query_cost + storage_cost
+        print(f"Monthly cost: $\{total:.2f\}")
+        print(f"  Query: $\{query_cost:.2f\}")
+        print(f"  Storage: $\{storage_cost:.2f\}")
+
+        return total`,
+          resources: [
+            'Vector DB scaling patterns',
+            'Production deployment guide',
+            'Cost optimization strategies',
+            'Disaster recovery best practices'
+          ]
+        }
       }
     ],
     projects: [
@@ -3137,7 +4520,62 @@ def track_cost(tokens_used, model="gpt-4"):
         id: 'agent-intro',
         title: 'Introduction to AI Agents',
         duration: '2 hours',
-        concepts: ['What is an AI agent', 'Agent vs chatbot', 'Autonomous behavior', 'Agent capabilities', 'Real-world applications']
+        concepts: ['What is an AI agent', 'Agent vs chatbot', 'Autonomous behavior', 'Agent capabilities', 'Real-world applications'],
+        details: {
+          overview: 'AI agents are autonomous systems that perceive, reason, decide, and act to achieve goals. Unlike chatbots that respond to single prompts, agents take multi-step actions, use tools, maintain context, and adapt their behavior. They represent the evolution from passive LLMs to active problem solvers. Modern agents power code assistants, research tools, customer service, and automation systems.',
+          keyPoints: [
+            'Agent = perceive → reason → decide → act → observe loop. Autonomy distinguishes agents from chatbots.',
+            'Key capabilities: tool use (search, APIs, code execution), memory (context across interactions), planning (multi-step strategies).',
+            'Agents handle complex tasks: "Research X and write a report" requires search, synthesis, writing, validation.',
+            'Chatbots respond once. Agents iterate: try action, observe result, adjust strategy, retry until goal achieved.',
+            'Real-world agents: GitHub Copilot (code), ChatGPT plugins (tool use), AutoGPT (autonomous research), customer service bots.',
+            'Challenges: reliability (agents can fail), cost (many LLM calls), safety (need constraints), evaluation (hard to measure success).'
+          ],
+          example: 'Chatbot vs Agent: User asks "What\'s the weather in Paris?". Chatbot: "I don\'t have real-time data." Agent: (1) Understands query, (2) Calls weather API for Paris, (3) Observes result: "15°C, cloudy", (4) Responds: "It\'s 15°C and cloudy in Paris right now."',
+          codeSnippet: `# Simple agent loop
+class SimpleAgent:
+    def __init__(self, llm, tools):
+        self.llm = llm
+        self.tools = tools
+        self.memory = []
+
+    def run(self, task, max_steps=5):
+        for step in range(max_steps):
+            # Perceive: understand current state
+            context = self.memory + [task]
+
+            # Reason & Decide: what to do next
+            action = self.llm.generate(
+                f"Task: $\{task\}\\nHistory: $\{context\}\\nWhat should I do next?"
+            )
+
+            # Act: execute action (use tool or give answer)
+            if action.startswith("FINAL_ANSWER:"):
+                return action.replace("FINAL_ANSWER:", "").strip()
+
+            # Observe: get result
+            result = self.execute_action(action)
+            self.memory.append(f"Action: $\{action\}, Result: $\{result\}")
+
+        return "Failed to complete task"
+
+    def execute_action(self, action):
+        # Parse action and call appropriate tool
+        for tool in self.tools:
+            if action.startswith(tool.name):
+                return tool.run(action)
+        return "Unknown action"
+
+# Usage
+agent = SimpleAgent(llm=my_llm, tools=[search_tool, calculator])
+result = agent.run("What is the population of Tokyo divided by 2?")`,
+          resources: [
+            'Building LLM Agents (Anthropic)',
+            'LangChain Agent Overview',
+            'AutoGPT documentation',
+            'Agents paper survey'
+          ]
+        }
       },
       {
         id: 'react-pattern',
@@ -3225,73 +4663,1140 @@ result = agent.run("Who is older, Obama or Trump?")`,
         id: 'tool-use',
         title: 'Tool Use and Function Calling',
         duration: '3 hours',
-        concepts: ['Tool definitions', 'Function calling API', 'Tool selection', 'Error handling', 'Tool chaining']
+        concepts: ['Tool definitions', 'Function calling API', 'Tool selection', 'Error handling', 'Tool chaining'],
+        details: {
+          overview: 'Tool use (function calling) lets LLMs interact with external systems - search engines, databases, APIs, code execution, file systems. The model decides WHICH tool to call and WITH WHAT arguments based on the user query. Tool use transforms LLMs from text generators into action-taking systems. Supported natively by OpenAI, Anthropic, Google, and open-source models.',
+          keyPoints: [
+            'Tool definition: specify name, description, parameters (type, required/optional). Model uses descriptions to decide when/how to call.',
+            'Flow: User query → Model decides tool needed → Outputs tool call (name + args) → You execute → Return result → Model continues.',
+            'OpenAI function calling: pass tools in API, model returns function_call object. Anthropic tool use: similar pattern.',
+            'Tool selection: model picks based on descriptions. Clear descriptions = better selection. "Search the web for current info" vs "Search".',
+            'Error handling: tool fails? Return error to model, it can retry or try different tool. "API rate limit" → model waits.',
+            'Tool chaining: model calls tool A, uses result to call tool B. "Search for stock price" → "Calculate 10% of price".'
+          ],
+          example: 'User: "What\'s the weather in SF and NYC?". Model outputs: get_weather(location="San Francisco"), get_weather(location="New York"). You execute both, return results. Model synthesizes: "SF: 65°F sunny. NYC: 45°F rainy."',
+          codeSnippet: `# OpenAI function calling
+import openai
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get current weather for a location",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string",
+                        "description": "City name, e.g. San Francisco"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "enum": ["celsius", "fahrenheit"],
+                        "description": "Temperature unit"
+                    }
+                },
+                "required": ["location"]
+            }
+        }
+    }
+]
+
+response = openai.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "What's the weather in SF?"}],
+    tools=tools,
+    tool_choice="auto"  # Let model decide
+)
+
+# Check if model wants to call a tool
+if response.choices[0].message.tool_calls:
+    tool_call = response.choices[0].message.tool_calls[0]
+    function_name = tool_call.function.name
+    arguments = json.loads(tool_call.function.arguments)
+
+    # Execute tool
+    if function_name == "get_weather":
+        result = get_weather(**arguments)
+
+    # Send result back to model
+    messages = [
+        {"role": "user", "content": "What's the weather in SF?"},
+        response.choices[0].message,
+        {
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": json.dumps(result)
+        }
+    ]
+
+    final_response = openai.chat.completions.create(
+        model="gpt-4",
+        messages=messages
+    )`,
+          resources: [
+            'OpenAI Function Calling Guide',
+            'Anthropic Tool Use',
+            'LangChain Tools',
+            'Function calling best practices'
+          ]
+        }
       },
       {
         id: 'agent-memory',
         title: 'Agent Memory Systems',
         duration: '3 hours',
-        concepts: ['Short-term memory', 'Long-term memory', 'Episodic memory', 'Semantic memory', 'Memory retrieval', 'Vector memory']
+        concepts: ['Short-term memory', 'Long-term memory', 'Episodic memory', 'Semantic memory', 'Memory retrieval', 'Vector memory'],
+        details: {
+          overview: 'Memory enables agents to maintain context across interactions, learn from past experiences, and build knowledge over time. Without memory, each interaction starts from scratch. Memory types: short-term (conversation buffer), long-term (vector DB of past interactions), episodic (specific events), semantic (general knowledge). Advanced agents combine multiple memory systems for human-like persistence.',
+          keyPoints: [
+            'Short-term memory: recent conversation context. Sliding window of last N messages. Simple but limited by context window.',
+            'Long-term memory: store past interactions in vector DB. Retrieve relevant memories based on current query. Unlimited capacity.',
+            'Episodic memory: remember specific events. "User mentioned they like Python" or "Last week user asked about X".',
+            'Semantic memory: general facts/knowledge. "User is software engineer" or "User\'s timezone is PST". Extracted from interactions.',
+            'Memory retrieval: when user asks question, search memory for relevant context. Combine with current query. Improves personalization.',
+            'Implementation: conversation buffer + vector DB + metadata store. Buffer for recency, vectors for similarity, metadata for facts.'
+          ],
+          example: 'User Day 1: "I\'m learning React". Agent stores in memory. User Day 5: "What was I learning?". Agent retrieves episodic memory: "You mentioned you\'re learning React on Day 1." User: "Show me hooks example". Agent uses semantic memory: "You\'re learning React" + "wants hooks" → provides relevant example.',
+          codeSnippet: `# Agent memory system
+from langchain.memory import ConversationBufferMemory, VectorStoreRetrieverMemory
+from langchain.vectorstores import Chroma
+
+class AgentMemory:
+    def __init__(self):
+        # Short-term: recent messages
+        self.short_term = ConversationBufferMemory(
+            return_messages=True,
+            memory_key="chat_history",
+            k=10  # Last 10 messages
+        )
+
+        # Long-term: vector store of past conversations
+        self.long_term = VectorStoreRetrieverMemory(
+            retriever=Chroma().as_retriever(search_kwargs={"k": 5}),
+            memory_key="relevant_memories"
+        )
+
+        # Semantic: extracted facts
+        self.semantic = {}
+
+    def add_interaction(self, user_msg, agent_msg):
+        # Add to short-term
+        self.short_term.save_context(
+            {"input": user_msg},
+            {"output": agent_msg}
+        )
+
+        # Add to long-term
+        self.long_term.save_context(
+            {"input": user_msg},
+            {"output": agent_msg}
+        )
+
+        # Extract facts for semantic memory
+        self.extract_facts(user_msg)
+
+    def extract_facts(self, message):
+        # Use LLM to extract structured facts
+        facts = llm.extract_facts(message)
+        for key, value in facts.items():
+            self.semantic[key] = value
+
+    def get_context(self, query):
+        # Combine all memory types
+        context = {
+            "recent": self.short_term.load_memory_variables({}),
+            "relevant": self.long_term.load_memory_variables({"prompt": query}),
+            "facts": self.semantic
+        }
+        return context
+
+# Usage
+memory = AgentMemory()
+memory.add_interaction("I'm learning React", "Great! React is powerful...")
+
+# Later conversation
+context = memory.get_context("What was I learning?")
+# context includes recent messages + relevant past + facts`,
+          resources: [
+            'LangChain Memory',
+            'MemGPT paper',
+            'Vector-based memory',
+            'Conversation memory patterns'
+          ]
+        }
       },
       {
         id: 'planning',
         title: 'Agent Planning',
         duration: '2 hours',
-        concepts: ['Task decomposition', 'Multi-step planning', 'Plan validation', 'Dynamic replanning', 'Plan & Solve prompting']
+        concepts: ['Task decomposition', 'Multi-step planning', 'Plan validation', 'Dynamic replanning', 'Plan & Solve prompting'],
+        details: {
+          overview: 'Planning enables agents to tackle complex multi-step tasks by breaking them into manageable subtasks. Instead of immediate action, agents first create a plan, validate it, then execute step-by-step. Planning improves success rates on complex tasks like "Build a web app" or "Research and summarize 10 papers". Techniques: task decomposition, Plan-and-Solve prompting, hierarchical planning, dynamic replanning when steps fail.',
+          keyPoints: [
+            'Task decomposition: break "Build web app" into: (1) Design schema, (2) Create backend, (3) Build frontend, (4) Write tests.',
+            'Plan-and-Solve prompting: "First, create a plan. Then execute each step." Outperforms immediate action on complex tasks.',
+            'Plan validation: check plan for feasibility before execution. "Step 3 requires output from step 2" - validate dependencies.',
+            'Multi-step execution: execute plan sequentially. After each step, validate result. If step fails, either retry or replan.',
+            'Dynamic replanning: if step fails or environment changes, regenerate plan. "API changed" → update plan to use new API.',
+            'Hierarchical planning: high-level plan with sub-plans. "Build backend" → "Setup DB" → "Design schema", "Write migrations".'
+          ],
+          example: 'Task: "Analyze sentiment of tweets about product X and create report". Plan: (1) Search Twitter for "product X", (2) Collect 100 tweets, (3) Run sentiment analysis on each, (4) Aggregate results, (5) Generate visualizations, (6) Write summary report. Execute sequentially, validate each step.',
+          codeSnippet: `# Plan-and-Solve agent
+class PlanningAgent:
+    def __init__(self, llm, tools):
+        self.llm = llm
+        self.tools = tools
+
+    def create_plan(self, task):
+        prompt = f"""
+Task: {task}
+
+Create a step-by-step plan to complete this task.
+Each step should be clear and actionable.
+
+Plan:
+"""
+        plan = self.llm.generate(prompt)
+        return self.parse_plan(plan)
+
+    def validate_plan(self, plan):
+        # Check dependencies, tool availability, etc.
+        for i, step in enumerate(plan):
+            if not self.is_feasible(step):
+                return False, f"Step {i+1} is not feasible"
+        return True, "Plan is valid"
+
+    def execute_plan(self, plan, task):
+        results = []
+        for i, step in enumerate(plan):
+            print(f"Executing step {i+1}: {step}")
+
+            # Execute step
+            result = self.execute_step(step)
+
+            # Validate result
+            if not result.success:
+                # Replan from this point
+                print(f"Step {i+1} failed. Replanning...")
+                new_plan = self.replan(task, plan[:i], result.error)
+                return self.execute_plan(new_plan, task)
+
+            results.append(result)
+
+        return self.synthesize_results(results)
+
+    def replan(self, original_task, completed_steps, error):
+        prompt = f"""
+Original task: {original_task}
+Completed steps: {completed_steps}
+Error: {error}
+
+Create a new plan to complete the remaining task.
+"""
+        return self.create_plan(prompt)
+
+# Usage
+agent = PlanningAgent(llm, tools)
+plan = agent.create_plan("Research topic X and write report")
+valid, msg = agent.validate_plan(plan)
+if valid:
+    result = agent.execute_plan(plan, task)`,
+          resources: [
+            'Plan-and-Solve paper',
+            'Hierarchical planning for agents',
+            'LangChain PlanAndExecute',
+            'Task decomposition strategies'
+          ]
+        }
       },
       {
         id: 'reflection',
         title: 'Reflection and Self-Critique',
         duration: '2 hours',
-        concepts: ['Self-evaluation', 'Iterative refinement', 'Reflexion pattern', 'Learning from mistakes', 'Quality improvement']
+        concepts: ['Self-evaluation', 'Iterative refinement', 'Reflexion pattern', 'Learning from mistakes', 'Quality improvement'],
+        details: {
+          overview: 'Reflection enables agents to evaluate their own outputs, identify mistakes, and iteratively improve. The Reflexion pattern: generate output → self-critique → refine → repeat until quality threshold met. Dramatically improves agent performance on code generation, writing, problem-solving. Agents learn from failures without external feedback. Key to autonomous improvement and robustness.',
+          keyPoints: [
+            'Reflexion pattern: (1) Generate output, (2) Self-critique: "What\'s wrong?", (3) Store reflection in memory, (4) Regenerate with reflection, (5) Repeat.',
+            'Self-evaluation: agent checks its own work. Code: "Does it pass tests?" Writing: "Is it clear and concise?" Math: "Is answer correct?"',
+            'Iterative refinement: each iteration uses previous critiques. Version 1 + critique 1 → Version 2 + critique 2 → Version 3.',
+            'Learning from mistakes: store failures and reflections in memory. Next time similar task appears, recall past mistakes.',
+            'Quality improvement: reflection can improve success rate from 30% to 80%+ on complex tasks (coding, reasoning).',
+            'Implementation: generate → prompt "Critique this output" → incorporate feedback → regenerate. Limit iterations to avoid infinite loops.'
+          ],
+          example: 'Code generation: (1) Agent writes code, (2) Runs tests → 2 tests fail, (3) Reflection: "Tests fail because I didn\'t handle edge case: empty array", (4) Regenerate code with this reflection, (5) All tests pass. Without reflection: stuck at failing code.',
+          codeSnippet: `# Reflexion agent
+class ReflexionAgent:
+    def __init__(self, llm):
+        self.llm = llm
+        self.reflections = []
+
+    def generate(self, task, max_iterations=3):
+        output = None
+
+        for i in range(max_iterations):
+            # Generate output with past reflections
+            context = {
+                "task": task,
+                "previous_reflections": self.reflections,
+                "previous_output": output
+            }
+
+            output = self.llm.generate(self.build_prompt(context))
+
+            # Evaluate output
+            evaluation = self.evaluate(output, task)
+
+            if evaluation.success:
+                return output
+
+            # Generate reflection on failure
+            reflection = self.llm.generate(f"""
+Task: {task}
+Your output: {output}
+Evaluation: {evaluation.feedback}
+
+What went wrong? How can you improve?
+
+Reflection:
+""")
+
+            self.reflections.append(reflection)
+            print(f"Iteration {i+1} failed. Reflection: {reflection}")
+
+        return output
+
+    def evaluate(self, output, task):
+        # Task-specific evaluation
+        if "code" in task.lower():
+            # Run tests
+            test_results = run_tests(output)
+            return test_results
+
+        # General evaluation
+        return self.llm.evaluate(output, task)
+
+# Usage - Code generation
+agent = ReflexionAgent(llm)
+code = agent.generate(
+    task="Write Python function to find median of array",
+    max_iterations=3
+)
+
+# Iteration 1: Code fails edge case
+# Reflection: "Didn't handle empty array"
+# Iteration 2: Code fails another test
+# Reflection: "Didn't sort array first"
+# Iteration 3: All tests pass`,
+          resources: [
+            'Reflexion paper (Northeastern)',
+            'Self-Refine paper',
+            'Iterative refinement techniques',
+            'Agent self-improvement'
+          ]
+        }
       },
       {
         id: 'langchain-agents',
         title: 'LangChain Agents',
         duration: '3 hours',
-        concepts: ['LangChain agent types', 'AgentExecutor', 'Custom agents', 'Callbacks', 'Debugging']
+        concepts: ['LangChain agent types', 'AgentExecutor', 'Custom agents', 'Callbacks', 'Debugging'],
+        details: {
+          overview: 'LangChain provides production-ready agent infrastructure. Agent types: Zero-shot ReAct (decides tools per step), Structured Chat (complex inputs), OpenAI Functions (native function calling), Conversational (with memory). AgentExecutor handles the agent loop: parse actions, execute tools, pass observations back. Callbacks for logging/monitoring. Most popular framework for building LLM agents.',
+          keyPoints: [
+            'Agent types: zero-shot-react-description (ReAct pattern), openai-functions (uses native function calling), conversational-react-description (with memory).',
+            'AgentExecutor: orchestrates agent loop. Manages max iterations, handles errors, tracks intermediate steps. Wraps agent + tools.',
+            'Tools: define with name, description, function. Agent uses descriptions to decide when to call. Clear descriptions critical.',
+            'Custom agents: subclass AgentExecutor, override planning or action execution. Full control over agent behavior.',
+            'Callbacks: hooks for logging, monitoring, debugging. onToolStart, onToolEnd, onAgentAction, onAgentFinish. Integrate with LangSmith.',
+            'Debugging: verbose=True shows agent reasoning. LangSmith traces full execution. Common issues: poor tool descriptions, infinite loops.'
+          ],
+          example: 'Build agent with search + calculator: Agent gets "What is population of Tokyo times 2?", decides to use Search tool for population, then Calculator tool for multiplication. AgentExecutor orchestrates this workflow.',
+          codeSnippet: `# LangChain agent
+from langchain.agents import initialize_agent, AgentType, Tool
+from langchain.llms import OpenAI
+
+# Define tools
+def search(query):
+    # Call search API
+    return search_api(query)
+
+def calculator(expression):
+    return eval(expression)
+
+tools = [
+    Tool(
+        name="Search",
+        func=search,
+        description="Useful for finding current information, facts, or data. Input should be a search query."
+    ),
+    Tool(
+        name="Calculator",
+        func=calculator,
+        description="Useful for math calculations. Input should be a math expression like '2 * 5' or '10 / 2'."
+    )
+]
+
+# Initialize agent
+llm = OpenAI(temperature=0)
+agent = initialize_agent(
+    tools=tools,
+    llm=llm,
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True,  # Show reasoning
+    max_iterations=5,
+    handle_parsing_errors=True
+)
+
+# Run agent
+result = agent.run("What is the population of Tokyo multiplied by 2?")
+
+# Agent reasoning:
+# Thought: I need to find Tokyo's population first
+# Action: Search
+# Action Input: "Tokyo population"
+# Observation: "Tokyo has 14 million people"
+# Thought: Now I need to multiply by 2
+# Action: Calculator
+# Action Input: "14000000 * 2"
+# Observation: "28000000"
+# Thought: I have the final answer
+# Final Answer: "28 million"
+
+# Custom callbacks
+from langchain.callbacks import BaseCallbackHandler
+
+class MyCallback(BaseCallbackHandler):
+    def on_tool_start(self, tool, input_str, **kwargs):
+        print(f"Starting tool: {tool} with input: {input_str}")
+
+    def on_tool_end(self, output, **kwargs):
+        print(f"Tool output: {output}")
+
+agent.run("Query", callbacks=[MyCallback()])`,
+          resources: [
+            'LangChain Agents Documentation',
+            'Agent types comparison',
+            'Building custom agents',
+            'LangSmith for monitoring'
+          ]
+        }
       },
       {
         id: 'langgraph',
         title: 'LangGraph for Complex Workflows',
         duration: '3 hours',
-        concepts: ['State graphs', 'Nodes and edges', 'Conditional routing', 'Cycles and loops', 'Human-in-the-loop']
+        concepts: ['State graphs', 'Nodes and edges', 'Conditional routing', 'Cycles and loops', 'Human-in-the-loop'],
+        details: {
+          overview: 'LangGraph enables building complex, stateful agent workflows as graphs. Nodes = computation (LLM calls, tools), Edges = control flow (sequential, conditional, cycles). Unlike linear chains, LangGraph supports loops, branching, parallel execution, human-in-the-loop. Perfect for multi-step workflows: code generation → test → debug (loop), research → critique → revise (loop). More flexible and powerful than basic agent loops.',
+          keyPoints: [
+            'State graph: nodes (functions/LLMs) connected by edges (transitions). State flows through graph, accumulating results.',
+            'Nodes: define computation. "generate_code", "run_tests", "fix_bugs". Each node updates shared state.',
+            'Edges: define flow. Normal edge (A → B), conditional edge (A → B if condition else C), cycle (A → B → A).',
+            'Conditional routing: based on node output. "If tests pass → finish. Else → debug node → retry."',
+            'Cycles/loops: iterate until condition met. Code gen → test → debug → test → debug → test → pass.',
+            'Human-in-the-loop: pause execution, wait for human input, resume. Critical for agents that need approval or clarification.'
+          ],
+          example: 'Code generation workflow: (1) Generate code node, (2) Run tests node, (3) If pass → finish. If fail → debug node → back to step 2 (cycle). Loop until tests pass or max iterations.',
+          codeSnippet: `# LangGraph workflow
+from langgraph.graph import StateGraph, END
+
+# Define state
+class AgentState(TypedDict):
+    task: str
+    code: str
+    tests_passed: bool
+    iteration: int
+
+# Define nodes
+def generate_code(state):
+    code = llm.generate(f"Write code for: {state['task']}")
+    return {"code": code, "iteration": state["iteration"] + 1}
+
+def run_tests(state):
+    passed = execute_tests(state["code"])
+    return {"tests_passed": passed}
+
+def debug_code(state):
+    errors = get_test_errors(state["code"])
+    fixed_code = llm.generate(f"Fix these errors: {errors}\\nCode: {state['code']}")
+    return {"code": fixed_code}
+
+# Build graph
+workflow = StateGraph(AgentState)
+
+# Add nodes
+workflow.add_node("generate", generate_code)
+workflow.add_node("test", run_tests)
+workflow.add_node("debug", debug_code)
+
+# Add edges
+workflow.set_entry_point("generate")
+workflow.add_edge("generate", "test")
+
+# Conditional edge: if tests pass → END, else → debug
+def should_continue(state):
+    if state["tests_passed"]:
+        return END
+    elif state["iteration"] > 5:
+        return END  # Max iterations
+    else:
+        return "debug"
+
+workflow.add_conditional_edges("test", should_continue)
+workflow.add_edge("debug", "test")  # Loop back
+
+# Compile and run
+app = workflow.compile()
+result = app.invoke({
+    "task": "Sort an array",
+    "code": "",
+    "tests_passed": False,
+    "iteration": 0
+})
+
+# Flow: generate → test → debug → test → debug → test → pass
+
+# Human-in-the-loop
+workflow.add_node("human_review", lambda s: {"approved": get_human_input()})
+workflow.add_conditional_edges("human_review",
+    lambda s: "continue" if s["approved"] else "revise")`,
+          resources: [
+            'LangGraph Documentation',
+            'Building agentic workflows',
+            'LangGraph tutorials',
+            'State management in agents'
+          ]
+        }
       },
       {
         id: 'autogpt-babygpt',
         title: 'AutoGPT and BabyAGI Patterns',
         duration: '2 hours',
-        concepts: ['Autonomous task generation', 'Task prioritization', 'Result storage', 'Continuous learning', 'Limitations']
+        concepts: ['Autonomous task generation', 'Task prioritization', 'Result storage', 'Continuous learning', 'Limitations'],
+        details: {
+          overview: 'AutoGPT and BabyAGI pioneered fully autonomous agents. Give them a high-level goal, they generate subtasks, execute them, create new tasks based on results, iterate indefinitely. BabyAGI: task list + prioritization + execution loop. AutoGPT: adds memory, file system access, web browsing. Revolutionary but flawed: infinite loops, high costs, reliability issues. Inspired modern agentic frameworks.',
+          keyPoints: [
+            'AutoGPT: goal-driven autonomous agent. "Build a website" → generates tasks: research frameworks, write code, test, deploy.',
+            'BabyAGI loop: (1) Pull highest priority task, (2) Execute with agent, (3) Store result, (4) Generate new tasks, (5) Reprioritize, (6) Repeat.',
+            'Task generation: agent creates new subtasks based on current context. "Research frameworks" → "Install React", "Learn TypeScript".',
+            'Task prioritization: rank tasks by importance/urgency. "Fix critical bug" > "Update docs". Re-prioritize after each iteration.',
+            'Memory system: vector DB stores all results. Agent retrieves relevant context when executing tasks. Enables continuity.',
+            'Limitations: expensive (many LLM calls), unreliable (can go off track), infinite loops, hard to control. Good for demos, not production.'
+          ],
+          example: 'Goal: "Research and summarize AI papers from 2024". BabyAGI: (1) Task 1: Search for AI papers 2024, (2) Execute → finds 10 papers, (3) Generates new tasks: Read paper 1, Read paper 2, ..., (4) Prioritizes: most cited first, (5) Executes each, (6) Final task: Synthesize summaries.',
+          codeSnippet: `# BabyAGI pattern
+class BabyAGI:
+    def __init__(self, llm, vectorstore):
+        self.llm = llm
+        self.task_list = []
+        self.vectorstore = vectorstore
+
+    def run(self, objective, max_iterations=20):
+        # Start with initial task
+        self.task_list = [{"id": 1, "task": objective}]
+
+        for i in range(max_iterations):
+            # Pull highest priority task
+            task = self.task_list.pop(0)
+            print(f"Executing: {task['task']}")
+
+            # Get context from memory
+            context = self.vectorstore.search(task['task'], k=5)
+
+            # Execute task
+            result = self.llm.generate(f"""
+Objective: {objective}
+Task: {task['task']}
+Context: {context}
+
+Complete this task:
+""")
+
+            # Store result in memory
+            self.vectorstore.add(task['task'], result)
+
+            # Generate new tasks based on result
+            new_tasks = self.llm.generate(f"""
+Objective: {objective}
+Completed task: {task['task']}
+Result: {result}
+
+What new tasks should be created? List 0-5 tasks:
+""")
+
+            # Add new tasks
+            for new_task in self.parse_tasks(new_tasks):
+                self.task_list.append(new_task)
+
+            # Prioritize task list
+            self.task_list = self.prioritize_tasks(self.task_list, objective)
+
+            if not self.task_list:
+                break
+
+        return "Objective complete"
+
+    def prioritize_tasks(self, tasks, objective):
+        prompt = f"""
+Objective: {objective}
+Tasks: {tasks}
+
+Prioritize these tasks (most important first):
+"""
+        return self.llm.prioritize(prompt)
+
+# Usage
+agent = BabyAGI(llm, vectorstore)
+agent.run("Research AI safety and write report")`,
+          resources: [
+            'BabyAGI GitHub',
+            'AutoGPT documentation',
+            'Autonomous agents patterns',
+            'Task management in agents'
+          ]
+        }
       },
       {
         id: 'agent-evaluation',
         title: 'Agent Evaluation',
         duration: '2 hours',
-        concepts: ['Success metrics', 'Benchmarks (AgentBench)', 'Human evaluation', 'Automated testing', 'Failure analysis']
+        concepts: ['Success metrics', 'Benchmarks (AgentBench)', 'Human evaluation', 'Automated testing', 'Failure analysis'],
+        details: {
+          overview: 'Evaluating agents is harder than evaluating models. Agents take actions with side effects - hard to measure success automatically. Evaluation approaches: task success rate (did it complete goal?), human evaluation (quality of output), benchmarks (AgentBench, WebArena), unit tests, failure analysis. Critical for iterating on agent design and measuring progress. Good eval = faster iteration.',
+          keyPoints: [
+            'Task success rate: primary metric. "Did agent complete the task correctly?" Binary or scored. Test on diverse tasks.',
+            'Benchmarks: AgentBench (15 environments), WebArena (web tasks), SWE-bench (code), GAIA (reasoning). Compare agents.',
+            'Human evaluation: for quality. "Is research report good? Is customer response helpful?" Slow but accurate. Use for validation.',
+            'Automated testing: unit tests for specific capabilities. "Can agent use search tool? Can it handle errors?" Fast iteration.',
+            'Failure analysis: when agent fails, analyze why. "Wrong tool? Poor planning? Hallucination?" Fix root cause.',
+            'Metrics to track: success rate, # steps taken, cost per task, time to completion, tool usage patterns, error rate.'
+          ],
+          example: 'Research agent eval: 100 test tasks like "Research topic X and summarize". Metrics: 85% success rate (completed correctly), avg 12 steps per task, $0.50 per task, 3 min avg time. Failures: 10 hallucinations, 5 infinite loops. Fix: add fact-checking tool, limit max steps.',
+          codeSnippet: `# Agent evaluation framework
+class AgentEvaluator:
+    def __init__(self, agent, test_suite):
+        self.agent = agent
+        self.test_suite = test_suite
+        self.results = []
+
+    def evaluate(self):
+        for test_case in self.test_suite:
+            result = self.run_test(test_case)
+            self.results.append(result)
+
+        return self.compute_metrics()
+
+    def run_test(self, test_case):
+        start_time = time.time()
+        start_cost = self.agent.total_cost
+
+        try:
+            # Run agent
+            output = self.agent.run(test_case['input'])
+
+            # Evaluate output
+            success = self.check_success(output, test_case['expected'])
+
+            return {
+                'test_id': test_case['id'],
+                'success': success,
+                'output': output,
+                'steps': len(self.agent.history),
+                'time': time.time() - start_time,
+                'cost': self.agent.total_cost - start_cost,
+                'error': None
+            }
+        except Exception as e:
+            return {
+                'test_id': test_case['id'],
+                'success': False,
+                'error': str(e),
+                'steps': len(self.agent.history)
+            }
+
+    def check_success(self, output, expected):
+        # Task-specific success check
+        if 'exact_match' in expected:
+            return output == expected['exact_match']
+        elif 'contains' in expected:
+            return expected['contains'] in output
+        else:
+            # Use LLM to judge
+            return self.llm_judge(output, expected)
+
+    def compute_metrics(self):
+        successes = sum(r['success'] for r in self.results)
+        return {
+            'success_rate': successes / len(self.results),
+            'avg_steps': np.mean([r['steps'] for r in self.results]),
+            'avg_cost': np.mean([r.get('cost', 0) for r in self.results]),
+            'avg_time': np.mean([r.get('time', 0) for r in self.results]),
+            'failures': [r for r in self.results if not r['success']]
+        }
+
+# Usage
+test_suite = [
+    {'id': 1, 'input': 'Research topic X', 'expected': {'contains': 'summary'}},
+    {'id': 2, 'input': 'Calculate 15% of 80', 'expected': {'exact_match': '12'}},
+]
+
+evaluator = AgentEvaluator(my_agent, test_suite)
+metrics = evaluator.evaluate()
+print(f"Success rate: {metrics['success_rate']}")`,
+          resources: [
+            'AgentBench paper',
+            'SWE-bench for code agents',
+            'Agent evaluation best practices',
+            'LLM-as-judge for evaluation'
+          ]
+        }
       },
       {
         id: 'agent-safety',
         title: 'Agent Safety and Constraints',
         duration: '2 hours',
-        concepts: ['Action validation', 'Sandboxing', 'Budget limits', 'Human oversight', 'Kill switches']
+        concepts: ['Action validation', 'Sandboxing', 'Budget limits', 'Human oversight', 'Kill switches'],
+        details: {
+          overview: 'Autonomous agents can take dangerous actions: delete files, make API calls, send emails, execute code. Safety critical for production. Constraints: action validation (approve dangerous actions), sandboxing (isolate execution), budget limits (max cost/steps), human oversight (require approval), kill switches (emergency stop). Trade-off between autonomy and safety. Start restrictive, gradually loosen constraints.',
+          keyPoints: [
+            'Action validation: whitelist/blacklist actions. "Allow: read files. Deny: delete files, send emails." Validate before executing.',
+            'Sandboxing: isolate agent execution. Docker containers, virtual machines, separate environments. Limit file system access.',
+            'Budget limits: max LLM cost ($10), max steps (50), max time (5 min). Prevent runaway agents from infinite loops.',
+            'Human-in-the-loop: require approval for dangerous actions. "Agent wants to delete file X. Approve?" Slow but safe.',
+            'Kill switches: emergency stop button. User can halt agent immediately. Essential for production.',
+            'Gradual autonomy: start with strict constraints, monitor behavior, gradually increase autonomy as trust builds.'
+          ],
+          example: 'Code execution agent: Sandbox in Docker container (can\'t access host files), whitelist allowed Python libraries (no os, subprocess), max 10 LLM calls ($1 budget), require human approval for file writes, 30 second timeout per execution. Agent can run code safely.',
+          codeSnippet: `# Safe agent wrapper
+class SafeAgent:
+    def __init__(self, agent, config):
+        self.agent = agent
+        self.config = config
+        self.cost = 0
+        self.steps = 0
+
+    def run(self, task):
+        while self.steps < self.config['max_steps']:
+            # Check budget
+            if self.cost > self.config['max_cost']:
+                raise Exception("Budget limit exceeded")
+
+            # Get next action
+            action = self.agent.get_next_action(task)
+
+            # Validate action
+            if not self.is_safe_action(action):
+                if self.config['require_approval']:
+                    if not self.get_human_approval(action):
+                        raise Exception("Action denied by human")
+                else:
+                    raise Exception(f"Unsafe action: {action}")
+
+            # Execute in sandbox
+            result = self.execute_in_sandbox(action)
+
+            self.steps += 1
+            self.cost += self.estimate_cost(action)
+
+            if self.agent.is_complete(result):
+                return result
+
+        raise Exception("Max steps exceeded")
+
+    def is_safe_action(self, action):
+        # Check against whitelist/blacklist
+        if action['type'] in self.config['blacklist']:
+            return False
+
+        if action['type'] == 'file_operation':
+            if action['operation'] == 'delete':
+                return False  # Never allow delete
+
+        if action['type'] == 'api_call':
+            if action['api'] not in self.config['allowed_apis']:
+                return False
+
+        return True
+
+    def execute_in_sandbox(self, action):
+        # Execute in isolated environment
+        if action['type'] == 'code_execution':
+            return docker_run(
+                action['code'],
+                timeout=self.config['code_timeout'],
+                memory_limit='512m',
+                network='none'  # No network access
+            )
+        else:
+            return self.agent.execute_action(action)
+
+# Configuration
+safe_config = {
+    'max_steps': 50,
+    'max_cost': 5.0,
+    'blacklist': ['file_delete', 'send_email', 'make_payment'],
+    'allowed_apis': ['search', 'calculator'],
+    'require_approval': True,
+    'code_timeout': 10
+}
+
+safe_agent = SafeAgent(my_agent, safe_config)`,
+          resources: [
+            'AI safety for agents',
+            'Sandboxing techniques',
+            'Agent constraint systems',
+            'Human-in-the-loop design'
+          ]
+        }
       },
       {
         id: 'observability',
         title: 'Agent Observability',
         duration: '2 hours',
-        concepts: ['Logging', 'Tracing', 'Metrics', 'Debugging tools', 'LangSmith', 'Weights & Biases']
+        concepts: ['Logging', 'Tracing', 'Metrics', 'Debugging tools', 'LangSmith', 'Weights & Biases'],
+        details: {
+          overview: 'Agent debugging is hard - they make multiple LLM calls, use tools, iterate. Observability essential: logging (what happened), tracing (full execution path), metrics (performance/cost), debugging tools (step through). Tools: LangSmith (traces LangChain agents), Weights & Biases (metrics), custom logging. Good observability = 10x faster debugging and iteration. Log everything: inputs, outputs, decisions, tool calls, errors.',
+          keyPoints: [
+            'Logging: record all events. "Agent started", "Tool called: search(query)", "LLM response: ...", "Error: X". Structured logs (JSON).',
+            'Tracing: visualize full execution path. Start → LLM call 1 → Tool A → LLM call 2 → Tool B → End. See bottlenecks.',
+            'Metrics: track performance. Success rate, latency, cost per task, tool usage, error rate. Dashboard for monitoring.',
+            'LangSmith: purpose-built for LangChain agents. Automatic tracing, prompt comparison, dataset testing, feedback collection.',
+            'Debugging: step through execution, inspect state at each step. "Why did agent call wrong tool?" Check decision reasoning.',
+            'Production monitoring: alerts for failures, cost spikes, slow tasks. "Agent success rate dropped from 90% to 60% → investigate".'
+          ],
+          example: 'Agent trace: (1) User query: "Research AI safety", (2) LLM planning: "I\'ll search for papers", (3) Tool call: search("AI safety papers"), (4) Search result: 10 papers, (5) LLM synthesis: "Here\'s a summary...", (6) Cost: $0.30, Time: 8s. Trace shows each step, helps debug.',
+          codeSnippet: `# Agent observability
+import logging
+from datetime import datetime
+import json
+
+class ObservableAgent:
+    def __init__(self, agent, logger=None):
+        self.agent = agent
+        self.logger = logger or self.setup_logger()
+        self.trace = []
+        self.metrics = {
+            'total_cost': 0,
+            'total_time': 0,
+            'tool_calls': {},
+            'llm_calls': 0
+        }
+
+    def setup_logger(self):
+        logger = logging.getLogger('agent')
+        handler = logging.FileHandler('agent.log')
+        handler.setFormatter(
+            logging.Formatter('%(asctime)s - %(message)s')
+        )
+        logger.addHandler(handler)
+        return logger
+
+    def run(self, task):
+        start_time = datetime.now()
+        self.log_event('agent_start', {'task': task})
+
+        try:
+            result = self.run_with_tracing(task)
+            self.log_event('agent_success', {'result': result})
+            return result
+        except Exception as e:
+            self.log_event('agent_error', {'error': str(e)})
+            raise
+        finally:
+            self.metrics['total_time'] = (datetime.now() - start_time).seconds
+            self.save_trace()
+            self.log_metrics()
+
+    def run_with_tracing(self, task):
+        for step in self.agent.execute(task):
+            # Trace each step
+            trace_entry = {
+                'timestamp': datetime.now().isoformat(),
+                'step': step['type'],
+                'input': step['input'],
+                'output': step['output'],
+                'cost': step.get('cost', 0)
+            }
+            self.trace.append(trace_entry)
+
+            # Log step
+            self.log_event(step['type'], step)
+
+            # Update metrics
+            if step['type'] == 'tool_call':
+                tool = step['tool']
+                self.metrics['tool_calls'][tool] = \\
+                    self.metrics['tool_calls'].get(tool, 0) + 1
+            elif step['type'] == 'llm_call':
+                self.metrics['llm_calls'] += 1
+                self.metrics['total_cost'] += step.get('cost', 0)
+
+        return self.agent.final_result
+
+    def log_event(self, event_type, data):
+        self.logger.info(json.dumps({
+            'event': event_type,
+            'data': data,
+            'timestamp': datetime.now().isoformat()
+        }))
+
+    def save_trace(self):
+        # Save to LangSmith, W&B, or local file
+        with open('trace.json', 'w') as f:
+            json.dump(self.trace, f, indent=2)
+
+    def log_metrics(self):
+        self.logger.info(f"Metrics: {json.dumps(self.metrics)}")
+
+# LangSmith integration
+from langsmith import Client
+
+client = Client()
+client.create_run(
+    name="agent_run",
+    inputs={"task": task},
+    outputs={"result": result},
+    run_type="chain"
+)`,
+          resources: [
+            'LangSmith Documentation',
+            'Observability best practices',
+            'Weights & Biases for LLMs',
+            'Agent debugging guide'
+          ]
+        }
       },
       {
         id: 'agent-orchestration',
         title: 'Agent Orchestration',
         duration: '2 hours',
-        concepts: ['Sequential agents', 'Parallel agents', 'Hierarchical agents', 'Supervisor pattern', 'Router pattern']
+        concepts: ['Sequential agents', 'Parallel agents', 'Hierarchical agents', 'Supervisor pattern', 'Router pattern'],
+        details: {
+          overview: 'Complex tasks often need multiple specialized agents working together. Orchestration patterns: Sequential (agent A → B → C), Parallel (agents run simultaneously), Hierarchical (manager delegates to workers), Supervisor (oversees and coordinates), Router (routes tasks to specialist agents). Orchestration improves performance by leveraging specialist agents, enables parallelization, provides better error handling and task decomposition.',
+          keyPoints: [
+            'Sequential: agents in pipeline. Research agent → Writing agent → Editing agent. Output of A feeds into B.',
+            'Parallel: agents run simultaneously. 3 research agents research different topics, results merged. Faster for independent tasks.',
+            'Hierarchical: manager agent delegates to worker agents. Manager plans, assigns subtasks to specialists (code agent, test agent).',
+            'Supervisor pattern: supervisor monitors worker agents, handles errors, reallocates tasks. Worker fails → supervisor assigns to another.',
+            'Router pattern: classify task, route to specialist. Code question → code agent. Math question → math agent. Single entry point.',
+            'Coordination: agents communicate via shared state, message passing, or central coordinator. Avoid conflicts and race conditions.'
+          ],
+          example: 'Research report pipeline (sequential): (1) Research agent searches and extracts facts, (2) Analysis agent identifies key insights, (3) Writing agent creates report, (4) Critique agent reviews and suggests edits, (5) Final agent incorporates feedback. Each agent specializes.',
+          codeSnippet: `# Agent orchestration patterns
+
+# 1. Sequential agents
+class SequentialOrchestrator:
+    def __init__(self, agents):
+        self.agents = agents
+
+    def run(self, input):
+        result = input
+        for agent in self.agents:
+            result = agent.run(result)
+        return result
+
+pipeline = SequentialOrchestrator([
+    research_agent,
+    analysis_agent,
+    writing_agent
+])
+report = pipeline.run("Topic: AI Safety")
+
+# 2. Parallel agents
+import asyncio
+
+class ParallelOrchestrator:
+    def __init__(self, agents):
+        self.agents = agents
+
+    async def run(self, inputs):
+        tasks = [agent.run_async(input) for agent, input
+                 in zip(self.agents, inputs)]
+        results = await asyncio.gather(*tasks)
+        return self.merge(results)
+
+# 3. Hierarchical (Supervisor)
+class SupervisorAgent:
+    def __init__(self, worker_agents):
+        self.workers = worker_agents
+
+    def run(self, task):
+        # Plan and decompose
+        subtasks = self.decompose(task)
+
+        results = []
+        for subtask in subtasks:
+            # Assign to appropriate worker
+            worker = self.select_worker(subtask)
+            result = worker.run(subtask)
+
+            # Validate result
+            if not self.validate(result):
+                # Reassign or retry
+                result = self.handle_failure(subtask)
+
+            results.append(result)
+
+        # Synthesize results
+        return self.synthesize(results)
+
+    def select_worker(self, subtask):
+        # Route to specialist based on subtask type
+        if "code" in subtask:
+            return self.workers['code_agent']
+        elif "research" in subtask:
+            return self.workers['research_agent']
+        else:
+            return self.workers['general_agent']
+
+# 4. Router pattern
+class RouterOrchestrator:
+    def __init__(self, agents, classifier):
+        self.agents = agents
+        self.classifier = classifier
+
+    def run(self, query):
+        # Classify query
+        agent_type = self.classifier.classify(query)
+
+        # Route to specialist
+        agent = self.agents[agent_type]
+        return agent.run(query)
+
+router = RouterOrchestrator(
+    agents={
+        'code': code_agent,
+        'math': math_agent,
+        'research': research_agent
+    },
+    classifier=llm_classifier
+)`,
+          resources: [
+            'Multi-agent orchestration patterns',
+            'LangGraph for orchestration',
+            'CrewAI supervisor pattern',
+            'Agent coordination strategies'
+          ]
+        }
       },
       {
         id: 'production-agents',
         title: 'Production Agent Deployment',
         duration: '3 hours',
-        concepts: ['Hosting', 'Scaling', 'Cost management', 'Monitoring', 'Error recovery', 'Version management']
+        concepts: ['Hosting', 'Scaling', 'Cost management', 'Monitoring', 'Error recovery', 'Version management'],
+        details: {
+          overview: 'Deploying agents to production requires infrastructure for reliability, scalability, cost control, monitoring. Key concerns: hosting (where agent runs), scaling (handle load), cost management (control LLM spend), monitoring (track health), error recovery (handle failures gracefully), version management (update agents safely). Production agents face real users, real costs, real consequences - must be robust, observable, and maintainable.',
+          keyPoints: [
+            'Hosting: serverless (AWS Lambda, Modal), containers (Docker + K8s), VMs. Serverless for sporadic use, containers for steady load.',
+            'Scaling: horizontal (more instances) vs vertical (bigger instances). Queue tasks, process in parallel. Use async for I/O-bound agents.',
+            'Cost management: set budgets per user/task, cache LLM responses, use cheaper models where possible, implement rate limiting.',
+            'Monitoring: track success rate, latency, cost, errors. Alerts for anomalies. Dashboards with real-time metrics. LangSmith, DataDog.',
+            'Error recovery: retry with exponential backoff, fallback to simpler agent, graceful degradation. Never expose raw errors to users.',
+            'Version management: A/B test new agents, gradual rollout, feature flags. Keep old version running during deployment. Rollback plan.'
+          ],
+          example: 'Customer service agent production setup: Host on AWS ECS (Docker), auto-scale based on queue length (2-20 instances), $5 budget per user per day, cache common responses (70% cache hit), monitor with DataDog (alert if success rate < 90%), retry failed tasks 3x with backoff, deploy new versions to 10% traffic first, full rollout if metrics good.',
+          codeSnippet: `# Production agent infrastructure
+
+# 1. Cost tracking and limits
+class CostLimitedAgent:
+    def __init__(self, agent, user_id, daily_limit=5.0):
+        self.agent = agent
+        self.user_id = user_id
+        self.daily_limit = daily_limit
+
+    def run(self, task):
+        # Check user's daily spend
+        spent_today = get_user_spend(self.user_id)
+        if spent_today >= self.daily_limit:
+            raise Exception("Daily budget exceeded")
+
+        # Track cost
+        start_cost = self.agent.total_cost
+        result = self.agent.run(task)
+        cost = self.agent.total_cost - start_cost
+
+        # Record spend
+        record_spend(self.user_id, cost)
+        return result
+
+# 2. Error recovery with retries
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+class ResilientAgent:
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10)
+    )
+    def run_with_retry(self, task):
+        try:
+            return self.agent.run(task)
+        except Exception as e:
+            logger.error(f"Agent failed: {e}")
+            # Try fallback
+            return self.fallback(task)
+
+    def fallback(self, task):
+        # Simpler, more reliable approach
+        return simple_agent.run(task)
+
+# 3. Monitoring and alerting
+from datadog import statsd
+
+class MonitoredAgent:
+    def run(self, task):
+        start = time.time()
+
+        try:
+            result = self.agent.run(task)
+            statsd.increment('agent.success')
+            return result
+        except Exception as e:
+            statsd.increment('agent.error')
+            logger.error(f"Agent error: {e}")
+            # Alert if error rate > 10%
+            raise
+        finally:
+            latency = time.time() - start
+            statsd.histogram('agent.latency', latency)
+            statsd.gauge('agent.cost', self.agent.total_cost)
+
+# 4. Caching for cost reduction
+class CachedAgent:
+    def __init__(self, agent, cache):
+        self.agent = agent
+        self.cache = cache
+
+    def run(self, task):
+        # Check cache
+        cache_key = hash(task)
+        if cached := self.cache.get(cache_key):
+            statsd.increment('agent.cache_hit')
+            return cached
+
+        # Cache miss - run agent
+        result = self.agent.run(task)
+        self.cache.set(cache_key, result, ttl=3600)
+        return result
+
+# 5. Deployment with feature flags
+class FlaggedAgent:
+    def run(self, task):
+        if feature_flag('new_agent_v2', user):
+            return new_agent.run(task)
+        else:
+            return old_agent.run(task)
+
+# Gradual rollout: 10% -> 50% -> 100%`,
+          resources: [
+            'Production LLM best practices',
+            'Agent scaling patterns',
+            'Cost optimization strategies',
+            'Monitoring with LangSmith'
+          ]
+        }
       }
     ],
     projects: [
