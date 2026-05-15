@@ -439,13 +439,122 @@ print(f"GPT-3 loss: {loss_175B_300B:.3f}")`,
         id: 'gpt-vs-bert',
         title: 'GPT vs BERT: Architecture Comparison',
         duration: '3 hours',
-        concepts: ['Decoder-only (GPT)', 'Encoder-only (BERT)', 'Encoder-decoder (T5)', 'Use case differences', 'Bidirectional vs causal']
+        concepts: ['Decoder-only (GPT)', 'Encoder-only (BERT)', 'Encoder-decoder (T5)', 'Use case differences', 'Bidirectional vs causal'],
+        details: {
+          overview: 'The transformer architecture has three variants: encoder-only (BERT), decoder-only (GPT), and encoder-decoder (T5). Each excels at different tasks. BERT dominates NLU (classification, NER), GPT dominates generation, T5 handles seq2seq. Modern trend: decoder-only winning across all tasks due to scaling and generalization.',
+          keyPoints: [
+            'BERT (encoder-only): bidirectional attention, sees full context. Pre-trained with MLM. Best for: classification, NER, Q&A (extractive). Cannot generate.',
+            'GPT (decoder-only): causal attention, sees only previous tokens. Pre-trained with next-token prediction. Best for: generation, completion, chat.',
+            'T5 (encoder-decoder): encoder processes input, decoder generates output. Pre-trained with span corruption. Best for: translation, summarization, seq2seq.',
+            'Bidirectional vs causal: BERT sees "the ___ sat" (both sides). GPT sees "the cat ___" (left only). BERT better for understanding, GPT for generation.',
+            'Modern insight: decoder-only (GPT-style) scales better. GPT-4, LLaMA, Claude are all decoder-only but excel at ALL tasks.',
+            'Training objectives: BERT = MLM (mask 15%, predict). GPT = next token prediction. T5 = denoise corrupted spans.'
+          ],
+          example: 'Task: Sentiment classification ("This movie is great!"). BERT: input → encoder → classifier head → "positive". GPT: input + "Sentiment:" → decoder → "positive". BERT was historically better, but GPT-4 now beats BERT on classification with in-context learning.',
+          codeSnippet: `from transformers import BertForSequenceClassification, GPT2LMHeadModel, T5ForConditionalGeneration
+
+# BERT for classification (encoder-only)
+bert = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=2)
+inputs = tokenizer("This movie is great!", return_tensors="pt")
+outputs = bert(**inputs)
+prediction = outputs.logits.argmax()  # 0=negative, 1=positive
+
+# GPT for generation (decoder-only)
+gpt = GPT2LMHeadModel.from_pretrained('gpt2')
+inputs = tokenizer("Once upon a time", return_tensors="pt")
+outputs = gpt.generate(inputs.input_ids, max_length=50)
+text = tokenizer.decode(outputs[0])
+
+# T5 for seq2seq (encoder-decoder)
+t5 = T5ForConditionalGeneration.from_pretrained('t5-base')
+inputs = tokenizer("translate English to French: Hello", return_tensors="pt")
+outputs = t5.generate(inputs.input_ids)
+translation = tokenizer.decode(outputs[0])  # "Bonjour"
+
+# Attention masks
+# BERT: [[1,1,1,1]]  - all tokens attend to all
+# GPT:  [[1,0,0,0],  - causal mask
+#        [1,1,0,0],
+#        [1,1,1,0],
+#        [1,1,1,1]]
+# T5: encoder sees all, decoder is causal`,
+          resources: [
+            'BERT paper',
+            'GPT-2 paper',
+            'T5 paper',
+            'Decoder-only vs encoder-decoder debate'
+          ]
+        }
       },
       {
         id: 'context-windows',
         title: 'Context Windows and Memory',
         duration: '2 hours',
-        concepts: ['Context length limitations', 'Extending context (LongFormer, BigBird)', 'Memory mechanisms', 'Efficient attention']
+        concepts: ['Context length limitations', 'Extending context (LongFormer, BigBird)', 'Memory mechanisms', 'Efficient attention'],
+        details: {
+          overview: 'Context window = how many tokens a model can process at once. Attention complexity is O(n²), limiting context length. GPT-3: 4K tokens, GPT-4: 128K tokens, Claude: 200K tokens. Techniques to extend context: sparse attention (Longformer), sliding windows (Mistral), and external memory. Long context enables analyzing entire books, codebases, conversations.',
+          keyPoints: [
+            'Standard attention: O(n²) time and memory. 100K tokens = 10 billion attention computations. Infeasible.',
+            'Sparse attention: only attend to subset of tokens. Longformer: local + global attention. BigBird: random + window + global.',
+            'Sliding window: Mistral uses 4K window that slides over 32K context. Efficient but preserves long-range info.',
+            'RoPE + ALiBi: position encodings that extrapolate to longer contexts. Train on 4K, infer on 32K.',
+            'External memory: Memorizing Transformer stores past context in external memory, retrieves relevant parts. Infinite context theoretically.',
+            'Production trade-offs: longer context = slower inference, higher cost. Use RAG to avoid fitting everything in context.'
+          ],
+          example: 'Analyzing 100-page research paper (250K tokens). GPT-3 (4K context): impossible, must chunk. Claude 3 (200K context): fit entire paper, ask questions about any part. "What does section 7 say about X?" - model can reference entire document.',
+          codeSnippet: `# Standard attention (limited context)
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained("gpt2")
+# GPT-2 max context: 1024 tokens
+
+# Long context with RoPE scaling
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b",
+    rope_scaling={"type": "dynamic", "factor": 2.0}
+)
+# Extends 4K context to 8K
+
+# Sliding window attention (Mistral)
+from transformers import MistralForCausalLM
+
+model = MistralForCausalLM.from_pretrained("mistralai/Mistral-7B-v0.1")
+# 32K context via 4K sliding window
+
+# Sparse attention pattern (conceptual)
+def sparse_attention_mask(seq_len, window_size=256):
+    """
+    Create Longformer-style mask:
+    - Local attention: window_size around each token
+    - Global attention: all tokens attend to first few
+    """
+    mask = torch.zeros(seq_len, seq_len)
+
+    # Local attention window
+    for i in range(seq_len):
+        start = max(0, i - window_size // 2)
+        end = min(seq_len, i + window_size // 2)
+        mask[i, start:end] = 1
+
+    # Global attention (first 10 tokens)
+    mask[:, :10] = 1
+    mask[:10, :] = 1
+
+    return mask
+
+# Chunking for limited context
+def process_long_document(doc, model, chunk_size=2000):
+    chunks = [doc[i:i+chunk_size] for i in range(0, len(doc), chunk_size)]
+    summaries = [model.generate(chunk) for chunk in chunks]
+    final_summary = model.generate("\\n".join(summaries))
+    return final_summary`,
+          resources: [
+            'Longformer paper',
+            'Mistral 7B paper',
+            'RoPE scaling techniques',
+            'Claude long context guide'
+          ]
+        }
       },
       {
         id: 'inference-optimization',
@@ -607,13 +716,124 @@ def generate(model, idx, max_new_tokens):
         id: 'llm-architectures',
         title: 'Modern LLM Architectures',
         duration: '3 hours',
-        concepts: ['GPT-3/4 architecture', 'LLaMA', 'Mistral', 'Claude architecture insights', 'Mixture of Experts']
+        concepts: ['GPT-3/4 architecture', 'LLaMA', 'Mistral', 'Claude architecture insights', 'Mixture of Experts'],
+        details: {
+          overview: 'Modern LLMs share the decoder-only transformer architecture but differ in key details: model size, training data, context windows, and architectural innovations. This lesson covers GPT-4 (mixture of experts), LLaMA (open-source, RoPE), Mistral (sliding window), and Claude (constitutional AI). Understanding these architectures helps you choose the right model.',
+          keyPoints: [
+            'GPT-4: likely 1.8T params with MoE (8 experts, 220B active per token). Multimodal. 128K context. Best overall performance.',
+            'LLaMA 2: 7B/13B/70B params, open-source. Trained on 2T tokens. Uses RoPE, GQA (grouped-query attention). Strong performance.',
+            'Mistral 7B: 7B params, 32K context via sliding window attention. Outperforms LLaMA-2-13B despite smaller size. Open-source.',
+            'Claude 3: ~100-200B params (estimated). 200K context. Constitutional AI training. Excels at safety, instruction following.',
+            'Mixture of Experts (MoE): route each token to specialized sub-networks (experts). 1.8T params, 220B active. Efficient scaling.',
+            'Key innovations: RoPE (better long context), GQA (faster inference), sliding window (efficient attention), MoE (scale without cost).'
+          ],
+          example: 'Mistral 7B vs LLaMA-2-13B: Mistral has 7B params, LLaMA 13B. But Mistral outperforms on benchmarks. Why? (1) Better training data quality, (2) Sliding window enables 32K context, (3) More efficient architecture. Shows size isn\'t everything - training and architecture matter.',
+          codeSnippet: `# Load different model architectures
+
+# LLaMA 2 with RoPE
+from transformers import LlamaForCausalLM
+llama = LlamaForCausalLM.from_pretrained("meta-llama/Llama-2-7b")
+# Features: RoPE, GQA, SwiGLU activation, RMSNorm
+
+# Mistral with sliding window
+from transformers import MistralForCausalLM
+mistral = MistralForCausalLM.from_pretrained("mistralai/Mistral-7B-v0.1")
+# Features: Sliding window attention (32K context), GQA
+
+# Mixtral (Mixture of Experts)
+from transformers import AutoModelForCausalLM
+mixtral = AutoModelForCausalLM.from_pretrained("mistralai/Mixtral-8x7B-v0.1")
+# 8 experts, 47B total params, 13B active per token
+
+# GPT-4 via API (architecture not public)
+from openai import OpenAI
+client = OpenAI()
+response = client.chat.completions.create(
+    model="gpt-4-turbo",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=100
+)
+
+# Compare architectures
+models = {
+    "GPT-3": {"params": "175B", "context": "4K", "arch": "decoder-only"},
+    "GPT-4": {"params": "~1.8T MoE", "context": "128K", "arch": "decoder-only + MoE"},
+    "LLaMA-2-70B": {"params": "70B", "context": "4K→32K", "arch": "decoder-only + RoPE"},
+    "Mistral-7B": {"params": "7B", "context": "32K", "arch": "sliding window"},
+    "Claude-3": {"params": "~100B?", "context": "200K", "arch": "constitutional AI"}
+}`,
+          resources: [
+            'GPT-4 System Card',
+            'LLaMA 2 paper',
+            'Mistral 7B paper',
+            'Mixtral MoE paper'
+          ]
+        }
       },
       {
         id: 'emergent-abilities',
         title: 'Emergent Abilities in LLMs',
         duration: '2 hours',
-        concepts: ['Chain-of-thought reasoning', 'In-context learning', 'Few-shot capabilities', 'Instruction following']
+        concepts: ['Chain-of-thought reasoning', 'In-context learning', 'Few-shot capabilities', 'Instruction following'],
+        details: {
+          overview: 'Emergent abilities are capabilities that appear suddenly at scale, absent in small models. GPT-2 (1.5B) cannot do chain-of-thought reasoning, GPT-3 (175B) can. These aren\'t explicitly trained - they emerge from scale and data. Key emergent abilities: in-context learning (learn from examples without training), chain-of-thought reasoning, instruction following, and code generation.',
+          keyPoints: [
+            'In-context learning: GPT-3 learns tasks from examples in the prompt, no gradient updates. Few-shot: 5 examples → solves task. Zero-shot: instruction only.',
+            'Chain-of-thought reasoning: emerges at ~100B params. Models can solve multi-step problems by generating intermediate reasoning steps.',
+            'Instruction following: smaller models need fine-tuning. Large models follow natural language instructions zero-shot after instruction tuning.',
+            'Code generation: ability to write functional code emerges with scale and code data. Codex (GPT-3 trained on GitHub) excels.',
+            'Scaling curves: abilities don\'t improve smoothly - they jump discontinuously. "Emergence" is controversial (some argue it\'s a measurement artifact).',
+            'Implications: larger models unlock qualitatively new capabilities, not just better performance on existing tasks.'
+          ],
+          example: 'Math problem: "Roger has 5 tennis balls. He buys 2 cans of 3 balls each. How many total?" GPT-2: "8" (wrong, no reasoning). GPT-3 zero-shot: "8" (wrong). GPT-3 with CoT: "Let\'s think step by step: 5 + (2 × 3) = 5 + 6 = 11" (correct). Reasoning ability emerged at scale.',
+          codeSnippet: `# In-context learning (few-shot)
+few_shot_prompt = """
+Translate English to French:
+
+sea otter => loutre de mer
+peppermint => menthe poivrée
+plush girafe => girafe peluche
+cheese => """
+
+response = gpt3.generate(few_shot_prompt)
+# "fromage" - learned translation from examples!
+
+# Chain-of-thought reasoning
+cot_prompt = """
+Q: Roger has 5 tennis balls. He buys 2 cans of 3 balls each. How many total?
+
+Let's think step by step:
+"""
+
+response = gpt3.generate(cot_prompt)
+# "Roger starts with 5. He buys 2 cans with 3 each: 2 * 3 = 6. Total: 5 + 6 = 11"
+
+# Instruction following
+instruction = """
+Write a Python function that checks if a number is prime.
+Include docstring and handle edge cases.
+"""
+
+response = gpt4.generate(instruction)
+# Generates working prime-checking function with docs!
+
+# Emergence plot
+model_sizes = [117e6, 345e6, 762e6, 1.5e9, 7e9, 13e9, 70e9, 175e9]
+cot_accuracy = [0.1, 0.1, 0.12, 0.15, 0.45, 0.62, 0.78, 0.85]
+# Sudden jump at ~10B params
+
+import matplotlib.pyplot as plt
+plt.semilogx(model_sizes, cot_accuracy)
+plt.xlabel('Model Parameters')
+plt.ylabel('CoT Reasoning Accuracy')
+plt.title('Emergent Chain-of-Thought Ability')`,
+          resources: [
+            'Emergent Abilities of Large Language Models',
+            'GPT-3 paper (in-context learning)',
+            'Chain-of-Thought Prompting',
+            'Scaling debate (emergence vs smooth)'
+          ]
+        }
       }
     ],
     projects: [
