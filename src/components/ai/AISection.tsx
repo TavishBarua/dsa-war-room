@@ -1,13 +1,18 @@
+import { AI_MODULES } from '../../data/ai/aiCourse';
+import AIModuleCard from './AIModuleCard';
+
 export default function AISection() {
-  const topics = [
+  const modules = AI_MODULES.slice(0, 3); // Show first 3 detailed modules for now
+
+  const quickTopics = [
     {
-      num: '01',
-      icon: '🤖',
-      title: 'LLM FUNDAMENTALS',
-      color: 'var(--neon)',
-      hoverColor: '#00ff88',
-      description: 'Transformer architecture, attention mechanisms, GPT vs BERT, tokenization, context windows. Understand how large language models actually work under the hood.',
-      tags: 'Transformers • Attention • Tokenization • Training'
+      num: '04',
+      icon: '🗄️',
+      title: 'VECTOR DATABASES',
+      color: 'var(--neon4)',
+      hoverColor: '#ffd600',
+      description: 'Pinecone, Weaviate, Chroma, FAISS. Store and query embeddings at scale. ANN algorithms, indexing strategies, similarity metrics for semantic search.',
+      tags: 'ANN • Cosine Similarity • HNSW • Indexing'
     },
     {
       num: '02',
@@ -366,63 +371,127 @@ export default function AISection() {
         </div>
       </div>
 
-      {/* AI TOPICS GRID */}
+      {/* COMPREHENSIVE MODULE CARDS */}
+      <div style={{
+        maxWidth: '1400px',
+        margin: '0 auto 80px',
+        display: 'grid',
+        gap: '32px'
+      }}>
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '40px'
+        }}>
+          <div style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: '36px',
+            letterSpacing: '3px',
+            color: 'var(--neon)',
+            marginBottom: '16px'
+          }}>
+            DETAILED COURSE MODULES
+          </div>
+          <p style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: '14px',
+            color: 'var(--muted)',
+            maxWidth: '700px',
+            margin: '0 auto'
+          }}>
+            Click on any module to expand and see the complete curriculum: lessons, projects, resources, and learning objectives. Each module is a complete mini-course.
+          </p>
+        </div>
+
+        {modules.map((module, index) => (
+          <AIModuleCard key={index} module={module} />
+        ))}
+      </div>
+
+      {/* QUICK REFERENCE CARDS - Other Topics */}
       <div style={{
         maxWidth: '1400px',
         margin: '0 auto',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '24px'
+        marginTop: '80px'
       }}>
-        {topics.map((topic, index) => (
-          <div
-            key={index}
-            className="mcard"
-            data-num={topic.num}
-            style={{
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
-              padding: '24px',
-              transition: 'all 0.3s',
-              cursor: 'pointer'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.borderColor = topic.hoverColor;
-              e.currentTarget.style.transform = 'translateY(-4px)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.borderColor = 'var(--border)';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            <div className="mcard-icon" style={{ fontSize: '48px', marginBottom: '16px' }}>{topic.icon}</div>
-            <div className="mcard-title" style={{
-              color: topic.color,
-              fontSize: '20px',
-              fontWeight: '600',
-              marginBottom: '12px',
-              fontFamily: "'Space Mono', monospace"
-            }}>{topic.title}</div>
-            <div className="mcard-text" style={{
-              color: 'var(--text)',
-              lineHeight: '1.6',
-              fontSize: '14px'
-            }}>
-              {topic.description}
-              <div style={{
-                marginTop: '12px',
-                paddingTop: '12px',
-                borderTop: '1px solid var(--border)',
-                fontSize: '12px',
-                color: 'var(--muted)',
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '40px'
+        }}>
+          <div style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: '36px',
+            letterSpacing: '3px',
+            color: 'var(--neon2)',
+            marginBottom: '16px'
+          }}>
+            MORE AI TOPICS
+          </div>
+          <p style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: '14px',
+            color: 'var(--muted)',
+            maxWidth: '700px',
+            margin: '0 auto'
+          }}>
+            Additional essential AI concepts and technologies. Full detailed courses for these topics coming soon!
+          </p>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '24px'
+        }}>
+          {quickTopics.map((topic, index) => (
+            <div
+              key={index}
+              className="mcard"
+              data-num={topic.num}
+              style={{
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                padding: '24px',
+                transition: 'all 0.3s',
+                cursor: 'pointer'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.borderColor = topic.hoverColor;
+                e.currentTarget.style.transform = 'translateY(-4px)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <div className="mcard-icon" style={{ fontSize: '48px', marginBottom: '16px' }}>{topic.icon}</div>
+              <div className="mcard-title" style={{
+                color: topic.color,
+                fontSize: '20px',
+                fontWeight: '600',
+                marginBottom: '12px',
                 fontFamily: "'Space Mono', monospace"
+              }}>{topic.title}</div>
+              <div className="mcard-text" style={{
+                color: 'var(--text)',
+                lineHeight: '1.6',
+                fontSize: '14px'
               }}>
-                Topics: {topic.tags}
+                {topic.description}
+                <div style={{
+                  marginTop: '12px',
+                  paddingTop: '12px',
+                  borderTop: '1px solid var(--border)',
+                  fontSize: '12px',
+                  color: 'var(--muted)',
+                  fontFamily: "'Space Mono', monospace"
+                }}>
+                  Topics: {topic.tags}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

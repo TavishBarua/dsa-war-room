@@ -15,7 +15,8 @@ const SD_LINKS = [
 ];
 
 const AI_LINKS = [
-  { href: '#ai-concepts', label: 'AI Concepts' },
+  { href: '#ai-concepts', label: 'Roadmap' },
+  { href: '#ai-concepts', label: 'Modules' },
 ];
 
 export default function Nav() {
