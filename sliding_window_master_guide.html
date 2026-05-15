@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Window Master Guide - From Zero to Expert</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        h2 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #764ba2;
+        }
+        .trick-box {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 3px solid #667eea;
+        }
+        .card.dynamic {
+            border-color: #19547b;
+        }
+        code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+        .keyword { color: #ff79c6; }
+        .function { color: #50fa7b; }
+        .string { color: #f1fa8c; }
+        .comment { color: #6272a4; }
+        svg {
+            display: block;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .emoji {
+            font-size: 1.5em;
+        }
+        ul {
+            line-height: 1.8;
+        }
+        li {
+            margin: 10px 0;
+        }
+        .step {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 5px solid #2196F3;
+            border-radius: 5px;
+        }
+        .formula {
+            background: #fff3e0;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 5px solid #ff9800;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Sliding Window Master Guide</h1>
+    <p style="color: white; text-align: center; font-size: 1.2em;">From Zero to Expert - Visual Learning</p>
+
+    <!-- PART 1: THE TWO TYPES -->
+    <div class="section">
+        <h2>📚 The Two Types of Sliding Window</h2>
+
+        <div class="trick-box">
+            🎯 GOLDEN RULE: Ask yourself - "Is the window size FIXED or FLEXIBLE?"
+        </div>
+
+        <div class="comparison">
+            <div class="card">
+                <h3>Type 1: STATIC (Fixed) Window 📏</h3>
+                <p><strong>Window size = CONSTANT</strong></p>
+                <ul>
+                    <li>✅ "Maximum sum of K elements"</li>
+                    <li>✅ "Average of subarrays size K"</li>
+                    <li>✅ K is given in the problem</li>
+                </ul>
+                <p><strong>Think:</strong> Sliding a ruler of FIXED LENGTH</p>
+            </div>
+
+            <div class="card dynamic">
+                <h3>Type 2: DYNAMIC (Flexible) Window 🎢</h3>
+                <p><strong>Window size = CHANGES</strong></p>
+                <ul>
+                    <li>✅ "Longest substring with..."</li>
+                    <li>✅ "Smallest substring with..."</li>
+                    <li>✅ "Find window that satisfies condition"</li>
+                </ul>
+                <p><strong>Think:</strong> Window GROWS and SHRINKS like an accordion</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANIMATION 1: STATIC WINDOW -->
+    <div class="section">
+        <h2>Type 1: STATIC Window - The Fixed Ruler 📏</h2>
+
+        <div class="trick-box">
+            🔑 TRICK: Move 1 step → Remove LEFT, Add RIGHT
+        </div>
+
+        <svg width="800" height="300" viewBox="0 0 800 300">
+            <!-- Array -->
+            <text x="400" y="30" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">
+                Array: [2, 1, 5, 1, 3, 2]    Window Size K = 3
+            </text>
+
+            <!-- Step 1 -->
+            <g id="static-step1">
+                <text x="50" y="80" font-size="16" fill="#667eea">Step 1: Initial Window</text>
+                <rect x="50" y="100" width="60" height="60" fill="#e3f2fd" stroke="#333" stroke-width="2"/>
+                <rect x="110" y="100" width="60" height="60" fill="#e3f2fd" stroke="#333" stroke-width="2"/>
+                <rect x="170" y="100" width="60" height="60" fill="#e3f2fd" stroke="#333" stroke-width="2"/>
+                <rect x="230" y="100" width="60" height="60" fill="#f5f5f5" stroke="#333" stroke-width="2"/>
+                <rect x="290" y="100" width="60" height="60" fill="#f5f5f5" stroke="#333" stroke-width="2"/>
+                <rect x="350" y="100" width="60" height="60" fill="#f5f5f5" stroke="#333" stroke-width="2"/>
+
+                <text x="80" y="140" font-size="24" text-anchor="middle">2</text>
+                <text x="140" y="140" font-size="24" text-anchor="middle">1</text>
+                <text x="200" y="140" font-size="24" text-anchor="middle">5</text>
+                <text x="260" y="140" font-size="24" text-anchor="middle">1</text>
+                <text x="320" y="140" font-size="24" text-anchor="middle">3</text>
+                <text x="380" y="140" font-size="24" text-anchor="middle">2</text>
+
+                <text x="80" y="185" font-size="14" fill="#2196F3">L</text>
+                <text x="200" y="185" font-size="14" fill="#f44336">R</text>
+                <text x="200" y="210" font-size="16" font-weight="bold" fill="#19547b">Sum = 8</text>
+            </g>
+
+            <!-- Step 2 -->
+            <g id="static-step2">
+                <text x="450" y="80" font-size="16" fill="#667eea">Step 2: Slide Right →</text>
+                <rect x="450" y="100" width="60" height="60" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="510" y="100" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="570" y="100" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="630" y="100" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="690" y="100" width="60" height="60" fill="#f5f5f5" stroke="#333" stroke-width="2"/>
+
+                <text x="480" y="140" font-size="24" text-anchor="middle">2</text>
+                <text x="540" y="140" font-size="24" text-anchor="middle">1</text>
+                <text x="600" y="140" font-size="24" text-anchor="middle">5</text>
+                <text x="660" y="140" font-size="24" text-anchor="middle">1</text>
+                <text x="720" y="140" font-size="24" text-anchor="middle">3</text>
+
+                <text x="540" y="185" font-size="14" fill="#2196F3">L</text>
+                <text x="660" y="185" font-size="14" fill="#f44336">R</text>
+
+                <text x="480" y="210" font-size="14" fill="#f44336">❌ Remove</text>
+                <text x="660" y="210" font-size="14" fill="#4CAF50">✅ Add</text>
+                <text x="600" y="235" font-size="16" font-weight="bold" fill="#19547b">Sum = 8-2+1 = 7</text>
+            </g>
+        </svg>
+
+        <div class="code-block">
+<span class="comment">// ✨ STATIC WINDOW TEMPLATE ✨</span>
+<span class="keyword">for</span> (<span class="keyword">int</span> right = <span class="string">0</span>; right < arr.length; right++) {
+    <span class="comment">// 1. ADD the new element on RIGHT</span>
+    windowSum += arr[right];
+
+    <span class="comment">// 2. Check if window is complete (size = K)</span>
+    <span class="keyword">if</span> (right >= K - <span class="string">1</span>) {
+        <span class="comment">// 3. Process current window (calculate answer)</span>
+        maxSum = Math.<span class="function">max</span>(maxSum, windowSum);
+
+        <span class="comment">// 4. REMOVE the LEFT element before sliding</span>
+        windowSum -= arr[right - K + <span class="string">1</span>];
+    }
+}
+        </div>
+
+        <div class="formula">
+            📐 LEFT pointer = right - K + 1
+        </div>
+    </div>
+
+    <!-- ANIMATION 2: DYNAMIC WINDOW -->
+    <div class="section">
+        <h2>Type 2: DYNAMIC Window - The Accordion 🎢</h2>
+
+        <div class="trick-box">
+            🔑 TRICK: EXPAND (right++) until BAD → SHRINK (left++) until GOOD
+        </div>
+
+        <p><strong>Two Sub-patterns:</strong></p>
+        <ul>
+            <li><strong>Pattern A: LONGEST/MAXIMUM</strong> - Find biggest valid window</li>
+            <li><strong>Pattern B: SHORTEST/MINIMUM</strong> - Find smallest valid window (like your code!)</li>
+        </ul>
+
+        <svg width="800" height="500" viewBox="0 0 800 500">
+            <text x="400" y="30" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">
+                Find LONGEST substring with at most 2 distinct chars: "eceba"
+            </text>
+
+            <!-- Phase 1: Expand -->
+            <g>
+                <text x="50" y="80" font-size="16" fill="#667eea" font-weight="bold">Phase 1: EXPAND (Add characters)</text>
+
+                <rect x="50" y="100" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <text x="80" y="140" font-size="24" text-anchor="middle">e</text>
+                <text x="80" y="180" font-size="12" fill="#2196F3">L,R</text>
+                <text x="80" y="200" font-size="12" fill="#19547b">distinct=1 ✅</text>
+
+                <text x="150" y="130" font-size="30">→</text>
+
+                <rect x="180" y="100" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="240" y="100" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <text x="210" y="140" font-size="24" text-anchor="middle">e</text>
+                <text x="270" y="140" font-size="24" text-anchor="middle">c</text>
+                <text x="210" y="180" font-size="12" fill="#2196F3">L</text>
+                <text x="270" y="180" font-size="12" fill="#f44336">R</text>
+                <text x="225" y="200" font-size="12" fill="#19547b">distinct=2 ✅</text>
+
+                <text x="330" y="130" font-size="30">→</text>
+
+                <rect x="360" y="100" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="420" y="100" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="480" y="100" width="60" height="60" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <text x="390" y="140" font-size="24" text-anchor="middle">e</text>
+                <text x="450" y="140" font-size="24" text-anchor="middle">c</text>
+                <text x="510" y="140" font-size="24" text-anchor="middle">e</text>
+                <text x="390" y="180" font-size="12" fill="#2196F3">L</text>
+                <text x="510" y="180" font-size="12" fill="#f44336">R</text>
+                <text x="435" y="200" font-size="12" fill="#19547b">distinct=2 ✅ Keep expanding!</text>
+            </g>
+
+            <!-- Phase 2: Too big, need to shrink -->
+            <g>
+                <text x="50" y="280" font-size="16" fill="#f44336" font-weight="bold">Phase 2: Window INVALID → SHRINK (Remove from left)</text>
+
+                <rect x="50" y="300" width="60" height="60" fill="#ffcdd2" stroke="#f44336" stroke-width="3"/>
+                <rect x="110" y="300" width="60" height="60" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="170" y="300" width="60" height="60" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="230" y="300" width="60" height="60" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <text x="80" y="340" font-size="24" text-anchor="middle">e</text>
+                <text x="140" y="340" font-size="24" text-anchor="middle">c</text>
+                <text x="200" y="340" font-size="24" text-anchor="middle">e</text>
+                <text x="260" y="340" font-size="24" text-anchor="middle">b</text>
+                <text x="80" y="380" font-size="12" fill="#2196F3">L</text>
+                <text x="260" y="380" font-size="12" fill="#f44336">R</text>
+                <text x="150" y="400" font-size="12" fill="#f44336">distinct=3 ❌ TOO MANY!</text>
+
+                <text x="310" y="330" font-size="30">→</text>
+                <text x="310" y="355" font-size="14" fill="#f44336">Shrink!</text>
+
+                <rect x="380" y="300" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="440" y="300" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="500" y="300" width="60" height="60" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <text x="410" y="340" font-size="24" text-anchor="middle">c</text>
+                <text x="470" y="340" font-size="24" text-anchor="middle">e</text>
+                <text x="530" y="340" font-size="24" text-anchor="middle">b</text>
+                <text x="410" y="380" font-size="12" fill="#2196F3">L</text>
+                <text x="530" y="380" font-size="12" fill="#f44336">R</text>
+                <text x="460" y="400" font-size="12" fill="#4CAF50">distinct=2 ✅ VALID AGAIN!</text>
+            </g>
+
+            <text x="400" y="470" font-size="18" font-weight="bold" text-anchor="middle" fill="#19547b">
+                Answer: "ece" (length 3)
+            </text>
+        </svg>
+
+        <h3>Pattern A: LONGEST Window Template</h3>
+        <div class="code-block">
+<span class="comment">// ✨ DYNAMIC WINDOW - LONGEST PATTERN ✨</span>
+<span class="keyword">int</span> left = <span class="string">0</span>, maxLength = <span class="string">0</span>;
+
+<span class="keyword">for</span> (<span class="keyword">int</span> right = <span class="string">0</span>; right < arr.length; right++) {
+    <span class="comment">// 1. EXPAND: Add right element to window</span>
+    <span class="function">addToWindow</span>(arr[right]);
+
+    <span class="comment">// 2. SHRINK: While window is INVALID, remove from left</span>
+    <span class="keyword">while</span> (<span class="function">windowIsInvalid</span>()) {
+        <span class="function">removeFromWindow</span>(arr[left]);
+        left++;
+    }
+
+    <span class="comment">// 3. UPDATE answer (window is valid now)</span>
+    maxLength = Math.<span class="function">max</span>(maxLength, right - left + <span class="string">1</span>);
+}
+        </div>
+    </div>
+
+    <!-- YOUR CODE: MINIMUM WINDOW -->
+    <div class="section">
+        <h2>Your Code: SHORTEST/MINIMUM Window Pattern 🎯</h2>
+
+        <div class="trick-box">
+            🧠 MINIMUM TRICK: EXPAND until VALID → SHRINK to find SMALLEST
+        </div>
+
+        <p><strong>Problem:</strong> Find SMALLEST substring of s that contains ALL characters of t</p>
+        <p><strong>Example:</strong> s = "ADOBECODEBANC", t = "ABC"</p>
+
+        <svg width="900" height="650" viewBox="0 0 900 650">
+            <text x="450" y="30" font-size="18" font-weight="bold" text-anchor="middle">
+                s = "ADOBECODEBANC"    t = "ABC"   (Need: A=1, B=1, C=1)
+            </text>
+
+            <!-- Step 1 -->
+            <g>
+                <text x="50" y="70" font-size="14" font-weight="bold" fill="#667eea">Step 1: EXPAND until we have all chars</text>
+                <rect x="50" y="85" width="40" height="40" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="90" y="85" width="40" height="40" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="130" y="85" width="40" height="40" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="170" y="85" width="40" height="40" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="210" y="85" width="40" height="40" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="250" y="85" width="40" height="40" fill="#c8e6c9" stroke="#4CAF50" stroke-width="3"/>
+
+                <text x="70" y="110" font-size="16" text-anchor="middle">A</text>
+                <text x="110" y="110" font-size="16" text-anchor="middle">D</text>
+                <text x="150" y="110" font-size="16" text-anchor="middle">O</text>
+                <text x="190" y="110" font-size="16" text-anchor="middle">B</text>
+                <text x="230" y="110" font-size="16" text-anchor="middle">E</text>
+                <text x="270" y="110" font-size="16" text-anchor="middle">C</text>
+
+                <text x="70" y="145" font-size="12" fill="#2196F3">L</text>
+                <text x="270" y="145" font-size="12" fill="#f44336">R</text>
+
+                <text x="150" y="170" font-size="13" fill="#4CAF50">✅ VALID! Have A, B, C (formed = 3 = required)</text>
+            </g>
+
+            <!-- Step 2 -->
+            <g>
+                <text x="450" y="70" font-size="14" font-weight="bold" fill="#667eea">Step 2: SHRINK to minimize</text>
+                <rect x="450" y="85" width="40" height="40" fill="#fff9c4" stroke="#333" stroke-width="2"/>
+                <rect x="490" y="85" width="40" height="40" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="530" y="85" width="40" height="40" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="570" y="85" width="40" height="40" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="610" y="85" width="40" height="40" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+                <rect x="650" y="85" width="40" height="40" fill="#c8e6c9" stroke="#333" stroke-width="2"/>
+
+                <text x="470" y="110" font-size="16" text-anchor="middle">A</text>
+                <text x="510" y="110" font-size="16" text-anchor="middle">D</text>
+                <text x="550" y="110" font-size="16" text-anchor="middle">O</text>
+                <text x="590" y="110" font-size="16" text-anchor="middle">B</text>
+                <text x="630" y="110" font-size="16" text-anchor="middle">E</text>
+                <text x="670" y="110" font-size="16" text-anchor="middle">C</text>
+
+                <text x="470" y="145" font-size="12" fill="#2196F3">L</text>
+                <text x="670" y="145" font-size="12" fill="#f44336">R</text>
+
+                <text x="560" y="165" font-size="12" fill="#FF9800">Can we remove A? 🤔</text>
+                <text x="560" y="185" font-size="12" fill="#f44336">❌ NO! We need it for "ABC"</text>
+
+                <path d="M 470 125 L 490 85" stroke="#f44336" stroke-width="2" fill="none" marker-end="url(#arrowred)"/>
+                <text x="480" y="75" font-size="11" fill="#f44336">Try to remove</text>
+            </g>
+
+            <!-- Step 3 -->
+            <g>
+                <text x="50" y="240" font-size="14" font-weight="bold" fill="#667eea">Step 3: Keep expanding...</text>
+                <rect x="50" y="255" width="35" height="35" fill="#f5f5f5" stroke="#999" stroke-width="1"/>
+                <rect x="85" y="255" width="35" height="35" fill="#fff9c4" stroke="#333" stroke-width="2"/>
+                <rect x="120" y="255" width="35" height="35" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="155" y="255" width="35" height="35" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="190" y="255" width="35" height="35" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="225" y="255" width="35" height="35" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="260" y="255" width="35" height="35" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="295" y="255" width="35" height="35" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="330" y="255" width="35" height="35" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="365" y="255" width="35" height="35" fill="#ffcdd2" stroke="#333" stroke-width="2"/>
+                <rect x="400" y="255" width="35" height="35" fill="#c8e6c9" stroke="#4CAF50" stroke-width="3"/>
+
+                <text x="67" y="278" font-size="14" text-anchor="middle">A</text>
+                <text x="102" y="278" font-size="14" text-anchor="middle">D</text>
+                <text x="137" y="278" font-size="14" text-anchor="middle">O</text>
+                <text x="172" y="278" font-size="14" text-anchor="middle">B</text>
+                <text x="207" y="278" font-size="14" text-anchor="middle">E</text>
+                <text x="242" y="278" font-size="14" text-anchor="middle">C</text>
+                <text x="277" y="278" font-size="14" text-anchor="middle">O</text>
+                <text x="312" y="278" font-size="14" text-anchor="middle">D</text>
+                <text x="347" y="278" font-size="14" text-anchor="middle">E</text>
+                <text x="382" y="278" font-size="14" text-anchor="middle">B</text>
+                <text x="417" y="278" font-size="14" text-anchor="middle">A</text>
+
+                <text x="102" y="310" font-size="12" fill="#2196F3">L</text>
+                <text x="417" y="310" font-size="12" fill="#f44336">R</text>
+                <text x="225" y="330" font-size="12" fill="#4CAF50">✅ Now we have A=2, B=2, C=1 - can shrink!</text>
+            </g>
+
+            <!-- Step 4 - MAGIC MOMENT -->
+            <g>
+                <text x="50" y="380" font-size="14" font-weight="bold" fill="#19547b">Step 4: 🎉 SHRINK and find SMALLEST!</text>
+                <rect x="50" y="395" width="35" height="35" fill="#f5f5f5" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+                <rect x="85" y="395" width="35" height="35" fill="#f5f5f5" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+                <rect x="120" y="395" width="35" height="35" fill="#f5f5f5" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+                <rect x="155" y="395" width="35" height="35" fill="#f5f5f5" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+                <rect x="190" y="395" width="35" height="35" fill="#f5f5f5" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+                <rect x="225" y="395" width="35" height="35" fill="#f5f5f5" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+                <rect x="260" y="395" width="35" height="35" fill="#f5f5f5" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+                <rect x="295" y="395" width="35" height="35" fill="#f5f5f5" stroke="#999" stroke-width="1" stroke-dasharray="5,5"/>
+                <rect x="330" y="395" width="35" height="35" fill="#ffd700" stroke="#FF6F00" stroke-width="4"/>
+                <rect x="365" y="395" width="35" height="35" fill="#ffd700" stroke="#FF6F00" stroke-width="4"/>
+                <rect x="400" y="395" width="35" height="35" fill="#ffd700" stroke="#FF6F00" stroke-width="4"/>
+                <rect x="435" y="395" width="35" height="35" fill="#ffd700" stroke="#FF6F00" stroke-width="4"/>
+
+                <text x="67" y="418" font-size="14" text-anchor="middle" fill="#999">A</text>
+                <text x="102" y="418" font-size="14" text-anchor="middle" fill="#999">D</text>
+                <text x="137" y="418" font-size="14" text-anchor="middle" fill="#999">O</text>
+                <text x="172" y="418" font-size="14" text-anchor="middle" fill="#999">B</text>
+                <text x="207" y="418" font-size="14" text-anchor="middle" fill="#999">E</text>
+                <text x="242" y="418" font-size="14" text-anchor="middle" fill="#999">C</text>
+                <text x="277" y="418" font-size="14" text-anchor="middle" fill="#999">O</text>
+                <text x="312" y="418" font-size="14" text-anchor="middle" fill="#999">D</text>
+                <text x="347" y="418" font-size="14" text-anchor="middle" font-weight="bold">E</text>
+                <text x="382" y="418" font-size="14" text-anchor="middle" font-weight="bold">B</text>
+                <text x="417" y="418" font-size="14" text-anchor="middle" font-weight="bold">A</text>
+                <text x="452" y="418" font-size="14" text-anchor="middle" font-weight="bold">N</text>
+
+                <text x="347" y="450" font-size="12" fill="#FF6F00" font-weight="bold">L</text>
+                <text x="452" y="450" font-size="12" fill="#FF6F00" font-weight="bold">R</text>
+
+                <text x="240" y="475" font-size="13" fill="#FF6F00">Removed: A,D,O,B,E,C,O,D (extras we don't need)</text>
+            </g>
+
+            <!-- Final answer -->
+            <g>
+                <rect x="250" y="510" width="400" height="80" fill="#4CAF50" rx="10" stroke="#2E7D32" stroke-width="3"/>
+                <text x="450" y="540" font-size="20" font-weight="bold" text-anchor="middle" fill="white">
+                    🏆 ANSWER: "BANC" (length = 4)
+                </text>
+                <text x="450" y="570" font-size="14" text-anchor="middle" fill="white">
+                    Smallest window containing A, B, C!
+                </text>
+            </g>
+
+            <defs>
+                <marker id="arrowred" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#f44336"/>
+                </marker>
+            </defs>
+        </svg>
+
+        <h3>Pattern B: SHORTEST/MINIMUM Window Template</h3>
+        <div class="code-block">
+<span class="comment">// ✨ DYNAMIC WINDOW - SHORTEST/MINIMUM PATTERN ✨</span>
+<span class="keyword">int</span> left = <span class="string">0</span>, minLength = Integer.MAX_VALUE;
+
+<span class="keyword">for</span> (<span class="keyword">int</span> right = <span class="string">0</span>; right < arr.length; right++) {
+    <span class="comment">// 1. EXPAND: Add right element</span>
+    <span class="function">addToWindow</span>(arr[right]);
+
+    <span class="comment">// 2. SHRINK: While window is VALID, try to minimize</span>
+    <span class="keyword">while</span> (<span class="function">windowIsValid</span>()) {
+        <span class="comment">// Update answer before shrinking</span>
+        minLength = Math.<span class="function">min</span>(minLength, right - left + <span class="string">1</span>);
+
+        <span class="function">removeFromWindow</span>(arr[left]);
+        left++;
+    }
+}
+        </div>
+
+        <div class="step">
+            <strong>Key Difference:</strong>
+            <ul>
+                <li><strong>LONGEST:</strong> while INVALID → shrink until valid</li>
+                <li><strong>SHORTEST:</strong> while VALID → shrink to minimize</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- CODE BREAKDOWN -->
+    <div class="section">
+        <h2>🔍 Your Code - Line by Line Breakdown</h2>
+
+        <div class="step">
+            <strong>1️⃣ Setup - Count what we need</strong>
+            <div class="code-block">
+Map&lt;Character, Integer&gt; tCount = <span class="keyword">new</span> HashMap<>();
+<span class="comment">// Count each char in target string t</span>
+<span class="comment">// Example: t="ABC" → {A:1, B:1, C:1}</span>
+            </div>
+            <p>💡 This tells us: "I need 1 A, 1 B, 1 C"</p>
+        </div>
+
+        <div class="step">
+            <strong>2️⃣ Variables</strong>
+            <div class="code-block">
+<span class="keyword">int</span> required = tCount.size();  <span class="comment">// How many UNIQUE chars (3 for "ABC")</span>
+<span class="keyword">int</span> formed = <span class="string">0</span>;              <span class="comment">// How many we've satisfied (0 → 1 → 2 → 3)</span>
+            </div>
+            <p>💡 <code>formed == required</code> means "I have ALL the chars I need!"</p>
+        </div>
+
+        <div class="step">
+            <strong>3️⃣ EXPAND Phase - Add right character</strong>
+            <div class="code-block">
+char c = s.charAt(right);
+windowCount.put(c, windowCount.getOrDefault(c, <span class="string">0</span>) + <span class="string">1</span>);
+
+<span class="comment">// If this char is now satisfied (count matches target)</span>
+<span class="keyword">if</span> (tCount.containsKey(c) &&
+    windowCount.get(c).intValue() == tCount.get(c).intValue()) {
+    formed++;  <span class="comment">// One more char type satisfied!</span>
+}
+            </div>
+            <p>💡 We're building up the window, counting characters</p>
+        </div>
+
+        <div class="step">
+            <strong>4️⃣ SHRINK Phase - When window is VALID</strong>
+            <div class="code-block">
+<span class="keyword">while</span> (left &lt;= right && formed == required) {
+    <span class="comment">// Window is VALID! Try to make it SMALLER</span>
+
+    <span class="comment">// Save this as potential answer</span>
+    <span class="keyword">if</span> (right - left + <span class="string">1</span> &lt; minLen) {
+        minLen = right - left + <span class="string">1</span>;
+        resultLeft = left;
+        resultRight = right;
+    }
+
+    <span class="comment">// Remove left char and move left pointer</span>
+    char leftChar = s.charAt(left);
+    windowCount.put(leftChar, windowCount.get(leftChar) - <span class="string">1</span>);
+
+    <span class="comment">// If removing this char breaks the condition</span>
+    <span class="keyword">if</span> (tCount.containsKey(leftChar) &&
+        windowCount.get(leftChar) &lt; tCount.get(leftChar)) {
+        formed--;  <span class="comment">// No longer satisfied</span>
+    }
+    left++;
+}
+            </div>
+            <p>💡 Keep removing from left while we still have all chars we need</p>
+        </div>
+    </div>
+
+    <!-- CHEAT SHEET -->
+    <div class="section">
+        <h2>📋 Ultimate Cheat Sheet</h2>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead style="background: #667eea; color: white;">
+                <tr>
+                    <th style="padding: 15px; border: 1px solid #ddd;">Pattern Type</th>
+                    <th style="padding: 15px; border: 1px solid #ddd;">When to Use</th>
+                    <th style="padding: 15px; border: 1px solid #ddd;">Key Trick</th>
+                    <th style="padding: 15px; border: 1px solid #ddd;">While Loop</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 15px; border: 1px solid #ddd;"><strong>STATIC</strong></td>
+                    <td style="padding: 15px; border: 1px solid #ddd;">Size K is given</td>
+                    <td style="padding: 15px; border: 1px solid #ddd;">Remove left, Add right</td>
+                    <td style="padding: 15px; border: 1px solid #ddd;"><code>if (right >= K-1)</code></td>
+                </tr>
+                <tr>
+                    <td style="padding: 15px; border: 1px solid #ddd;"><strong>LONGEST</strong></td>
+                    <td style="padding: 15px; border: 1px solid #ddd;">Find max/longest valid</td>
+                    <td style="padding: 15px; border: 1px solid #ddd;">Expand → Shrink INVALID</td>
+                    <td style="padding: 15px; border: 1px solid #ddd;"><code>while (INVALID)</code></td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 15px; border: 1px solid #ddd;"><strong>SHORTEST</strong></td>
+                    <td style="padding: 15px; border: 1px solid #ddd;">Find min/smallest valid</td>
+                    <td style="padding: 15px; border: 1px solid #ddd;">Expand → Shrink while VALID</td>
+                    <td style="padding: 15px; border: 1px solid #ddd;"><code>while (VALID)</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="trick-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            🎓 MASTER TRICK: LONGEST shrinks when BAD, SHORTEST shrinks when GOOD!
+        </div>
+
+        <h3>🎯 How to Identify Pattern in 3 Seconds</h3>
+        <div class="step">
+            <strong>Ask these questions:</strong>
+            <ol>
+                <li><strong>Is size K given?</strong> → STATIC window</li>
+                <li><strong>Says "longest/maximum"?</strong> → LONGEST pattern (shrink when invalid)</li>
+                <li><strong>Says "shortest/minimum"?</strong> → SHORTEST pattern (shrink when valid)</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- PRACTICE -->
+    <div class="section">
+        <h2>🏋️ Practice Problems</h2>
+
+        <div class="card">
+            <h4>STATIC Window:</h4>
+            <ul>
+                <li>Maximum sum subarray of size K</li>
+                <li>Average of subarrays size K</li>
+                <li>First negative in every window of size K</li>
+            </ul>
+        </div>
+
+        <div class="card dynamic">
+            <h4>LONGEST Pattern:</h4>
+            <ul>
+                <li>Longest substring with K distinct characters</li>
+                <li>Longest substring without repeating chars</li>
+                <li>Max consecutive ones after replacing K zeros</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h4>SHORTEST Pattern:</h4>
+            <ul>
+                <li>Minimum window substring (your code!) ✅</li>
+                <li>Smallest subarray with sum ≥ K</li>
+                <li>Minimum size subarray sum</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="section">
+        <h2>🎊 Summary - You're Now an Expert!</h2>
+
+        <div style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); padding: 30px; border-radius: 15px; color: white;">
+            <h3 style="color: white; border: none;">What You Learned:</h3>
+            <ul style="font-size: 1.1em; line-height: 2;">
+                <li>✅ Two types: STATIC (fixed) vs DYNAMIC (flexible)</li>
+                <li>✅ STATIC: Just slide and subtract/add</li>
+                <li>✅ LONGEST: Expand → shrink when INVALID</li>
+                <li>✅ SHORTEST: Expand → shrink while VALID</li>
+                <li>✅ Your code is SHORTEST pattern - MASTER IT!</li>
+            </ul>
+
+            <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px; margin-top: 20px;">
+                <p style="font-size: 1.3em; font-weight: bold; margin: 0;">
+                    🎯 The One Thing to Remember:
+                </p>
+                <p style="font-size: 1.2em; margin: 10px 0 0 0;">
+                    "LONGEST removes bad stuff, SHORTEST removes while keeping good stuff"
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; padding: 30px; color: white; font-size: 1.2em;">
+        🚀 You're ready to solve ANY sliding window problem! 🚀
+    </div>
+</body>
+</html>

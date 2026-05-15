@@ -1,16 +1,18 @@
+import AIHero from '../components/ai/AIHero';
+import AISection from '../components/ai/AISection';
+import Footer from '../components/layout/Footer';
+
 export default function AIPage() {
   return (
-    <div style={{ minHeight: '100vh' }}>
-      <iframe
-        src="/artifacts/neetcode-battleplan.html#ai-concepts"
-        style={{
-          width: '100%',
-          height: '100vh',
-          border: 'none',
-          display: 'block'
-        }}
-        title="AI Mastery Guide"
-      />
-    </div>
+    <>
+      <AIHero />
+      <div className="ticker">
+        <span className="ticker-inner">
+          ★ LLM FUNDAMENTALS ★ PROMPT ENGINEERING ★ RAG ★ VECTOR DATABASES ★ EMBEDDINGS ★ MCP ★ A2A ★ AI AGENTS ★ FINE-TUNING ★ AI SAFETY ★ LLM APIS ★ MULTIMODAL AI ★ THE FUTURE IS NOW ★ MASTER THE AI STACK ★ BUILD THE NEXT GENERATION ★
+        </span>
+      </div>
+      <AISection />
+      <Footer />
+    </>
   );
 }

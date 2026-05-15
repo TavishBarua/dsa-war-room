@@ -1,0 +1,195 @@
+I'll completely redesign all variations to be clean and beautiful. Let me create the cleaned versions:
+
+VARIATION 1: STATIC WINDOW (Fixed Size)
+=====================================
+THE GOLDEN RULE
+Ask: "Is window size FIXED or FLEXIBLE?"
+
+WHEN TO USE
+• Problem gives you fixed size K
+• "Maximum sum of K elements"
+• "Average of subarrays size K"
+
+THE TRICK
+Move 1 step → Remove LEFT, Add RIGHT
+
+MENTAL MODEL
+Fixed-size ruler sliding across array:
+• Window size never changes (always K)
+• Slide: remove old left, add new right
+• Update answer when complete
+
+TEMPLATE
+for (int right = 0; right < arr.length; right++) {
+    windowSum += arr[right];
+
+    if (right >= K - 1) {
+        maxSum = Math.max(maxSum, windowSum);
+        windowSum -= arr[right - K + 1];
+    }
+}
+
+KEY FORMULA: LEFT = right - K + 1
+
+EXAMPLE: arr=[2,1,5,1,3,2], K=3
+[2,1,5] → sum=8
+[1,5,1] → sum=7
+[5,1,3] → sum=9 ← MAX!
+
+
+VARIATION 2: DYNAMIC - LONGEST
+=====================================
+THE TRICK
+EXPAND until INVALID → SHRINK until VALID
+
+WHEN TO USE
+• "LONGEST substring with K distinct"
+• "MAXIMUM consecutive 1s"
+• Find BIGGEST valid window
+
+MENTAL MODEL: The Greedy Accordion
+Keep expanding. Only shrink when forced!
+
+TEMPLATE
+int left = 0, maxLength = 0;
+
+for (int right = 0; right < arr.length; right++) {
+    addToWindow(arr[right]);
+
+    while (windowIsINVALID()) {  // Bad? Fix it!
+        removeFromWindow(arr[left]);
+        left++;
+    }
+
+    maxLength = Math.max(maxLength, right - left + 1);
+}
+
+KEY: Shrink ONLY when invalid
+while (INVALID) → make valid
+
+EXAMPLE: s="eceba", K=2 distinct allowed
+[e] → distinct=1 ✓
+[e,c] → distinct=2 ✓
+[e,c,e,b] → distinct=3 ✗ Shrink!
+[e,b] → distinct=2 ✓ Answer=3
+
+
+VARIATION 3: DYNAMIC - SHORTEST
+=====================================
+THE TRICK
+EXPAND until VALID → SHRINK while VALID
+
+WHEN TO USE
+• "SHORTEST substring containing..."
+• "MINIMUM window substring"
+• Find SMALLEST valid window
+
+MENTAL MODEL: Find Perfect Fit
+Expand to get valid, squeeze to minimize!
+
+TEMPLATE
+int left = 0, minLength = MAX_VALUE;
+
+for (int right = 0; right < arr.length; right++) {
+    addToWindow(arr[right]);
+
+    while (windowIsVALID()) {  // Good? Smaller!
+        minLength = Math.min(minLength, right - left + 1);
+        removeFromWindow(arr[left]);
+        left++;
+    }
+}
+
+KEY: Shrink while STILL valid
+while (VALID) → find smallest
+
+MASTER TRICK:
+LONGEST  → while (INVALID) shrink
+SHORTEST → while (VALID) shrink
+
+
+VARIATION 4: MINIMUM WINDOW SUBSTRING
+=====================================
+Pattern 2B - SHORTEST Window in Action
+
+PROBLEM
+s="ADOBECODEBANC", t="ABC"
+Find SMALLEST substring containing ALL chars
+Answer: "BANC"
+
+VISUAL FLOW:
+
+Step 1-5: EXPAND to find first valid
+[A D O B E C] formed=3 ✓ First valid!
+
+Step 6: SHRINK - lost 'A'
+[D O B E C] formed=2 ✗
+
+Step 7-10: EXPAND again
+[D O B E C O D E B A] formed=3 ✓
+
+Step 11-15: SHRINK aggressively
+[O B E C O D E B A] still valid
+[B E C O D E B A] still valid
+... (remove extras)
+
+Step 16-19: EXPAND + SHRINK to finale
+[O D E B A N C] formed=3 ✓
+[D E B A N C] shrink
+[E B A N C] shrink len=5
+[B A N C] shrink len=4 ← ANSWER!
+
+CODE STRUCTURE:
+1. SETUP: count chars in target
+2. EXPAND: add right char every iteration
+3. SHRINK: when formed==required
+4. UPDATE: track minimum length
+
+KEY VARIABLES:
+• required = unique chars needed (3 for "ABC")
+• formed = unique chars satisfied (0→1→2→3)
+• When formed==required → window VALID
+
+PATTERN:
+while (VALID) {
+    update minimum
+    shrink and check if still valid
+}
+
+WHY O(n): Each char enters once, exits once
+
+
+VARIATION 5: CHARACTER REPLACEMENT
+=====================================
+THE TRICK
+Track max_frequency in window
+Window VALID when: (size - maxFreq) ≤ k
+
+WHY IT WORKS
+Keep most frequent char, replace rest
+If need to replace > k chars, shrink
+
+FORMULA
+replacements_needed = (right - left + 1) - maxFreq
+• ≤ k → VALID ✓
+• > k → SHRINK ✗
+
+EXAMPLE: s="AABABBA", k=1
+[AABA] size=4, maxFreq=3 → need 1 replacement ✓
+[AABAB] size=5, maxFreq=3 → need 2 ✗ shrink!
+
+CODE
+int[] count = new int[26];
+int maxFreq = 0, left = 0, result = 0;
+
+for (int right = 0; right < s.length(); right++) {
+    count[s.charAt(right) - 'A']++;
+    maxFreq = Math.max(maxFreq, count[s.charAt(right) - 'A']);
+
+    while ((right - left + 1) - maxFreq > k) {
+        count[s.charAt(left) - 'A']--;
+        left++;
+    }
+
+    result = Math.max(result, right - left + 1);
+}
