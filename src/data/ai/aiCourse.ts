@@ -1192,9 +1192,38 @@ response = client.chat.completions.create(
 # Anthropic Claude format
 prompt = """
 System: You are a helpful math tutor. Explain step-by-step. Use analogies.
+
+User: Explain logarithms.
+"""
+
+# Persona design
+system_prompt = """
+You are a senior software architect with 15 years experience.
+Focus: scalability, best practices, tradeoffs.
+Style: concise, technical, practical.
+Constraints: No deprecated approaches, always mention alternatives.
+"""`,
+          resources: [
+            'System prompt guide (OpenAI)',
+            'Persona design patterns',
+            'Claude system prompt examples'
+          ]
+        }
+      },
+      {
+        id: 'temperature-params',
+        title: 'Temperature and Sampling Parameters',
+        duration: '2 hours',
+        concepts: ['Temperature control', 'Top-p (nucleus sampling)', 'Top-k sampling', 'Frequency/presence penalties']
+      },
+      {
+        id: 'prompt-templates',
+        title: 'Building Prompt Templates',
+        duration: '2 hours',
+        concepts: ['Template design', 'Variable substitution', 'Reusable patterns', 'Version control']
+      },
       {
         id: 'advanced-techniques',
-        title: 'Advanced Prompting Techniques',
         duration: '3 hours',
         concepts: ['Self-critique', 'Constitutional AI prompting', 'Debate prompting', 'Prompt chaining']
       },
@@ -2667,7 +2696,7 @@ def track_cost(tokens_used, model="gpt-4"):
       {
         id: 'swarm-optimizer',
         title: 'Swarm Optimization System',
-        difficulty: 'Expert',
+        difficulty: 'Advanced',
         description: 'Implement a swarm intelligence system for optimization problems. Compare with traditional algorithms.',
         skills: ['Swarm intelligence', 'Optimization', 'Algorithms'],
         estimatedTime: '30-40 hours'
@@ -3040,7 +3069,7 @@ result = agent.run("Who is older, Obama or Trump?")`,
       {
         id: 'rlhf-implementation',
         title: 'RLHF Implementation',
-        difficulty: 'Expert',
+        difficulty: 'Advanced',
         description: 'Implement full RLHF pipeline: collect preferences, train reward model, run PPO fine-tuning.',
         skills: ['RLHF', 'RL', 'Training', 'Advanced ML'],
         estimatedTime: '50-70 hours'
