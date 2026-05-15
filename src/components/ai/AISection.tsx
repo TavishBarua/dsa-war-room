@@ -2,7 +2,7 @@ import { AI_MODULES } from '../../data/ai/aiCourse';
 import AIModuleCard from './AIModuleCard';
 
 export default function AISection() {
-  const modules = AI_MODULES.slice(0, 3); // Show first 3 detailed modules for now
+  const modules = AI_MODULES; // Show ALL 12 comprehensive modules
 
   const quickTopics = [
     {
