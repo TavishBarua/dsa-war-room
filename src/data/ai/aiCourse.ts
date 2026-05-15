@@ -194,19 +194,187 @@ output, weights = attention(Q, K, V)`,
         id: 'tokenization',
         title: 'Tokenization Strategies',
         duration: '2 hours',
-        concepts: ['BPE (Byte-Pair Encoding)', 'WordPiece', 'SentencePiece', 'Character vs subword', 'Vocabulary building']
+        concepts: ['BPE (Byte-Pair Encoding)', 'WordPiece', 'SentencePiece', 'Character vs subword', 'Vocabulary building'],
+        details: {
+          overview: 'Tokenization converts raw text into tokens - the fundamental units LLMs process. Modern LLMs use subword tokenization (BPE, WordPiece) to balance vocabulary size and coverage. Understanding tokenization is crucial: it affects model performance, context windows, and costs (APIs charge per token).',
+          keyPoints: [
+            'Character-level: each character is a token. Huge sequences, no OOV issues. Rarely used.',
+            'Word-level: each word is a token. Huge vocab (100K+), can\'t handle new words (out-of-vocabulary).',
+            'Subword tokenization: balance between characters and words. Common words = 1 token, rare words = multiple tokens.',
+            'BPE (Byte-Pair Encoding): used by GPT. Iteratively merges most frequent character pairs. Vocab ~50K tokens.',
+            'WordPiece: used by BERT. Similar to BPE but optimizes for likelihood. Adds ## prefix to non-initial subwords.',
+            'SentencePiece: language-agnostic, treats spaces as tokens. Used by multilingual models. No pre-tokenization needed.'
+          ],
+          example: 'Tokenizing "tokenization": (1) Word-level: ["tokenization"] if in vocab, else [UNK]. (2) BPE: ["token", "ization"] or ["token", "iz", "ation"]. (3) Character: ["t","o","k","e","n","i","z","a","t","i","o","n"]. Subword BPE is optimal: handles rare words, reasonable sequence length.',
+          codeSnippet: `import tiktoken  # OpenAI's tokenizer
+
+# GPT-4 tokenizer (BPE)
+enc = tiktoken.encoding_for_model("gpt-4")
+
+text = "Tokenization is fundamental"
+tokens = enc.encode(text)
+print(tokens)  # [6899, 2065, 374, 16188]
+print(len(tokens))  # 4 tokens
+
+# Decode back to text
+decoded = enc.decode(tokens)
+print(decoded)  # "Tokenization is fundamental"
+
+# Count tokens in text
+def count_tokens(text, model="gpt-4"):
+    enc = tiktoken.encoding_for_model(model)
+    return len(enc.encode(text))
+
+# Important: APIs charge per token!
+prompt = "Write a story about..."
+tokens = count_tokens(prompt)
+cost = (tokens / 1000) * 0.03  # $0.03 per 1K tokens
+
+# Training BPE tokenizer from scratch
+from tokenizers import Tokenizer, models, trainers
+
+tokenizer = Tokenizer(models.BPE())
+trainer = trainers.BpeTrainer(vocab_size=30000)
+tokenizer.train_from_iterator(texts, trainer=trainer)`,
+          resources: [
+            'tiktoken library',
+            'Hugging Face tokenizers',
+            'BPE paper',
+            'SentencePiece docs'
+          ]
+        }
       },
       {
         id: 'position-encoding',
         title: 'Position Encodings',
         duration: '2 hours',
-        concepts: ['Sinusoidal encoding', 'Learned positional embeddings', 'Rotary embeddings (RoPE)', 'ALiBi']
+        concepts: ['Sinusoidal encoding', 'Learned positional embeddings', 'Rotary embeddings (RoPE)', 'ALiBi'],
+        details: {
+          overview: 'Transformers have no inherent notion of sequence order - attention is permutation-invariant. Position encodings inject order information so models understand "the cat chased the mouse" ≠ "the mouse chased the cat". This lesson covers sinusoidal encoding (original Transformer), learned embeddings (BERT), RoPE (LLaMA), and ALiBi (extends context windows).',
+          keyPoints: [
+            'Why needed: self-attention is permutation-invariant. Without position info, model can\'t distinguish token order.',
+            'Sinusoidal encoding (Transformer paper): fixed mathematical function. pos_enc[pos][i] = sin(pos / 10000^(2i/d)). Benefits: works for any sequence length.',
+            'Learned positional embeddings (BERT, GPT): treat position as learned parameters. Max sequence length fixed at training.',
+            'RoPE (Rotary Position Embedding): used by LLaMA, PaLM. Rotates query/key embeddings based on position. Naturally encodes relative positions.',
+            'ALiBi (Attention with Linear Biases): bias attention scores based on distance. No position embeddings needed. Excellent for extrapolating to longer contexts.',
+            'Modern trend: RoPE and ALiBi are replacing absolute position embeddings due to better long-context performance.'
+          ],
+          example: 'Encoding positions in "The cat sat": Position 0 (The), 1 (cat), 2 (sat). Sinusoidal: each position gets 512-dim vector computed via sin/cos. RoPE: rotates Q/K by position-dependent angle. Result: model learns "cat" is between "The" and "sat".',
+          codeSnippet: `import torch
+import math
+
+# Sinusoidal position encoding
+def sinusoidal_pos_encoding(seq_len, d_model):
+    pe = torch.zeros(seq_len, d_model)
+    position = torch.arange(0, seq_len).unsqueeze(1)
+    div_term = torch.exp(torch.arange(0, d_model, 2) *
+                         -(math.log(10000.0) / d_model))
+
+    pe[:, 0::2] = torch.sin(position * div_term)
+    pe[:, 1::2] = torch.cos(position * div_term)
+    return pe
+
+# Learned positional embeddings (simpler)
+class LearnedPositionEmbedding(nn.Module):
+    def __init__(self, max_len, d_model):
+        super().__init__()
+        self.pos_emb = nn.Embedding(max_len, d_model)
+
+    def forward(self, x):
+        seq_len = x.size(1)
+        positions = torch.arange(seq_len, device=x.device)
+        return x + self.pos_emb(positions)
+
+# RoPE (Rotary Position Embedding)
+def apply_rotary_pos_emb(q, k, cos, sin):
+    # Rotate queries and keys by position-dependent angle
+    q_embed = (q * cos) + (rotate_half(q) * sin)
+    k_embed = (k * cos) + (rotate_half(k) * sin)
+    return q_embed, k_embed
+
+# ALiBi (just bias attention scores)
+def get_alibi_slopes(num_heads):
+    slopes = torch.tensor([2 ** (-8 / num_heads * i)
+                          for i in range(1, num_heads + 1)])
+    return slopes
+
+# Usage in attention
+attention_scores = attention_scores + alibi_bias  # Add distance-based bias`,
+          resources: [
+            'Transformer position encoding explained',
+            'RoPE paper',
+            'ALiBi paper',
+            'Position encodings comparison'
+          ]
+        }
       },
       {
         id: 'training-pipeline',
         title: 'Training LLMs: The Complete Pipeline',
         duration: '5 hours',
-        concepts: ['Pre-training objectives', 'Next token prediction', 'Masked language modeling', 'Loss functions', 'Optimization strategies']
+        concepts: ['Pre-training objectives', 'Next token prediction', 'Masked language modeling', 'Loss functions', 'Optimization strategies'],
+        details: {
+          overview: 'Training LLMs is a massive undertaking involving pre-training on trillions of tokens. This lesson covers the complete pipeline: pre-training objectives (next token prediction, MLM), data preparation, loss functions, optimization (Adam, learning rate schedules), and distributed training. Understanding training helps you debug models and make informed fine-tuning decisions.',
+          keyPoints: [
+            'Pre-training objective for GPT: next token prediction (autoregressive). Model predicts P(token_t | token_1...token_{t-1}).',
+            'Pre-training objective for BERT: masked language modeling (MLM). Mask 15% of tokens, predict them using bidirectional context.',
+            'Loss function: cross-entropy between predicted token probabilities and actual tokens. Minimize negative log-likelihood.',
+            'Optimization: AdamW optimizer with learning rate warmup, cosine decay. Batch size 1-4M tokens (mega-batches).',
+            'Data: trillion-token corpus from web (Common Crawl), books, code. Extensive filtering for quality and safety.',
+            'Training scale: GPT-3 trained on 300B tokens over weeks on thousands of GPUs. Cost: $5-10M.'
+          ],
+          example: 'Training mini-GPT on 100M tokens: (1) Dataset: Wikipedia + books, (2) Tokenize with BPE, (3) Create batches: [context, target], (4) Forward pass: predict next token, (5) Compute cross-entropy loss, (6) Backward pass: gradients, (7) Adam optimizer: update weights, (8) Repeat for 100K steps. Final: model can generate coherent text.',
+          codeSnippet: `import torch
+import torch.nn as nn
+from torch.optim import AdamW
+
+# Training loop for next-token prediction
+model = GPTModel()  # Your transformer
+optimizer = AdamW(model.parameters(), lr=3e-4)
+criterion = nn.CrossEntropyLoss()
+
+for batch in dataloader:
+    # batch: [batch_size, seq_len] of token IDs
+    input_ids = batch[:, :-1]  # All but last token
+    target_ids = batch[:, 1:]  # All but first token
+
+    # Forward pass
+    logits = model(input_ids)  # [batch, seq_len, vocab_size]
+
+    # Compute loss (next token prediction)
+    loss = criterion(
+        logits.view(-1, vocab_size),  # Flatten
+        target_ids.view(-1)
+    )
+
+    # Backward pass
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+# Learning rate schedule
+from torch.optim.lr_scheduler import CosineAnnealingLR
+
+scheduler = CosineAnnealingLR(optimizer, T_max=100000)
+
+# After each step
+scheduler.step()
+
+# Distributed training with DeepSpeed
+import deepspeed
+
+model_engine, optimizer, _, _ = deepspeed.initialize(
+    model=model,
+    model_parameters=model.parameters(),
+    config="deepspeed_config.json"
+)`,
+          resources: [
+            'nanoGPT training',
+            'GPT-3 paper',
+            'DeepSpeed documentation',
+            'The Stack (code training data)'
+          ]
+        }
       },
       {
         id: 'scaling-laws',
@@ -230,13 +398,157 @@ output, weights = attention(Q, K, V)`,
         id: 'inference-optimization',
         title: 'Inference Optimization',
         duration: '3 hours',
-        concepts: ['KV caching', 'Quantization (INT8, INT4)', 'Model pruning', 'Speculative decoding', 'Flash Attention']
+        concepts: ['KV caching', 'Quantization (INT8, INT4)', 'Model pruning', 'Speculative decoding', 'Flash Attention'],
+        details: {
+          overview: 'LLM inference is expensive - GPT-4 runs on clusters of GPUs. Optimization techniques make models faster and cheaper: KV caching (avoid recomputing), quantization (INT8/INT4 instead of FP32), Flash Attention (efficient attention), speculative decoding (parallel generation). Essential for deploying models at scale.',
+          keyPoints: [
+            'KV caching: cache key/value matrices during generation. Avoid recomputing for previous tokens. 10-100x speedup for long sequences.',
+            'Quantization: reduce precision from FP32 → INT8 (8-bit) or INT4 (4-bit). 4x smaller model, 2-4x faster. Minimal quality loss with careful quantization.',
+            'Flash Attention: optimize attention computation to use GPU memory efficiently. 2-4x faster, enables longer context windows.',
+            'Speculative decoding: small model generates candidates, large model verifies in parallel. 2-3x faster generation.',
+            'Model pruning: remove unnecessary weights. Structured pruning (remove entire layers/heads) or unstructured (individual weights).',
+            'Batching: process multiple requests together. Increases throughput but higher latency per request.'
+          ],
+          example: 'Optimizing LLaMA-7B inference: (1) INT8 quantization: 26GB → 7GB, (2) Flash Attention: 1.5x speedup, (3) KV caching: 50x speedup on long contexts, (4) Result: runs on single A100 GPU, 100 tokens/sec throughput. Without optimization: OOM or 5 tokens/sec.',
+          codeSnippet: `# KV caching (built into most frameworks)
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained("gpt2")
+
+# Generate with KV caching (default)
+output = model.generate(
+    input_ids,
+    max_length=100,
+    use_cache=True  # Caches K/V for each layer
+)
+
+# Quantization with bitsandbytes
+from transformers import BitsAndBytesConfig
+
+quantization_config = BitsAndBytesConfig(
+    load_in_8bit=True,  # or load_in_4bit=True
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b",
+    quantization_config=quantization_config,
+    device_map="auto"
+)
+
+# Flash Attention
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b",
+    attn_implementation="flash_attention_2",  # Requires flash-attn package
+)
+
+# Speculative decoding
+from transformers import AutoModelForCausalLM
+
+small_model = AutoModelForCausalLM.from_pretrained("gpt2")
+large_model = AutoModelForCausalLM.from_pretrained("gpt2-large")
+
+# Small model drafts, large model verifies
+output = large_model.generate(
+    input_ids,
+    assistant_model=small_model,
+    do_sample=False
+)`,
+          resources: [
+            'Flash Attention paper',
+            'bitsandbytes quantization',
+            'llama.cpp (fast inference)',
+            'vLLM (production inference)'
+          ]
+        }
       },
       {
         id: 'mini-gpt',
         title: 'Building Mini-GPT from Scratch',
         duration: '6 hours',
-        concepts: ['PyTorch implementation', 'Training on small corpus', 'Text generation', 'Evaluation metrics']
+        concepts: ['PyTorch implementation', 'Training on small corpus', 'Text generation', 'Evaluation metrics'],
+        details: {
+          overview: 'The best way to understand transformers is to build one. This hands-on lesson walks through implementing a mini-GPT from scratch in PyTorch: multi-head attention, transformer blocks, position encodings, training loop, and text generation. You\'ll train on a small corpus (Shakespeare) and see the model learn language. Follow along with nanoGPT.',
+          keyPoints: [
+            'Architecture: 6-layer decoder-only transformer, 6 attention heads, 384 embedding dims, 256 context window.',
+            'Components: token embedding, position embedding, transformer blocks (attention + FFN), layer norm, output projection.',
+            'Training: next-token prediction on Shakespeare corpus (1MB text). 5000 steps, batch size 64, ~10M parameters.',
+            'Text generation: sample from model probability distribution. Techniques: greedy, temperature sampling, top-k, nucleus (top-p).',
+            'Evaluation: perplexity (exponentiated loss). Lower = better. Shakespeare model achieves ~2.5 perplexity.',
+            'Result: model generates Shakespeare-style text. Not perfect but grammatically coherent. Demonstrates transformer learning.'
+          ],
+          example: 'Training mini-GPT on Shakespeare: (1) Implement model in 200 lines, (2) Train 5000 steps (30 min on GPU), (3) Generate: "To be or not to be" → "To be or not to be the king of england and the world of the crown". Model learned Shakespearean style!',
+          codeSnippet: `import torch
+import torch.nn as nn
+from torch.nn import functional as F
+
+class Head(nn.Module):
+    """Single attention head"""
+    def __init__(self, head_size, n_embd, block_size):
+        super().__init__()
+        self.key = nn.Linear(n_embd, head_size, bias=False)
+        self.query = nn.Linear(n_embd, head_size, bias=False)
+        self.value = nn.Linear(n_embd, head_size, bias=False)
+        self.register_buffer('tril', torch.tril(torch.ones(block_size, block_size)))
+
+    def forward(self, x):
+        B, T, C = x.shape
+        k = self.key(x)
+        q = self.query(x)
+        v = self.value(x)
+
+        # Attention scores
+        wei = q @ k.transpose(-2, -1) * (C ** -0.5)
+        wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf'))
+        wei = F.softmax(wei, dim=-1)
+        out = wei @ v
+        return out
+
+class GPT(nn.Module):
+    def __init__(self, vocab_size, n_embd=384, n_head=6, n_layer=6, block_size=256):
+        super().__init__()
+        self.token_emb = nn.Embedding(vocab_size, n_embd)
+        self.pos_emb = nn.Embedding(block_size, n_embd)
+        self.blocks = nn.Sequential(*[Block(n_embd, n_head) for _ in range(n_layer)])
+        self.ln_f = nn.LayerNorm(n_embd)
+        self.lm_head = nn.Linear(n_embd, vocab_size)
+
+    def forward(self, idx):
+        B, T = idx.shape
+        tok_emb = self.token_emb(idx)
+        pos_emb = self.pos_emb(torch.arange(T, device=idx.device))
+        x = tok_emb + pos_emb
+        x = self.blocks(x)
+        x = self.ln_f(x)
+        logits = self.lm_head(x)
+        return logits
+
+# Training
+model = GPT(vocab_size=vocab_size)
+optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
+
+for step in range(5000):
+    xb, yb = get_batch('train')
+    logits = model(xb)
+    loss = F.cross_entropy(logits.view(-1, vocab_size), yb.view(-1))
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+# Generate text
+def generate(model, idx, max_new_tokens):
+    for _ in range(max_new_tokens):
+        logits = model(idx[:, -block_size:])
+        probs = F.softmax(logits[:, -1, :], dim=-1)
+        idx_next = torch.multinomial(probs, num_samples=1)
+        idx = torch.cat((idx, idx_next), dim=1)
+    return idx`,
+          resources: [
+            'nanoGPT (Andrej Karpathy)',
+            'minGPT',
+            'Build GPT from scratch video',
+            'Shakespeare dataset'
+          ]
+        }
       },
       {
         id: 'llm-architectures',
@@ -344,7 +656,73 @@ output, weights = attention(Q, K, V)`,
         id: 'chain-of-thought',
         title: 'Chain-of-Thought (CoT) Reasoning',
         duration: '3 hours',
-        concepts: ['Step-by-step reasoning', 'Let\'s think step by step', 'Self-consistency', 'Tree of Thoughts']
+        concepts: ['Step-by-step reasoning', 'Let\'s think step by step', 'Self-consistency', 'Tree of Thoughts'],
+        details: {
+          overview: 'Chain-of-Thought (CoT) prompting dramatically improves LLM reasoning on complex tasks. Instead of directly answering, the model generates intermediate reasoning steps. Simple addition: "Let\'s think step by step" boosts math accuracy from 20% to 80%. This lesson covers CoT techniques: zero-shot CoT, few-shot CoT, self-consistency, and Tree of Thoughts.',
+          keyPoints: [
+            'Basic CoT: include reasoning examples in few-shot prompts. Show step-by-step working, not just final answers.',
+            'Zero-shot CoT: simply add "Let\'s think step by step" to prompt. Works surprisingly well without examples.',
+            'Self-consistency: generate multiple reasoning paths (temperature > 0), take majority vote on final answer. Improves accuracy 10-30%.',
+            'Tree of Thoughts: explore multiple reasoning branches like a tree. Model evaluates promising branches. Best for complex planning.',
+            'When to use CoT: math, logic, multi-step reasoning, coding problems. Less helpful for factual recall or simple classification.',
+            'CoT adds tokens (reasoning = cost) but dramatically improves quality on hard problems.'
+          ],
+          example: 'Problem: "Roger has 5 tennis balls. He buys 2 cans of 3 balls each. How many balls does he have?" Without CoT: "8" (wrong). With CoT: "Roger starts with 5 balls. He buys 2 cans with 3 balls each. That\'s 2 × 3 = 6 new balls. Total: 5 + 6 = 11 balls." (correct)',
+          codeSnippet: `# Zero-shot CoT (add magic phrase)
+prompt = """
+Q: Roger has 5 tennis balls. He buys 2 cans of 3 balls each. How many balls does he have?
+
+Let's think step by step:
+"""
+
+response = llm.generate(prompt)
+# Output: "Roger starts with 5 balls. He buys 2 cans...Total: 11 balls"
+
+# Few-shot CoT (provide reasoning examples)
+few_shot_cot = """
+Q: Jane has 3 apples. She gives away 1 and buys 4 more. How many does she have?
+A: Let's think step by step:
+1. Jane starts with 3 apples
+2. She gives away 1: 3 - 1 = 2 apples
+3. She buys 4 more: 2 + 4 = 6 apples
+Answer: 6 apples
+
+Q: {new_question}
+A: Let's think step by step:
+"""
+
+# Self-consistency: sample multiple times
+answers = []
+for _ in range(5):
+    response = llm.generate(prompt, temperature=0.7)
+    answer = extract_final_answer(response)
+    answers.append(answer)
+
+# Majority vote
+from collections import Counter
+final_answer = Counter(answers).most_common(1)[0][0]
+
+# Tree of Thoughts
+def tree_of_thoughts(problem, depth=3):
+    # Generate multiple reasoning paths
+    paths = []
+    for _ in range(3):
+        path = generate_reasoning_step(problem)
+        score = evaluate_path(path)
+        paths.append((path, score))
+
+    # Select best path, continue reasoning
+    best_path = max(paths, key=lambda x: x[1])
+    if depth > 0:
+        return tree_of_thoughts(best_path[0], depth-1)
+    return best_path[0]`,
+          resources: [
+            'Chain-of-Thought Prompting paper',
+            'Self-Consistency paper',
+            'Tree of Thoughts paper',
+            'CoT Hub (examples)'
+          ]
+        }
       },
       {
         id: 'system-prompts',
@@ -469,79 +847,782 @@ output, weights = attention(Q, K, V)`,
         id: 'rag-intro',
         title: 'RAG Fundamentals',
         duration: '2 hours',
-        concepts: ['What is RAG', 'Why RAG over fine-tuning', 'RAG architecture', 'Use cases']
+        concepts: ['What is RAG', 'Why RAG over fine-tuning', 'RAG architecture', 'Use cases'],
+        details: {
+          overview: 'Retrieval-Augmented Generation (RAG) combines the power of LLMs with external knowledge retrieval. Instead of relying solely on parameters learned during training, RAG systems retrieve relevant documents and inject them as context. This enables LLMs to answer questions with up-to-date information, cite sources, and avoid hallucinations.',
+          keyPoints: [
+            'RAG retrieves relevant documents from external knowledge bases before generating responses',
+            'Solves LLM limitations: outdated knowledge, hallucinations, inability to cite sources',
+            'More cost-effective than fine-tuning for frequently changing knowledge',
+            'Three-stage pipeline: Retrieve relevant docs → Augment prompt with context → Generate answer',
+            'Use RAG when you need: current information, citations, domain-specific knowledge, or frequent updates',
+            'RAG complements fine-tuning - fine-tune for style/format, RAG for knowledge'
+          ],
+          example: 'User asks: "What was Apple\'s Q4 2024 revenue?" Without RAG, GPT-4 (trained on data up to early 2024) can\'t answer. With RAG: (1) Retrieve Apple\'s Q4 2024 earnings report, (2) Add document to prompt context, (3) LLM extracts "$94.9B revenue" and cites the source.',
+          codeSnippet: `# Simple RAG Pipeline
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.chat_models import ChatOpenAI
+
+# 1. Retrieve relevant documents
+vectorstore = Chroma(embedding_function=OpenAIEmbeddings())
+docs = vectorstore.similarity_search(query="Apple Q4 2024 revenue", k=3)
+
+# 2. Augment prompt with retrieved context
+context = "\\n\\n".join([doc.page_content for doc in docs])
+prompt = f"""Answer the question based on the context below.
+
+Context: {context}
+
+Question: {query}
+
+Answer with citations:"""
+
+# 3. Generate response
+llm = ChatOpenAI(model="gpt-4")
+response = llm.predict(prompt)`,
+          resources: [
+            'RAG Paper (Lewis et al., 2020)',
+            'LangChain RAG Tutorial',
+            'When to use RAG vs Fine-tuning',
+            'Pinecone RAG Guide'
+          ]
+        }
       },
       {
         id: 'document-loading',
         title: 'Document Loading and Preprocessing',
         duration: '2 hours',
-        concepts: ['PDF parsing', 'HTML extraction', 'OCR for images', 'Markdown handling', 'Cleaning text']
+        concepts: ['PDF parsing', 'HTML extraction', 'OCR for images', 'Markdown handling', 'Cleaning text'],
+        details: {
+          overview: 'Before building a RAG system, you must load and clean documents from various sources. This lesson covers parsing PDFs, extracting text from HTML, handling images with OCR, processing markdown, and cleaning noisy text. Quality document loading is critical - garbage in, garbage out.',
+          keyPoints: [
+            'Different document types require different parsers: PDFMiner/PyPDF2 for PDFs, BeautifulSoup for HTML, Tesseract for OCR',
+            'PDFs are tricky: text PDFs vs scanned images, tables, multi-column layouts, headers/footers',
+            'HTML extraction: remove scripts/styles, preserve semantic structure, handle links and images',
+            'OCR for scanned documents: Tesseract, cloud APIs (Google Vision, AWS Textract), quality depends on image resolution',
+            'Text cleaning: remove extra whitespace, fix encoding issues, handle special characters, normalize unicode',
+            'Preserve metadata: page numbers, sections, dates, authors - crucial for citations and filtering'
+          ],
+          example: 'Loading a research paper PDF: (1) Use PyPDF2 to extract text, (2) Detect it has tables - switch to pdfplumber for better table extraction, (3) Combine text and tables into structured format, (4) Extract metadata (title, authors, date), (5) Clean artifacts like "\\n\\n" and header repetitions.',
+          codeSnippet: `from langchain.document_loaders import PyPDFLoader, UnstructuredHTMLLoader
+from unstructured.partition.auto import partition
+
+# PDF loading with metadata
+pdf_loader = PyPDFLoader("research_paper.pdf")
+pdf_docs = pdf_loader.load()
+# Each doc has: page_content, metadata (source, page number)
+
+# HTML loading
+html_loader = UnstructuredHTMLLoader("webpage.html")
+html_docs = html_loader.load()
+
+# Advanced: Auto-detect format and extract
+elements = partition(filename="document.pdf")
+text = "\\n\\n".join([str(el) for el in elements])
+
+# Text cleaning
+import re
+def clean_text(text):
+    text = re.sub(r'\\s+', ' ', text)  # Normalize whitespace
+    text = re.sub(r'\\n{3,}', '\\n\\n', text)  # Max 2 newlines
+    return text.strip()`,
+          resources: [
+            'LangChain Document Loaders',
+            'Unstructured.io library',
+            'PyPDF2 vs pdfplumber comparison',
+            'Tesseract OCR docs'
+          ]
+        }
       },
       {
         id: 'chunking-strategies',
         title: 'Document Chunking Strategies',
         duration: '3 hours',
-        concepts: ['Fixed-size chunking', 'Semantic chunking', 'Recursive splitting', 'Overlap strategies', 'Metadata preservation']
+        concepts: ['Fixed-size chunking', 'Semantic chunking', 'Recursive splitting', 'Overlap strategies', 'Metadata preservation'],
+        details: {
+          overview: 'Documents must be split into chunks before embedding - LLMs have context limits and embeddings work best on focused text segments. Chunking strategy dramatically impacts retrieval quality. Too small: lose context. Too large: retrieve irrelevant information. This lesson covers fixed-size, semantic, and recursive chunking with overlap strategies.',
+          keyPoints: [
+            'Fixed-size chunking: split by character/token count (e.g., 512 tokens). Simple but breaks sentences/paragraphs.',
+            'Semantic chunking: split by meaning - paragraphs, sections, sentences. Preserves coherence but variable sizes.',
+            'Recursive splitting: try splitting by paragraphs, then sentences, then words until chunk size met. Best of both worlds.',
+            'Overlap strategy: overlap chunks by 10-20% to avoid losing context at boundaries. E.g., chunk 1: tokens 0-500, chunk 2: tokens 400-900.',
+            'Chunk size sweet spot: 256-512 tokens for most use cases. Smaller for precise retrieval, larger for more context.',
+            'Preserve metadata in each chunk: source document, page number, section title. Critical for citations and filtering.'
+          ],
+          example: 'Chunking a 10-page technical document: (1) Split by sections (Introduction, Methods, Results), (2) If section > 512 tokens, recursively split by paragraphs, (3) Add 100-token overlap between chunks, (4) Each chunk metadata: {source: "doc.pdf", page: 3, section: "Methods", chunk_id: 5}.',
+          codeSnippet: `from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+# Recursive splitting with overlap
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=512,          # Target chunk size in chars/tokens
+    chunk_overlap=100,       # 100 token overlap between chunks
+    length_function=len,     # How to measure length
+    separators=["\\n\\n", "\\n", ". ", " ", ""]  # Try these in order
+)
+
+chunks = text_splitter.split_documents(documents)
+
+# Semantic chunking by paragraphs
+from langchain.text_splitter import ParagraphTextSplitter
+semantic_splitter = ParagraphTextSplitter(chunk_size=512)
+semantic_chunks = semantic_splitter.split_documents(documents)
+
+# Each chunk preserves metadata
+for chunk in chunks:
+    print(f"Content: {chunk.page_content}")
+    print(f"Metadata: {chunk.metadata}")  # {source, page, etc}`,
+          resources: [
+            'LangChain Text Splitters',
+            'Chunking Strategies Guide (Pinecone)',
+            'Optimal chunk size experiments',
+            'Semantic chunking with spaCy'
+          ]
+        }
       },
       {
         id: 'embedding-generation',
         title: 'Generating Embeddings',
         duration: '2 hours',
-        concepts: ['OpenAI embeddings', 'Sentence transformers', 'Cohere embeddings', 'Batch processing', 'Caching strategies']
+        concepts: ['OpenAI embeddings', 'Sentence transformers', 'Cohere embeddings', 'Batch processing', 'Caching strategies'],
+        details: {
+          overview: 'Embeddings convert text chunks into high-dimensional vectors that capture semantic meaning. For RAG, you embed both your document chunks (offline) and user queries (online) to find semantically similar content. This lesson covers OpenAI, Cohere, and open-source embedding models, plus optimization techniques.',
+          keyPoints: [
+            'OpenAI text-embedding-3-small (1536 dims, $0.02/1M tokens): fast and cheap. text-embedding-3-large: higher quality.',
+            'Sentence Transformers (open-source): all-MiniLM-L6-v2 (384 dims, free), runs locally or on your servers.',
+            'Cohere embeddings: strong multilingual support, good for cross-lingual search.',
+            'Batch processing: embed documents in batches of 100-1000 to optimize API costs and speed.',
+            'Caching: store embeddings in vector DB, never re-embed same content. Use content hash as cache key.',
+            'Embedding quality impacts retrieval quality - test multiple models on your domain.'
+          ],
+          example: 'Embedding 10,000 document chunks: (1) Batch chunks into groups of 100, (2) Call OpenAI API: embed_texts(batch), (3) Store embeddings in Pinecone with metadata, (4) Total cost: 10K chunks * 500 tokens avg = 5M tokens * $0.02/1M = $0.10. (5) Cache embeddings, never re-compute.',
+          codeSnippet: `from langchain.embeddings import OpenAIEmbeddings, HuggingFaceEmbeddings
+import numpy as np
+
+# OpenAI embeddings (cloud API)
+openai_embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+
+# Embed documents in batches
+texts = [chunk.page_content for chunk in chunks]
+vectors = openai_embeddings.embed_documents(texts)  # Automatically batches
+
+# Open-source alternative (runs locally)
+hf_embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+local_vectors = hf_embeddings.embed_documents(texts)
+
+# Embedding caching
+import hashlib
+cache = {}
+
+def cached_embed(text, embedder):
+    text_hash = hashlib.md5(text.encode()).hexdigest()
+    if text_hash not in cache:
+        cache[text_hash] = embedder.embed_query(text)
+    return cache[text_hash]`,
+          resources: [
+            'OpenAI Embeddings API',
+            'Sentence Transformers docs',
+            'Cohere Embed API',
+            'Embedding model benchmarks (MTEB)'
+          ]
+        }
       },
       {
         id: 'vector-storage',
         title: 'Storing Vectors Efficiently',
         duration: '2 hours',
-        concepts: ['Vector database selection', 'Indexing strategies', 'Metadata filtering', 'Hybrid search']
+        concepts: ['Vector database selection', 'Indexing strategies', 'Metadata filtering', 'Hybrid search'],
+        details: {
+          overview: 'Vector databases store embeddings and enable fast similarity search across millions of vectors. Unlike traditional databases that index exact values, vector DBs use ANN (Approximate Nearest Neighbors) algorithms for semantic search. This lesson covers choosing the right vector DB, indexing strategies, and hybrid search combining vectors with metadata.',
+          keyPoints: [
+            'Vector DB options: Pinecone (managed, production-ready), Weaviate (open-source, GraphQL), Chroma (lightweight, local dev), FAISS (library, not a full DB)',
+            'Indexing: HNSW (fast, memory-intensive), IVF (balanced), Flat (exact but slow). HNSW recommended for most use cases.',
+            'Metadata filtering: filter by date, author, document type BEFORE or AFTER vector search. Pre-filtering faster but less accurate.',
+            'Hybrid search: combine dense vectors (semantic) with sparse vectors (keyword/BM25). Best of both worlds.',
+            'Store metadata with vectors: document ID, chunk ID, source, page, date - enables filtering and citations.',
+            'Namespace/collections: separate vectors by tenant, use case, or environment (dev/prod).'
+          ],
+          example: 'Storing 100K document chunks in Pinecone: (1) Create index with dimension=1536, metric=cosine, (2) Upsert vectors in batches of 100: (id, vector, metadata), (3) Metadata: {source: "doc.pdf", page: 3, date: "2024-01-15"}, (4) Enable hybrid search for keyword + semantic, (5) Query: "machine learning" filtered by date > 2024.',
+          codeSnippet: `import pinecone
+from langchain.vectorstores import Pinecone
+
+# Initialize Pinecone
+pinecone.init(api_key="...", environment="...")
+index = pinecone.Index("rag-documents")
+
+# Store embeddings with metadata
+vectorstore = Pinecone.from_documents(
+    documents=chunks,
+    embedding=OpenAIEmbeddings(),
+    index_name="rag-documents",
+    namespace="production"  # Logical separation
+)
+
+# Each document has metadata
+for i, chunk in enumerate(chunks):
+    index.upsert([(
+        f"chunk-{i}",           # Unique ID
+        embeddings[i],          # Vector
+        {                       # Metadata
+            "text": chunk.page_content,
+            "source": chunk.metadata["source"],
+            "page": chunk.metadata["page"],
+            "date": "2024-01-15"
+        }
+    )])
+
+# Hybrid search (vector + metadata filter)
+results = vectorstore.similarity_search(
+    "machine learning",
+    k=5,
+    filter={"date": {"$gte": "2024-01-01"}}
+)`,
+          resources: [
+            'Pinecone Getting Started',
+            'Weaviate Quickstart',
+            'Chroma Documentation',
+            'Vector DB comparison guide'
+          ]
+        }
       },
       {
         id: 'retrieval-methods',
         title: 'Retrieval Methods',
         duration: '3 hours',
-        concepts: ['Similarity search', 'MMR (Maximal Marginal Relevance)', 'Hybrid search (dense + sparse)', 'Query expansion']
+        concepts: ['Similarity search', 'MMR (Maximal Marginal Relevance)', 'Hybrid search (dense + sparse)', 'Query expansion'],
+        details: {
+          overview: 'Retrieval is the core of RAG - finding the most relevant documents for a query. Simple similarity search often returns redundant results. This lesson covers advanced retrieval methods: MMR for diversity, hybrid search combining semantic and keyword matching, and query expansion techniques. Better retrieval = better generation.',
+          keyPoints: [
+            'Basic similarity search: embed query, find k nearest neighbors by cosine similarity. Simple but can return redundant similar documents.',
+            'MMR (Maximal Marginal Relevance): balance relevance with diversity. Penalizes documents similar to already-retrieved ones. Great for comprehensive answers.',
+            'Hybrid search: combine dense vectors (semantic) with sparse vectors (BM25 keyword matching). Catches both conceptual and exact matches.',
+            'Query expansion: rewrite user query into multiple variations, retrieve for each, merge results. Handles ambiguity and typos.',
+            'Parent-child retrieval: retrieve small chunks for precision, return larger parent chunks for context.',
+            'Retrieval parameters: k (number of results), score threshold, MMR lambda (diversity vs relevance)'
+          ],
+          example: 'User asks: "How do transformers handle long sequences?" (1) Basic search returns 5 similar chunks all saying "transformers use attention". (2) MMR retrieval returns: attention mechanism, positional encoding, context window limitations, memory optimization, sparse attention - diverse relevant topics.',
+          codeSnippet: `from langchain.vectorstores import Pinecone
+from langchain.retrievers import ContextualCompressionRetriever
+
+# Basic similarity search
+retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+docs = retriever.get_relevant_documents("transformers long sequences")
+
+# MMR for diverse results
+mmr_retriever = vectorstore.as_retriever(
+    search_type="mmr",
+    search_kwargs={
+        "k": 5,              # Return top 5
+        "fetch_k": 20,       # Fetch 20 candidates first
+        "lambda_mult": 0.5   # 0=max diversity, 1=max relevance
+    }
+)
+diverse_docs = mmr_retriever.get_relevant_documents(query)
+
+# Hybrid search (semantic + keyword)
+hybrid_results = vectorstore.hybrid_search(
+    query="transformer attention",
+    k=5,
+    alpha=0.5  # 0=pure keyword, 1=pure semantic, 0.5=balanced
+)
+
+# Query expansion
+queries = [
+    "How do transformers handle long sequences?",
+    "Transformer context window limitations",
+    "Long-range dependencies in transformers"
+]
+all_docs = []
+for q in queries:
+    all_docs.extend(retriever.get_relevant_documents(q))
+# Deduplicate and rerank`,
+          resources: [
+            'MMR algorithm paper',
+            'Hybrid search guide (Weaviate)',
+            'LangChain retriever docs',
+            'Query expansion techniques'
+          ]
+        }
       },
       {
         id: 'reranking',
         title: 'Reranking for Quality',
         duration: '3 hours',
-        concepts: ['Cross-encoder reranking', 'Cohere rerank', 'Custom scoring', 'Two-stage retrieval']
+        concepts: ['Cross-encoder reranking', 'Cohere rerank', 'Custom scoring', 'Two-stage retrieval'],
+        details: {
+          overview: 'Initial retrieval (bi-encoder) is fast but imprecise - it embeds query and documents separately. Reranking uses cross-encoders that process query+document together for higher accuracy. Two-stage retrieval: (1) Fast bi-encoder gets top 100 candidates, (2) Slow cross-encoder reranks to top 5. Dramatically improves quality.',
+          keyPoints: [
+            'Bi-encoders (SBERT): encode query and docs separately, compare embeddings. Fast but less accurate.',
+            'Cross-encoders: encode query+document together, output relevance score. More accurate but 1000x slower.',
+            'Two-stage pipeline: bi-encoder retrieves 50-100 candidates, cross-encoder reranks to top k. Best of both worlds.',
+            'Cohere Rerank API: powerful cross-encoder reranking as a service. Easy to integrate, handles 1000+ docs.',
+            'Custom scoring: combine relevance score with recency, popularity, source quality. Weighted formula.',
+            'Reranking improves NDCG by 10-30% over raw retrieval. Worth the latency for high-quality applications.'
+          ],
+          example: 'Query: "best practices for RAG systems". (1) Bi-encoder retrieves 100 docs in 50ms, (2) Cross-encoder reranks to top 10 in 200ms, (3) Custom scoring boosts recent papers by 20%, (4) Final top 5 are highly relevant, recent, and from trusted sources. Total latency: 250ms.',
+          codeSnippet: `from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import CohereRerank
+import cohere
+
+# Stage 1: Fast bi-encoder retrieval (top 50)
+base_retriever = vectorstore.as_retriever(search_kwargs={"k": 50})
+
+# Stage 2: Cross-encoder reranking (top 5)
+cohere_client = cohere.Client(api_key="...")
+compressor = CohereRerank(
+    client=cohere_client,
+    top_n=5,  # Rerank to top 5
+    model="rerank-english-v2.0"
+)
+
+# Combined retriever
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=compressor,
+    base_retriever=base_retriever
+)
+
+# Retrieve and rerank in one call
+final_docs = compression_retriever.get_relevant_documents(
+    "best practices for RAG systems"
+)
+
+# Custom scoring
+def custom_score(doc, base_score):
+    recency_boost = 1.2 if doc.metadata["year"] >= 2024 else 1.0
+    source_boost = 1.3 if doc.metadata["source"] == "peer_reviewed" else 1.0
+    return base_score * recency_boost * source_boost
+
+# Apply custom scoring
+for doc in docs:
+    doc.score = custom_score(doc, doc.score)
+docs.sort(key=lambda d: d.score, reverse=True)`,
+          resources: [
+            'Cross-encoders explained',
+            'Cohere Rerank API',
+            'Sentence Transformers reranking',
+            'Two-stage retrieval benchmarks'
+          ]
+        }
       },
       {
         id: 'context-compression',
         title: 'Context Compression',
         duration: '2 hours',
-        concepts: ['Token optimization', 'Irrelevant content removal', 'Summary-based compression', 'LongLLMLingua']
+        concepts: ['Token optimization', 'Irrelevant content removal', 'Summary-based compression', 'LongLLMLingua'],
+        details: {
+          overview: 'Retrieved documents often contain irrelevant content that wastes tokens and context window. Context compression extracts only the relevant parts before sending to the LLM. Techniques: extract sentences matching query, use LLM to summarize, or LongLLMLingua to compress while preserving meaning. Saves tokens = saves money.',
+          keyPoints: [
+            'Problem: retrieving full 512-token chunks when only 1-2 sentences are relevant. Wastes 90% of tokens.',
+            'Extractive compression: use embeddings or keyword matching to extract only relevant sentences from each chunk.',
+            'Abstractive compression: use LLM to summarize retrieved docs into concise context. More flexible but costs tokens.',
+            'LongLLMLingua: compresses context by removing redundant tokens while preserving key information. Can compress 4:1 ratio.',
+            'Trade-off: compression adds latency but saves tokens. Worth it for long contexts or high-volume applications.',
+            'Always preserve citations - track which compressed sentences came from which original documents.'
+          ],
+          example: 'Retrieved 5 chunks (2500 tokens total) for query "What is RLHF?". (1) Extract sentences containing "RLHF" or "reinforcement learning" (400 tokens), (2) Or use LLM to summarize: "RLHF is a technique to align LLMs using human feedback..." (100 tokens), (3) Pass compressed context to final LLM. Saved 2400 tokens = $0.024 per query.',
+          codeSnippet: `from langchain.retrievers.document_compressors import LLMChainExtractor
+from langchain.retrievers import ContextualCompressionRetriever
+
+# Extractive compression: extract relevant sentences
+extractor = LLMChainExtractor.from_llm(llm)
+
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=extractor,
+    base_retriever=base_retriever
+)
+
+# Compressed docs contain only relevant parts
+compressed_docs = compression_retriever.get_relevant_documents(
+    "What is RLHF?"
+)
+
+# LongLLMLingua compression
+from llmlingua import PromptCompressor
+
+compressor = PromptCompressor()
+compressed_context = compressor.compress_prompt(
+    context=long_retrieved_text,
+    instruction="What is RLHF?",
+    target_token=100  # Compress to 100 tokens
+)
+
+# Before: 2500 tokens
+# After: 100 tokens (25x compression)
+# Quality: 90% information retained`,
+          resources: [
+            'LongLLMLingua paper',
+            'LangChain compressors',
+            'Token optimization guide',
+            'Context compression benchmarks'
+          ]
+        }
       },
       {
         id: 'query-understanding',
         title: 'Query Understanding and Routing',
         duration: '2 hours',
-        concepts: ['Query classification', 'Intent detection', 'Multi-query generation', 'Query rewriting']
+        concepts: ['Query classification', 'Intent detection', 'Multi-query generation', 'Query rewriting'],
+        details: {
+          overview: 'User queries are often vague, ambiguous, or poorly worded. Query understanding preprocesses queries before retrieval: classify intent, rewrite for clarity, expand into multiple queries, or route to different retrievers. Better queries = better retrieval = better answers. Essential for production RAG systems.',
+          keyPoints: [
+            'Query classification: categorize query type (factual, how-to, comparison, opinion). Route to specialized retrievers or prompts.',
+            'Intent detection: what does the user actually want? "Latest research on RAG" → intent: recent papers, date filter > 2024.',
+            'Query rewriting: improve vague queries. "How does that work?" → "How does retrieval augmented generation work?"',
+            'Multi-query generation: expand query into 3-5 variations, retrieve for each, merge results. Handles ambiguity.',
+            'Routing: route queries to different data sources based on content. Technical questions → docs, company questions → internal KB.',
+            'Use fast LLM (GPT-4o-mini) for query understanding to minimize latency.'
+          ],
+          example: 'User query: "latest stuff on agents". (1) Classify: intent=recent research, (2) Rewrite: "recent research papers on AI agents", (3) Expand: ["AI agent frameworks 2024", "autonomous agent systems", "multi-agent architectures"], (4) Add filter: date >= 2024-01-01, (5) Retrieve for all variations, merge top results.',
+          codeSnippet: `from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+
+# Query rewriting
+rewrite_prompt = PromptTemplate.from_template("""
+Rewrite the following query to be more specific and clear:
+
+Query: {query}
+
+Rewritten query:""")
+
+rewrite_chain = LLMChain(llm=llm, prompt=rewrite_prompt)
+clear_query = rewrite_chain.run(query="latest stuff on agents")
+
+# Multi-query generation
+multi_query_prompt = PromptTemplate.from_template("""
+Generate 3 different search queries for this question:
+
+Question: {query}
+
+Queries:""")
+
+multi_query_chain = LLMChain(llm=llm, prompt=multi_query_prompt)
+queries = multi_query_chain.run(query="How do transformers work?").split("\\n")
+
+# Retrieve for each query
+all_docs = []
+for q in queries:
+    docs = retriever.get_relevant_documents(q)
+    all_docs.extend(docs)
+
+# Deduplicate and rerank
+unique_docs = remove_duplicates(all_docs)
+final_docs = rerank(unique_docs, original_query)
+
+# Query routing
+def route_query(query):
+    if "latest" in query or "recent" in query:
+        return retriever_with_date_filter
+    elif "how to" in query:
+        return tutorial_retriever
+    else:
+        return general_retriever`,
+          resources: [
+            'Query understanding patterns',
+            'LangChain MultiQueryRetriever',
+            'Intent classification models',
+            'Query rewriting with LLMs'
+          ]
+        }
       },
       {
         id: 'multi-doc-rag',
         title: 'Multi-Document RAG',
         duration: '3 hours',
-        concepts: ['Cross-document synthesis', 'Citation generation', 'Source tracking', 'Conflicting information']
+        concepts: ['Cross-document synthesis', 'Citation generation', 'Source tracking', 'Conflicting information'],
+        details: {
+          overview: 'Production RAG systems retrieve from multiple documents and must synthesize information across sources. Challenges: conflicting information, proper citations, source tracking, answer completeness. This lesson covers cross-document synthesis, citation generation, handling contradictions, and building comprehensive multi-source answers.',
+          keyPoints: [
+            'Cross-document synthesis: combine information from multiple docs into coherent answer. Identify common themes and unique insights.',
+            'Citation generation: track which facts came from which sources. Format: [source_name, page X] or footnotes [1], [2].',
+            'Source tracking: maintain provenance throughout pipeline. Each fact → original document + location.',
+            'Conflicting information: when sources disagree, present both viewpoints with citations. Never silently ignore contradictions.',
+            'Answer completeness: retrieve from diverse sources to build comprehensive answers. Check coverage of query aspects.',
+            'Source quality assessment: prioritize high-quality sources (peer-reviewed, recent, authoritative).'
+          ],
+          example: 'Query: "What is the capital of India?" (1) Doc A (tourism site): "New Delhi", (2) Doc B (old encyclopedia): "Delhi", (3) Doc C (government): "New Delhi". Answer: "The capital of India is New Delhi [1, 3]. Some older sources refer to it simply as Delhi [2]." Citations: [1] Government of India, [2] Encyclopedia 1990, [3] Tourism Board.',
+          codeSnippet: `from langchain.chains import RetrievalQAWithSourcesChain
+
+# RAG with source citations
+qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
+    llm=llm,
+    chain_type="stuff",
+    retriever=retriever,
+    return_source_documents=True
+)
+
+result = qa_chain({"question": "What is RLHF?"})
+print(result["answer"])  # Answer with inline citations
+print(result["sources"]) # List of source documents
+
+# Custom citation format
+citation_prompt = """Answer the question based on the context.
+Include citations as [source_name, page X] after each claim.
+
+Context:
+{context}
+
+Question: {question}
+
+Answer with citations:"""
+
+# Handle conflicting information
+conflict_prompt = """The following sources provide different information:
+
+Source 1: {source1}
+Source 2: {source2}
+
+Summarize both viewpoints and note the discrepancy:"""
+
+# Multi-document synthesis
+synthesis_prompt = """Synthesize information from multiple sources below.
+Combine common themes and highlight unique insights.
+Cite sources for each claim.
+
+Sources:
+{all_sources}
+
+Comprehensive answer:"""`,
+          resources: [
+            'Multi-document QA techniques',
+            'Citation generation best practices',
+            'Handling conflicting sources',
+            'LangChain QA with sources'
+          ]
+        }
       },
       {
         id: 'rag-evaluation',
         title: 'Evaluating RAG Systems',
         duration: '3 hours',
-        concepts: ['Retrieval metrics (MRR, NDCG)', 'Generation quality', 'Faithfulness scoring', 'RAGAS framework']
+        concepts: ['Retrieval metrics (MRR, NDCG)', 'Generation quality', 'Faithfulness scoring', 'RAGAS framework'],
+        details: {
+          overview: 'You can\'t improve what you don\'t measure. RAG evaluation has two components: retrieval quality (did we find the right documents?) and generation quality (did the LLM use them correctly?). This lesson covers retrieval metrics (MRR, NDCG), generation metrics (faithfulness, answer relevance), and the RAGAS framework for end-to-end evaluation.',
+          keyPoints: [
+            'Retrieval metrics: Precision@K (% relevant in top K), Recall (% relevant docs found), MRR (Mean Reciprocal Rank), NDCG (Normalized Discounted Cumulative Gain)',
+            'Generation metrics: Faithfulness (answer grounded in context?), Answer relevance (addresses the question?), Context relevance (retrieved docs are relevant?)',
+            'RAGAS framework: automated evaluation using LLM-as-judge. Measures faithfulness, answer relevance, context precision, context recall.',
+            'Human evaluation: essential for final validation. Sample 100 Q&A pairs, get expert ratings.',
+            'A/B testing: compare RAG configurations on production traffic. Track user engagement, thumbs up/down.',
+            'Common failure modes: retrieval failure (wrong docs), generation failure (hallucination), context window overflow.'
+          ],
+          example: 'Evaluating RAG system on 500 test questions: (1) Retrieval: Recall@5 = 85% (found relevant docs in top 5), NDCG = 0.78, (2) Generation: Faithfulness = 92% (answers grounded in context), Answer relevance = 88%, (3) Human eval on 100 samples: 86% correct answers, (4) Failure analysis: 10% retrieval failures, 4% hallucinations.',
+          codeSnippet: `from ragas import evaluate
+from ragas.metrics import faithfulness, answer_relevancy, context_precision
+
+# Prepare evaluation dataset
+eval_data = {
+    "question": ["What is RLHF?", ...],
+    "answer": ["RLHF is...", ...],  # Your RAG answers
+    "contexts": [[doc1, doc2], ...],  # Retrieved contexts
+    "ground_truth": ["RLHF is a technique...", ...]  # Reference answers
+}
+
+# Run RAGAS evaluation
+result = evaluate(
+    dataset=eval_data,
+    metrics=[
+        faithfulness,         # Is answer faithful to context?
+        answer_relevancy,     # Does answer address question?
+        context_precision,    # Are retrieved contexts relevant?
+        context_recall        # Did we retrieve all relevant info?
+    ]
+)
+
+print(result)
+# {
+#   "faithfulness": 0.92,
+#   "answer_relevancy": 0.88,
+#   "context_precision": 0.85,
+#   "context_recall": 0.78
+# }
+
+# Retrieval-only metrics
+from sklearn.metrics import ndcg_score
+
+def evaluate_retrieval(queries, retrieved_docs, relevant_docs):
+    # NDCG: rank quality metric
+    scores = []
+    for query, retrieved, relevant in zip(queries, retrieved_docs, relevant_docs):
+        relevance_scores = [1 if doc in relevant else 0 for doc in retrieved]
+        scores.append(ndcg_score([relevance_scores], [relevance_scores]))
+    return np.mean(scores)`,
+          resources: [
+            'RAGAS framework',
+            'Retrieval metrics explained',
+            'LLM-as-judge evaluation',
+            'RAG evaluation best practices'
+          ]
+        }
       },
       {
         id: 'advanced-rag',
         title: 'Advanced RAG Patterns',
         duration: '3 hours',
-        concepts: ['Hierarchical RAG', 'Graph RAG', 'Agentic RAG', 'Self-RAG']
+        concepts: ['Hierarchical RAG', 'Graph RAG', 'Agentic RAG', 'Self-RAG'],
+        details: {
+          overview: 'Beyond basic RAG lie advanced patterns that dramatically improve quality and capabilities. This lesson covers: Hierarchical RAG (summaries + chunks), Graph RAG (entity relationships), Agentic RAG (agents with retrieval tools), and Self-RAG (model critiques its own retrieval). These patterns solve complex multi-hop reasoning and knowledge-intensive tasks.',
+          keyPoints: [
+            'Hierarchical RAG: index document summaries AND chunks. Retrieve summaries first, then drill into relevant chunks. Great for long documents.',
+            'Graph RAG: build knowledge graph from docs. Retrieve entities and relationships. Enables multi-hop reasoning ("Who did X work with on Y?").',
+            'Agentic RAG: give agent retrieval as a tool. Agent decides when/what to retrieve, can iterate. Handles complex queries requiring multiple lookups.',
+            'Self-RAG: model generates answer, then critiques if it needs more info. Retrieves additional context and refines. Adaptive retrieval.',
+            'Hypothetical Document Embeddings (HyDE): generate hypothetical answer, embed it, retrieve similar docs. Better than embedding question directly.',
+            'Advanced patterns add complexity - only use when basic RAG fails.'
+          ],
+          example: 'Agentic RAG for complex query "Compare the revenue growth of Apple and Microsoft from 2022-2024": (1) Agent retrieves "Apple 2022 revenue", (2) Retrieves "Apple 2023 revenue", (3) Retrieves "Apple 2024 revenue", (4) Retrieves same for Microsoft, (5) Synthesizes: "Apple grew 15% vs Microsoft 12%". Basic RAG would fail - needs multiple retrievals.',
+          codeSnippet: `# Hierarchical RAG
+from langchain.retrievers import ParentDocumentRetriever
+
+# Create parent (full docs) and child (chunks) retrievers
+parent_retriever = ParentDocumentRetriever(
+    vectorstore=vectorstore,
+    docstore=docstore,
+    child_splitter=CharacterTextSplitter(chunk_size=400),
+    parent_splitter=CharacterTextSplitter(chunk_size=2000)
+)
+
+# Retrieve small chunks for precision, return large parents for context
+docs = parent_retriever.get_relevant_documents(query)
+
+# Graph RAG with Neo4j
+from langchain.graphs import Neo4jGraph
+from langchain.chains import GraphCypherQAChain
+
+graph = Neo4jGraph(url="...", username="...", password="...")
+graph_chain = GraphCypherQAChain.from_llm(
+    llm=llm,
+    graph=graph
+)
+
+# Multi-hop query
+result = graph_chain.run("Who did Einstein collaborate with on relativity?")
+
+# Agentic RAG with LangChain
+from langchain.agents import initialize_agent, Tool
+
+retriever_tool = Tool(
+    name="Knowledge Base",
+    func=retriever.get_relevant_documents,
+    description="Search the knowledge base for information"
+)
+
+agent = initialize_agent(
+    tools=[retriever_tool, ...],
+    llm=llm,
+    agent="zero-shot-react-description"
+)
+
+# Agent decides when/what to retrieve
+agent.run("Compare Apple and Microsoft revenue growth 2022-2024")
+
+# Self-RAG: model critiques and retrieves
+def self_rag(query):
+    answer = llm.generate(query)
+    confidence = llm.evaluate_confidence(answer)
+    if confidence < 0.7:
+        # Retrieve more info
+        docs = retriever.get_relevant_documents(query)
+        answer = llm.generate(query, context=docs)
+    return answer`,
+          resources: [
+            'Graph RAG paper (Microsoft)',
+            'Self-RAG paper',
+            'HyDE technique',
+            'LangChain parent-document retriever'
+          ]
+        }
       },
       {
         id: 'rag-production',
         title: 'Production RAG Systems',
         duration: '3 hours',
-        concepts: ['Caching strategies', 'Rate limiting', 'Monitoring', 'Cost optimization', 'Failure handling']
+        concepts: ['Caching strategies', 'Rate limiting', 'Monitoring', 'Cost optimization', 'Failure handling'],
+        details: {
+          overview: 'Production RAG systems require robust engineering: caching to reduce costs, monitoring to detect failures, rate limiting to prevent abuse, graceful error handling, and continuous optimization. This lesson covers the operational aspects of running RAG at scale - reliability, observability, cost management, and performance tuning.',
+          keyPoints: [
+            'Caching: cache (query → docs) at retrieval layer, cache (query → answer) at response layer. Redis/Memcached. Semantic caching for similar queries.',
+            'Rate limiting: protect against abuse and control costs. Per-user limits, token budgets, queue system for spikes.',
+            'Monitoring: track retrieval latency, LLM latency, error rates, costs per query, cache hit rates. Alerts for anomalies.',
+            'Cost optimization: use cheaper embedding models, cache aggressively, compress context, batch requests, use GPT-4o-mini for simple queries.',
+            'Failure handling: retry with exponential backoff, fallback to cached answers, graceful degradation (return partial results).',
+            'Continuous improvement: A/B test chunking strategies, monitor user feedback, retrain embeddings on domain data.'
+          ],
+          example: 'Production RAG serving 10K queries/day: (1) Semantic cache: 40% hit rate, saves $200/day, (2) Monitoring: 95th percentile latency = 1.2s, (3) Cost: $0.05/query avg = $500/day, (4) Optimization: switch to text-embedding-3-small, compress context → $0.03/query = $300/day saved, (5) Uptime: 99.9% with automatic retries.',
+          codeSnippet: `import redis
+from functools import wraps
+import time
+
+# Semantic caching with Redis
+redis_client = redis.Redis(host='localhost', port=6379)
+
+def semantic_cache(embedder, threshold=0.95):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(query):
+            # Check cache for similar queries
+            query_emb = embedder.embed_query(query)
+            cached = redis_client.get(f"cache:{query}")
+
+            if cached:
+                return cached
+
+            # Execute and cache
+            result = func(query)
+            redis_client.setex(
+                f"cache:{query}",
+                3600,  # 1 hour TTL
+                result
+            )
+            return result
+        return wrapper
+    return decorator
+
+# Rate limiting per user
+from ratelimit import limits, sleep_and_retry
+
+@sleep_and_retry
+@limits(calls=10, period=60)  # 10 queries per minute
+def rag_query(user_id, query):
+    return rag_chain.run(query)
+
+# Monitoring with callbacks
+from langchain.callbacks import StdOutCallbackHandler
+
+class MonitoringCallback(StdOutCallbackHandler):
+    def on_llm_start(self, serialized, prompts, **kwargs):
+        self.start_time = time.time()
+
+    def on_llm_end(self, response, **kwargs):
+        latency = time.time() - self.start_time
+        # Log to monitoring system
+        logger.info(f"LLM latency: {latency}s")
+
+# Graceful error handling
+def robust_rag(query, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            return rag_chain.run(query)
+        except Exception as e:
+            if attempt == max_retries - 1:
+                # Fallback to cached or simple response
+                return "I'm having trouble right now. Please try again."
+            time.sleep(2 ** attempt)  # Exponential backoff
+
+# Cost tracking
+def track_cost(tokens_used, model="gpt-4"):
+    cost_per_1k = 0.03 if model == "gpt-4" else 0.001
+    cost = (tokens_used / 1000) * cost_per_1k
+    logger.info(f"Query cost: ${cost:.4f}")
+    return cost`,
+          resources: [
+            'LangSmith for monitoring',
+            'Semantic caching patterns',
+            'Production RAG architecture',
+            'Cost optimization strategies'
+          ]
+        }
       }
     ],
     projects: [
@@ -1133,7 +2214,83 @@ output, weights = attention(Q, K, V)`,
         id: 'react-pattern',
         title: 'ReAct Pattern (Reason + Act)',
         duration: '3 hours',
-        concepts: ['Reasoning traces', 'Action execution', 'Observation handling', 'Thought-action-observation loop', 'ReAct prompting']
+        concepts: ['Reasoning traces', 'Action execution', 'Observation handling', 'Thought-action-observation loop', 'ReAct prompting'],
+        details: {
+          overview: 'ReAct (Reasoning + Acting) is the foundation of modern AI agents. The model alternates between reasoning (thought), taking actions (tool use), and observing results - iterating until it solves the task. ReAct enables agents to use tools, search the web, run code, and interact with external systems. Essential for building autonomous agents.',
+          keyPoints: [
+            'ReAct loop: Thought → Action → Observation → Thought → Action... until final answer.',
+            'Thought: model reasons about what to do next. "I need to search for X" or "Let me calculate Y".',
+            'Action: model calls a tool/function. Search("query"), Calculate(expression), or final answer.',
+            'Observation: environment returns result. "Search found: ...", "Calculation: 42".',
+            'Model decides when to stop: when it has enough info, outputs final answer.',
+            'ReAct beats pure reasoning OR pure tool use. Synergy: reasoning guides tool use, observations inform reasoning.'
+          ],
+          example: 'Query: "Who is older, Obama or Trump?" (1) Thought: "I need Obama\'s birth year", (2) Action: Search("Obama birth year"), (3) Observation: "1961", (4) Thought: "Now I need Trump\'s birth year", (5) Action: Search("Trump birth year"), (6) Observation: "1946", (7) Thought: "1946 < 1961, so Trump is older", (8) Final Answer: "Trump is older (born 1946 vs 1961)".',
+          codeSnippet: `# ReAct prompt template
+react_prompt = """
+Answer the following question by using available tools.
+
+Available tools:
+- Search(query): search the web
+- Calculate(expression): evaluate math
+
+Use this format:
+Thought: [your reasoning]
+Action: [tool name and input]
+Observation: [tool output]
+... (repeat as needed)
+Final Answer: [your final answer]
+
+Question: {question}
+"""
+
+# ReAct agent implementation
+def react_agent(question, tools, max_steps=10):
+    prompt = react_prompt.format(question=question)
+
+    for step in range(max_steps):
+        # Generate thought + action
+        response = llm.generate(prompt)
+
+        # Parse response
+        if "Final Answer:" in response:
+            return extract_answer(response)
+
+        thought = extract_thought(response)
+        action = extract_action(response)  # e.g., "Search(Obama birth year)"
+
+        # Execute action
+        tool_name, tool_input = parse_action(action)
+        observation = tools[tool_name](tool_input)
+
+        # Add to prompt for next iteration
+        prompt += f"\\nThought: {thought}\\nAction: {action}\\nObservation: {observation}\\n"
+
+    return "Failed to answer within step limit"
+
+# LangChain ReAct agent
+from langchain.agents import initialize_agent, Tool
+
+tools = [
+    Tool(name="Search", func=search, description="Search the web"),
+    Tool(name="Calculator", func=calc, description="Do math")
+]
+
+agent = initialize_agent(
+    tools=tools,
+    llm=llm,
+    agent="zero-shot-react-description",
+    verbose=True
+)
+
+result = agent.run("Who is older, Obama or Trump?")`,
+          resources: [
+            'ReAct paper',
+            'LangChain ReAct agents',
+            'ReAct prompting guide',
+            'AutoGPT (uses ReAct)'
+          ]
+        }
       },
       {
         id: 'tool-use',
