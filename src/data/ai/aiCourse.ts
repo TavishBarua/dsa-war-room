@@ -2543,7 +2543,7 @@ def robust_rag(query, max_retries=3):
 def track_cost(tokens_used, model="gpt-4"):
     cost_per_1k = 0.03 if model == "gpt-4" else 0.001
     cost = (tokens_used / 1000) * cost_per_1k
-    logger.info(f"Query cost: ${cost:.4f}")
+    logger.info(f"Query cost: \\${cost:.4f}")
     return cost`,
           resources: [
             'LangSmith for monitoring',
@@ -3170,7 +3170,7 @@ Observation: [tool output]
 ... (repeat as needed)
 Final Answer: [your final answer]
 
-Question: {question}
+Question: \${question}
 """
 
 # ReAct agent implementation
@@ -3193,7 +3193,7 @@ def react_agent(question, tools, max_steps=10):
         observation = tools[tool_name](tool_input)
 
         # Add to prompt for next iteration
-        prompt += f"\\nThought: {thought}\\nAction: {action}\\nObservation: {observation}\\n"
+        prompt += f"\\nThought: \${thought}\\nAction: \${action}\\nObservation: \${observation}\\n"
 
     return "Failed to answer within step limit"
 
