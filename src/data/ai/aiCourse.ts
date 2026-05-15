@@ -1214,24 +1214,271 @@ Constraints: No deprecated approaches, always mention alternatives.
         id: 'temperature-params',
         title: 'Temperature and Sampling Parameters',
         duration: '2 hours',
-        concepts: ['Temperature control', 'Top-p (nucleus sampling)', 'Top-k sampling', 'Frequency/presence penalties']
+        concepts: ['Temperature control', 'Top-p (nucleus sampling)', 'Top-k sampling', 'Frequency/presence penalties'],
+        details: {
+          overview: "Temperature and sampling parameters control randomness in LLM outputs. Temperature 0 = deterministic, temperature 1+ = creative. Top-p (nucleus sampling) and top-k limit token choices. Frequency/presence penalties discourage repetition. Understanding these parameters is crucial for controlling output style and quality.",
+          keyPoints: [
+            "Temperature (0-2): controls randomness. 0=deterministic/focused, 1=balanced, 2=very creative/random.",
+            "Low temp (0-0.3): factual tasks, code generation, precise answers. High temp (0.7-1.5): creative writing, brainstorming.",
+            "Top-p (nucleus sampling): select from top tokens until cumulative probability reaches p. p=0.9 typical.",
+            "Top-k: select only from top k tokens. k=50 common. More restrictive than top-p.",
+            "Frequency penalty: reduce repetition of tokens based on how often they've appeared. 0-2 range.",
+            "Presence penalty: reduce repetition regardless of frequency. Encourages topic diversity."
+          ],
+          example: "Code generation: temperature=0, top_p=1 (deterministic). Creative story: temperature=0.9, top_p=0.95 (varied). Customer service: temperature=0.3, frequency_penalty=0.5 (consistent, no repetition).",
+          codeSnippet: `# Temperature comparison
+# Low temperature (deterministic)
+response = llm.generate("Write a haiku about code", temperature=0)
+# Same output every time
+
+# High temperature (creative)
+response = llm.generate("Write a haiku about code", temperature=1.2)
+# Different output each time
+
+# Top-p (nucleus sampling)
+response = llm.generate(
+    prompt,
+    temperature=0.8,
+    top_p=0.9  # Sample from top 90% probability mass
+)
+
+# Top-k sampling
+response = llm.generate(
+    prompt,
+    temperature=0.8,
+    top_k=50  # Sample from top 50 tokens only
+)
+
+# Repetition penalties
+response = llm.generate(
+    prompt,
+    frequency_penalty=0.5,   # -2 to 2
+    presence_penalty=0.3     # -2 to 2
+)
+
+# Recipe: Different tasks
+params_by_task = {
+    "code": {"temperature": 0, "top_p": 1},
+    "analysis": {"temperature": 0.2, "top_p": 0.95},
+    "creative": {"temperature": 0.9, "top_p": 0.95},
+    "chat": {"temperature": 0.7, "frequency_penalty": 0.5}
+}`,
+          resources: [
+            'Temperature and Top-p explained',
+            'OpenAI parameter guide',
+            'Sampling strategies comparison'
+          ]
+        }
       },
       {
         id: 'prompt-templates',
         title: 'Building Prompt Templates',
         duration: '2 hours',
-        concepts: ['Template design', 'Variable substitution', 'Reusable patterns', 'Version control']
+        concepts: ['Template design', 'Variable substitution', 'Reusable patterns', 'Version control'],
+        details: {
+          overview: "Prompt templates enable reusable, maintainable prompt engineering. Instead of writing prompts from scratch, define templates with variables. Benefits: consistency, easy updates, version control, A/B testing. Essential for production systems. Templates separate prompt logic from data.",
+          keyPoints: [
+            "Template = prompt structure with {variables} for dynamic content. Reusable across many inputs.",
+            "Variable substitution: {user_query}, {context}, {examples} get replaced with actual values.",
+            "Version control: track prompt changes like code. Git commit messages: 'v2: added CoT reasoning'.",
+            "Template libraries: organize by task (summarization, extraction, QA). Easy to find and reuse.",
+            "Testing: A/B test template versions. Measure quality improvements.",
+            "Tools: LangChain PromptTemplate, f-strings, Jinja2 for complex templates."
+          ],
+          example: "Email response template: 'You are a customer service rep. Tone: {tone}. Respond to: {email}. Include: {requirements}.' Reuse with different tones (professional, friendly), emails, requirements. One template, infinite uses.",
+          codeSnippet: `# Basic template with variables
+from langchain import PromptTemplate
+
+template = """
+Task: {task_type}
+Input: {user_input}
+Requirements:
+- {requirement_1}
+- {requirement_2}
+
+Output:"""
+
+prompt = PromptTemplate(
+    template=template,
+    input_variables=["task_type", "user_input", "requirement_1", "requirement_2"]
+)
+
+# Use template
+final_prompt = prompt.format(
+    task_type="Summarize",
+    user_input="Long article text...",
+    requirement_1="3 bullet points",
+    requirement_2="Focus on key findings"
+)
+
+# Template library
+class PromptLibrary:
+    SUMMARIZE = PromptTemplate(...)
+    EXTRACT_ENTITIES = PromptTemplate(...)
+    CLASSIFY = PromptTemplate(...)
+
+# Version control (Git)
+# prompts/summarize_v2.txt
+# Changelog: Added few-shot examples, improved formatting
+
+# A/B testing templates
+results_v1 = test_template(template_v1, test_cases)
+results_v2 = test_template(template_v2, test_cases)
+if results_v2.quality > results_v1.quality:
+    deploy(template_v2)`,
+          resources: [
+            'LangChain PromptTemplate docs',
+            'Prompt versioning best practices',
+            'Template design patterns'
+          ]
+        }
       },
       {
         id: 'advanced-techniques',
+        title: 'Advanced Prompting Techniques',
         duration: '3 hours',
-        concepts: ['Self-critique', 'Constitutional AI prompting', 'Debate prompting', 'Prompt chaining']
+        concepts: ['Self-critique', 'Constitutional AI prompting', 'Debate prompting', 'Prompt chaining'],
+        details: {
+          overview: "Advanced prompting techniques push beyond basic instructions. Self-critique: model evaluates its own output. Constitutional AI: model follows principles and critiques responses. Debate: multiple models argue for better answers. Prompt chaining: break complex tasks into steps. These techniques dramatically improve quality on hard problems.",
+          keyPoints: [
+            "Self-critique: generate answer, then ask model to critique and improve it. Iterative refinement.",
+            "Constitutional AI: define principles (helpful, harmless, honest), model self-critiques against principles.",
+            "Debate prompting: generate multiple answers, have model debate which is best. Best answer wins.",
+            "Prompt chaining: complex task → multiple prompts in sequence. Output of prompt N → input to prompt N+1.",
+            "Reflection: model explains reasoning, then reflects on potential errors. Catches mistakes.",
+            "Meta-prompting: prompt the model to generate better prompts. Prompt optimization via LLM."
+          ],
+          example: "Self-critique: (1) 'Write essay on X' → draft, (2) 'Critique this essay and list improvements' → critique, (3) 'Rewrite incorporating feedback' → final. Each step improves quality.",
+          codeSnippet: `# Self-critique pattern
+draft = llm.generate("Write a product description for {product}")
+
+critique = llm.generate(f"""
+Critique this product description:
+{draft}
+
+Issues to check:
+- Clarity
+- Persuasiveness
+- Accuracy
+
+Critique:""")
+
+final = llm.generate(f"""
+Improve this description based on feedback:
+
+Original: {draft}
+Feedback: {critique}
+
+Improved description:""")
+
+# Constitutional AI
+principles = [
+    "Be helpful and informative",
+    "Avoid harmful or biased content",
+    "Admit uncertainty when unsure"
+]
+
+response = llm.generate(query)
+critique = llm.generate(f"""
+Evaluate this response against principles:
+{principles}
+
+Response: {response}
+
+Does it follow principles? Suggest improvements:""")
+
+# Debate prompting
+answer_a = llm.generate(query, temperature=0.8)
+answer_b = llm.generate(query, temperature=0.8)
+
+winner = llm.generate(f"""
+Two answers to: {query}
+
+Answer A: {answer_a}
+Answer B: {answer_b}
+
+Which is better and why?""")
+
+# Prompt chaining
+step1 = llm.generate("Extract key points from: {article}")
+step2 = llm.generate(f"Organize these points by theme: {step1}")
+step3 = llm.generate(f"Write executive summary from: {step2}")`,
+          resources: [
+            'Constitutional AI paper (Anthropic)',
+            'Self-critique techniques',
+            'Prompt chaining patterns'
+          ]
+        }
       },
       {
         id: 'prompt-optimization',
         title: 'Optimizing Prompts for Quality',
         duration: '2 hours',
-        concepts: ['A/B testing prompts', 'Evaluation metrics', 'Iterative refinement', 'Prompt versioning']
+        concepts: ['A/B testing prompts', 'Evaluation metrics', 'Iterative refinement', 'Prompt versioning'],
+        details: {
+          overview: "Prompt optimization systematically improves prompts through testing and iteration. A/B test variations, measure quality with metrics, refine based on data. Version control tracks changes. Automated optimization uses LLMs to generate prompt variants. Continuous improvement process like traditional software engineering.",
+          keyPoints: [
+            "A/B testing: create 2+ prompt versions, test on same inputs, measure quality. Deploy winner.",
+            "Evaluation metrics: accuracy, relevance, completeness, format correctness. Automated scoring.",
+            "Iterative refinement: test → measure → analyze failures → improve → repeat. Data-driven iteration.",
+            "Prompt versioning: track prompts in Git. Changelog documents improvements. Rollback if regression.",
+            "Automated optimization: use LLM to generate prompt variants. Test all, keep best.",
+            "Human evaluation: final validation on sample. Automated metrics miss nuance."
+          ],
+          example: "Optimize summarization prompt: v1 'Summarize this' → 60% quality. v2 'Summarize in 3 bullet points focusing on key findings' → 75% quality. v3 adds few-shot examples → 85% quality. Data-driven improvement.",
+          codeSnippet: `# A/B testing prompts
+prompt_v1 = "Summarize this article: {article}"
+prompt_v2 = "Summarize this article in 3 concise bullet points, focusing on key findings: {article}"
+
+results_v1 = []
+results_v2 = []
+
+for article in test_set:
+    output_v1 = llm.generate(prompt_v1.format(article=article))
+    output_v2 = llm.generate(prompt_v2.format(article=article))
+
+    results_v1.append(evaluate(output_v1))
+    results_v2.append(evaluate(output_v2))
+
+# Compare
+print(f"v1 avg quality: {np.mean(results_v1)}")
+print(f"v2 avg quality: {np.mean(results_v2)}")
+
+# Evaluation function
+def evaluate_summary(summary, reference):
+    scores = {
+        "relevance": check_relevance(summary, reference),
+        "completeness": check_coverage(summary, reference),
+        "conciseness": len(summary) / len(reference),
+        "format": check_format(summary, required="bullet_points")
+    }
+    return np.mean(list(scores.values()))
+
+# Automated prompt optimization
+def optimize_prompt(base_prompt, test_cases):
+    variants = llm.generate(f"""
+    Generate 5 improved versions of this prompt:
+    {base_prompt}
+
+    Variations:""").split("\\n")
+
+    best_score = 0
+    best_prompt = base_prompt
+
+    for variant in variants:
+        score = test_prompt(variant, test_cases)
+        if score > best_score:
+            best_score = score
+            best_prompt = variant
+
+    return best_prompt, best_score`,
+          resources: [
+            'Prompt optimization frameworks',
+            'A/B testing for prompts',
+            'PromptPerfect tool',
+            'DSPy (automated optimization)'
+          ]
+        }
       },
       {
         id: 'prompt-security',
@@ -1306,13 +1553,153 @@ response = llm.generate(prompt, response_format={"type": "json_object"})`,
         id: 'multimodal-prompts',
         title: 'Multimodal Prompting',
         duration: '2 hours',
-        concepts: ['Image + text prompts', 'Vision-language models', 'Audio prompting', 'Video understanding']
+        concepts: ['Image + text prompts', 'Vision-language models', 'Audio prompting', 'Video understanding'],
+        details: {
+          overview: "Multimodal models process multiple input types: text + images (GPT-4V, Claude 3), text + audio, text + video. Prompting differs from text-only: describe what you want from image, ask questions about visual content, combine text instructions with image input. Opens new use cases: document analysis, visual QA, image description.",
+          keyPoints: [
+            "Vision-language models: GPT-4 Vision, Claude 3, Gemini. Accept image + text prompt.",
+            "Use cases: extract data from screenshots, describe images, answer questions about photos, analyze charts/graphs.",
+            "Prompting tips: be specific about what to extract, reference image regions, ask for structured output.",
+            "Image input formats: URL, base64, file upload. Max sizes vary by model.",
+            "Audio models: Whisper (transcription), speech-to-text. Prompt with context for better accuracy.",
+            "Video understanding: process frames + audio. Describe events, answer temporal questions."
+          ],
+          example: "Analyze chart: Prompt: 'Extract all data points from this bar chart as JSON: {x_axis, y_axis, values}' + [image of chart]. Output: Structured JSON with chart data. Saves manual data entry.",
+          codeSnippet: `# GPT-4 Vision example
+from openai import OpenAI
+import base64
+
+client = OpenAI()
+
+# Encode image
+with open("chart.png", "rb") as img:
+    img_base64 = base64.b64encode(img.read()).decode()
+
+response = client.chat.completions.create(
+    model="gpt-4-vision-preview",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Extract all text from this screenshot"},
+            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{img_base64}"}}
+        ]
+    }]
+)
+
+# Claude 3 Vision
+import anthropic
+
+client = anthropic.Anthropic()
+message = client.messages.create(
+    model="claude-3-opus-20240229",
+    max_tokens=1024,
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "image", "source": {"type": "base64", "data": img_base64}},
+            {"type": "text", "text": "Describe this image in detail"}
+        ]
+    }]
+)
+
+# Audio transcription with context
+from openai import OpenAI
+audio_file = open("meeting.mp3", "rb")
+transcript = client.audio.transcriptions.create(
+    model="whisper-1",
+    file=audio_file,
+    prompt="This is a technical meeting about cloud architecture"  # Context improves accuracy
+)`,
+          resources: [
+            'GPT-4 Vision guide',
+            'Claude 3 multimodal docs',
+            'Whisper API',
+            'Gemini multimodal'
+          ]
+        }
       },
       {
         id: 'prompt-libraries',
         title: 'Building Prompt Libraries',
         duration: '2 hours',
-        concepts: ['Organization strategies', 'Sharing prompts', 'Community patterns', 'LangChain prompts']
+        concepts: ['Organization strategies', 'Sharing prompts', 'Community patterns', 'LangChain prompts'],
+        details: {
+          overview: "Prompt libraries organize reusable prompts for teams. Instead of reinventing prompts, build a shared library categorized by task. Benefits: consistency, knowledge sharing, faster development. Structure: task folders (summarization, extraction), version controlled, documented with examples. LangChain provides prompt hub infrastructure.",
+          keyPoints: [
+            "Organization: folder structure by task type (summarization/, extraction/, qa/). Each has multiple prompt versions.",
+            "Documentation: each prompt includes: purpose, variables, example input/output, version history, quality metrics.",
+            "Sharing: internal team library or public (Awesome ChatGPT Prompts, LangChain Hub). Contribute and learn.",
+            "Version control: Git for prompts. Tag versions, track A/B test results in commit messages.",
+            "LangChain Hub: public prompt registry. Search by task, fork and customize, track usage.",
+            "Governance: review process for new prompts, quality standards, deprecation policy."
+          ],
+          example: "Team library structure: /prompts/summarization/news_v2.txt, /prompts/extraction/email_entities_v1.txt. Each documented, tested, version controlled. New engineer? Browse library, don't write from scratch.",
+          codeSnippet: `# Prompt library structure
+prompts/
+  summarization/
+    news_articles_v1.txt
+    technical_docs_v2.txt
+    meeting_notes_v1.txt
+  extraction/
+    email_entities_v3.txt
+    resume_skills_v2.txt
+  qa/
+    customer_support_v1.txt
+
+# Python prompt library
+class PromptLibrary:
+    @staticmethod
+    def load_prompt(category, name, version="latest"):
+        path = f"prompts/{category}/{name}_{version}.txt"
+        with open(path) as f:
+            return f.read()
+
+    SUMMARIZE_NEWS = load_prompt("summarization", "news_articles", "v1")
+    EXTRACT_EMAIL = load_prompt("extraction", "email_entities", "v3")
+
+# Using LangChain Hub
+from langchain import hub
+
+# Load public prompt
+prompt = hub.pull("rlm/rag-prompt")
+
+# Push your prompt
+hub.push("my-username/custom-rag", prompt_template)
+
+# Search prompts
+results = hub.search("summarization")
+
+# Prompt documentation template
+"""
+# Prompt: Summarize News Articles v2
+
+## Purpose
+Summarize news articles into 3 bullet points focusing on key facts.
+
+## Variables
+- {article}: Full article text
+- {focus}: Optional focus area
+
+## Example
+Input: {article: "Long news article...", focus: "economic impact"}
+Output: "• Point 1\n• Point 2\n• Point 3"
+
+## Metrics
+- Quality score: 8.5/10
+- Tested on: 500 articles
+- Success rate: 92%
+
+## Changelog
+v2: Added focus variable, improved bullet formatting
+v1: Initial version
+"""`,
+          resources: [
+            'LangChain Hub',
+            'Awesome ChatGPT Prompts',
+            'PromptBase marketplace',
+            'Internal prompt library best practices'
+          ]
+        }
       }
     ],
     projects: [
