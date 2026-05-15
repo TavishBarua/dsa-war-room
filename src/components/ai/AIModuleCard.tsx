@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AIModule } from '../../data/ai/aiCourse';
+import AILessonCard from './AILessonCard';
 
 interface AIModuleCardProps {
   module: AIModule;
@@ -327,65 +328,14 @@ export default function AIModuleCard({ module }: AIModuleCardProps) {
 
             {/* Tab Content */}
             {activeTab === 'lessons' && (
-              <div style={{ display: 'grid', gap: '16px' }}>
+              <div style={{ display: 'grid', gap: '12px' }}>
                 {module.lessons.map((lesson, idx) => (
-                  <div key={idx} style={{
-                    background: 'var(--bg2)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
-                    padding: '20px',
-                    transition: 'all 0.3s'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.borderColor = module.color;
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border)';
-                  }}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'start',
-                      marginBottom: '12px'
-                    }}>
-                      <div style={{
-                        fontFamily: "'Space Mono', monospace",
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: 'var(--text)'
-                      }}>
-                        {lesson.title}
-                      </div>
-                      <div style={{
-                        fontFamily: "'Space Mono', monospace",
-                        fontSize: '11px',
-                        color: module.color,
-                        whiteSpace: 'nowrap',
-                        marginLeft: '16px'
-                      }}>
-                        ⏱️ {lesson.duration}
-                      </div>
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '8px'
-                    }}>
-                      {lesson.concepts.map((concept, cidx) => (
-                        <span key={cidx} style={{
-                          fontSize: '11px',
-                          color: 'var(--muted)',
-                          background: 'var(--bg3)',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontFamily: "'Space Mono', monospace"
-                        }}>
-                          {concept}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  <AILessonCard
+                    key={idx}
+                    lesson={lesson}
+                    color={module.color}
+                    index={idx}
+                  />
                 ))}
               </div>
             )}

@@ -4,6 +4,13 @@ export interface AILesson {
   duration: string;
   concepts: string[];
   visualization?: string;
+  details?: {
+    overview: string;
+    keyPoints: string[];
+    example?: string;
+    codeSnippet?: string;
+    resources?: string[];
+  };
 }
 
 export interface AIProject {
@@ -65,19 +72,123 @@ export const AI_MODULES: AIModule[] = [
         id: 'llm-101',
         title: 'Introduction to Language Models',
         duration: '2 hours',
-        concepts: ['N-gram models', 'RNNs vs Transformers', 'Why transformers won', 'Model architectures comparison']
+        concepts: ['N-gram models', 'RNNs vs Transformers', 'Why transformers won', 'Model architectures comparison'],
+        details: {
+          overview: 'Language models predict the next word in a sequence. This lesson covers the evolution from simple N-gram models to RNNs, and finally to Transformers - the architecture that powers GPT, BERT, and Claude. You\'ll understand why transformers became dominant and how they differ fundamentally from previous approaches.',
+          keyPoints: [
+            'N-gram models use fixed context windows and struggle with long-range dependencies',
+            'RNNs process sequences but suffer from vanishing gradients and can\'t parallelize',
+            'Transformers use self-attention to process entire sequences in parallel',
+            'Transformers scale better with more data and compute (scaling laws)',
+            'Modern LLMs (GPT-4, Claude) are all based on transformer architecture',
+            'Key innovation: attention mechanism replaces sequential processing'
+          ],
+          example: 'Consider predicting the next word in: "The cat sat on the ___". N-gram model looks at last 2-3 words. RNN processes sequentially left-to-right. Transformer attends to ALL words simultaneously - it can learn that "cat" is relevant even if it\'s far away.',
+          codeSnippet: `# N-gram model (simple, limited context)
+bigram_model = {
+    ("the", "cat"): {"sat": 0.8, "ran": 0.2},
+    ("cat", "sat"): {"on": 0.9, "down": 0.1}
+}
+
+# Transformer (attends to full context)
+# Self-attention computes: Attention(Q, K, V) = softmax(QK^T/√d)V
+attention_scores = softmax(query @ key.T / sqrt(d_k))
+output = attention_scores @ value`,
+          resources: [
+            '"Attention Is All You Need" paper',
+            'The Illustrated Transformer',
+            'Stanford CS224N Lecture 8'
+          ]
+        }
       },
       {
         id: 'transformer-arch',
         title: 'Transformer Architecture Deep Dive',
         duration: '4 hours',
-        concepts: ['Encoder-decoder structure', 'Multi-head attention', 'Feed-forward networks', 'Layer normalization', 'Residual connections']
+        concepts: ['Encoder-decoder structure', 'Multi-head attention', 'Feed-forward networks', 'Layer normalization', 'Residual connections'],
+        details: {
+          overview: 'Dive deep into transformer architecture components. Learn how encoder-decoder structure works, why multi-head attention is powerful, the role of feed-forward networks, and how layer normalization + residual connections enable training deep models. This is the foundation for understanding GPT, BERT, T5, and all modern LLMs.',
+          keyPoints: [
+            'Encoder processes input, decoder generates output (T5). GPT uses decoder-only, BERT uses encoder-only.',
+            'Multi-head attention: 8-12 parallel attention heads learn different patterns (syntax, semantics, etc.)',
+            'Feed-forward networks: 2-layer MLP after attention, typically 4x hidden size',
+            'Layer normalization stabilizes training, applied before attention & FFN',
+            'Residual connections allow gradients to flow, enabling 100+ layer models',
+            'Position encodings add sequence order information (transformers have no inherent order)'
+          ],
+          example: 'In "The cat chased the mouse", multi-head attention might have: Head 1 focuses on subject-verb ("cat" → "chased"), Head 2 on verb-object ("chased" → "mouse"), Head 3 on determiner-noun ("the" → "cat"). Each head learns different linguistic patterns.',
+          codeSnippet: `import torch.nn as nn
+
+class TransformerBlock(nn.Module):
+    def __init__(self, d_model, n_heads):
+        super().__init__()
+        self.attention = MultiHeadAttention(d_model, n_heads)
+        self.ffn = nn.Sequential(
+            nn.Linear(d_model, 4 * d_model),  # Expand
+            nn.GELU(),
+            nn.Linear(4 * d_model, d_model)   # Project back
+        )
+        self.ln1 = nn.LayerNorm(d_model)
+        self.ln2 = nn.LayerNorm(d_model)
+
+    def forward(self, x):
+        # Residual + Layer Norm pattern
+        x = x + self.attention(self.ln1(x))  # Self-attention
+        x = x + self.ffn(self.ln2(x))        # Feed-forward
+        return x`,
+          resources: [
+            'Illustrated Transformer',
+            'nanoGPT architecture',
+            'Hugging Face Transformers docs'
+          ]
+        }
       },
       {
         id: 'attention-mechanism',
         title: 'Attention Mechanisms Explained',
         duration: '3 hours',
-        concepts: ['Self-attention', 'Cross-attention', 'Scaled dot-product', 'Query, Key, Value matrices', 'Attention visualization']
+        concepts: ['Self-attention', 'Cross-attention', 'Scaled dot-product', 'Query, Key, Value matrices', 'Attention visualization'],
+        details: {
+          overview: 'Attention is the core innovation that made transformers work. Learn how self-attention allows each token to attend to every other token, how Query/Key/Value matrices work, why we use scaled dot-product, and the difference between self-attention and cross-attention. You\'ll understand the math and intuition.',
+          keyPoints: [
+            'Self-attention: each token attends to all tokens in same sequence (used in GPT, BERT)',
+            'Cross-attention: tokens in one sequence attend to another (encoder-decoder models like T5)',
+            'Q, K, V matrices: learned projections. Attention(Q, K, V) = softmax(QK^T/√d_k)V',
+            'Scaled dot-product: divide by √d_k to prevent softmax saturation',
+            'Attention weights sum to 1 (softmax), show which tokens are most relevant',
+            'Causal masking in GPT: tokens can only attend to previous tokens (autoregressive)'
+          ],
+          example: 'Sentence: "The animal didn\'t cross the street because it was too tired". When processing "it", attention weights might be: 0.7 to "animal", 0.1 to "street", 0.05 to "because", 0.05 to "tired". The model learns "it" refers to "animal".',
+          codeSnippet: `import torch
+import torch.nn.functional as F
+
+def attention(Q, K, V, mask=None):
+    d_k = Q.size(-1)
+    # Compute attention scores
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(d_k)
+
+    # Apply mask (for causal/padding)
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, -1e9)
+
+    # Softmax to get weights
+    attn_weights = F.softmax(scores, dim=-1)
+
+    # Weighted sum of values
+    output = torch.matmul(attn_weights, V)
+    return output, attn_weights
+
+# Usage
+Q = torch.randn(batch, seq_len, d_model)
+K = torch.randn(batch, seq_len, d_model)
+V = torch.randn(batch, seq_len, d_model)
+output, weights = attention(Q, K, V)`,
+          resources: [
+            'Jay Alammar attention visualization',
+            'Attention paper (Vaswani et al.)',
+            'BertViz - attention visualizer'
+          ]
+        }
       },
       {
         id: 'tokenization',
