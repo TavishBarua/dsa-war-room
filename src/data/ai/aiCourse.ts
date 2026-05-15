@@ -987,13 +987,108 @@ Summarize the following article
         id: 'zero-shot',
         title: 'Zero-Shot Prompting Mastery',
         duration: '2 hours',
-        concepts: ['Clear instructions', 'Role prompting', 'Format specification', 'Common patterns']
+        concepts: ['Clear instructions', 'Role prompting', 'Format specification', 'Common patterns'],
+        details: {
+          overview: "Zero-shot prompting means getting results without examples - just clear instructions. 'Translate to French: Hello' → model translates without seeing any translation examples. Modern LLMs (GPT-4, Claude) excel at zero-shot due to scale and instruction tuning. Key: be specific, provide context, define output format.",
+          keyPoints: [
+            "Zero-shot = no examples, just instruction. Model uses knowledge from pre-training.",
+            "Be explicit: 'Summarize in 3 bullet points' beats 'summarize this'.",
+            "Add role: 'You are an expert Python developer' sets expertise level.",
+            "Specify format: 'Output as JSON' or 'List with numbers' guides structure.",
+            "Works best with: factual questions, simple transformations, well-defined tasks.",
+            "Limitations: complex reasoning, ambiguous tasks, or novel formats may need few-shot examples."
+          ],
+          example: "Zero-shot sentiment: Prompt: 'Classify sentiment as positive/negative/neutral: The product exceeded expectations!' Output: 'positive'. No examples needed - model learned sentiment from training data.",
+          codeSnippet: `# Zero-shot classification
+prompt = """
+Task: Classify the sentiment of the review below.
+
+Review: {review_text}
+
+Sentiment (positive/negative/neutral):"""
+
+response = llm.generate(prompt)
+# Works without examples!
+
+# Zero-shot with role and format
+prompt = """
+You are an expert data analyst.
+
+Task: Extract key metrics from this business report.
+Format: JSON with keys: revenue, profit, growth_rate
+
+Report: {report_text}
+
+Output:"""
+
+# Zero-shot translation
+prompt = "Translate to Spanish: The weather is beautiful today."
+# "El clima está hermoso hoy."`,
+          resources: [
+            'Zero-shot learning explained',
+            'GPT-3 zero-shot capabilities',
+            'Instruction tuning papers'
+          ]
+        }
       },
       {
         id: 'few-shot',
         title: 'Few-Shot Learning Techniques',
         duration: '3 hours',
-        concepts: ['Example selection', 'Ordering effects', 'Diverse examples', 'Example quality']
+        concepts: ['Example selection', 'Ordering effects', 'Diverse examples', 'Example quality'],
+        details: {
+          overview: "Few-shot learning provides examples that teach the model the desired pattern. 3-5 examples dramatically improve quality vs zero-shot. The model learns from examples via in-context learning - no gradient updates, just pattern matching. Critical factors: example quality, diversity, ordering, and relevance.",
+          keyPoints: [
+            "Few-shot = provide examples, model learns pattern. 3-5 examples usually optimal.",
+            "Example quality matters more than quantity. One great example > three mediocre ones.",
+            "Diverse examples: cover edge cases, variations, different input types.",
+            "Ordering matters: most recent example has strongest influence. Put best example last.",
+            "Format consistency: keep input→output format identical across examples.",
+            "When to use: complex tasks, ambiguous formatting, domain-specific patterns."
+          ],
+          example: "Few-shot entity extraction: Example 1: 'Apple CEO Tim Cook' → CEO: Tim Cook, Company: Apple. Example 2: 'Microsoft founder Bill Gates' → Founder: Bill Gates, Company: Microsoft. Input: 'Tesla chief Elon Musk' → Chief: Elon Musk, Company: Tesla. Model learned the extraction pattern.",
+          codeSnippet: `# Few-shot classification with examples
+few_shot_prompt = """
+Classify the following product reviews:
+
+Review: "Amazing quality, exceeded expectations!"
+Sentiment: Positive
+
+Review: "Terrible experience, broke after one use."
+Sentiment: Negative
+
+Review: "It's okay, nothing special."
+Sentiment: Neutral
+
+Review: "Best purchase I've made this year!"
+Sentiment:"""
+
+# Few-shot extraction
+extraction_prompt = """
+Extract structured data:
+
+Text: "John Smith works at Google as a Software Engineer"
+Output: {"name": "John Smith", "company": "Google", "role": "Software Engineer"}
+
+Text: "Sarah Chen is the CEO of Acme Corp"
+Output: {"name": "Sarah Chen", "company": "Acme Corp", "role": "CEO"}
+
+Text: "Mike Johnson, senior developer at Meta"
+Output:"""
+
+# Example selection strategy
+def select_examples(query, example_pool, k=5):
+    # Select most similar examples to query
+    embeddings = embed([query] + example_pool)
+    similarities = cosine_similarity(embeddings[0], embeddings[1:])
+    top_k_indices = similarities.argsort()[-k:]
+    return [example_pool[i] for i in top_k_indices]`,
+          resources: [
+            'Few-shot learning with LLMs',
+            'In-context learning paper (GPT-3)',
+            'Example selection strategies'
+          ]
+        }
       },
       {
         id: 'chain-of-thought',
@@ -1071,20 +1166,32 @@ def tree_of_thoughts(problem, depth=3):
         id: 'system-prompts',
         title: 'System Prompts and Roles',
         duration: '2 hours',
-        concepts: ['System vs user messages', 'Role definition', 'Persona design', 'Constraints']
-      },
-      {
-        id: 'temperature-params',
-        title: 'Temperature and Sampling Parameters',
-        duration: '2 hours',
-        concepts: ['Temperature control', 'Top-p (nucleus sampling)', 'Top-k sampling', 'Frequency/presence penalties']
-      },
-      {
-        id: 'prompt-templates',
-        title: 'Building Prompt Templates',
-        duration: '2 hours',
-        concepts: ['Template design', 'Variable substitution', 'Reusable patterns', 'Version control']
-      },
+        concepts: ['System vs user messages', 'Role definition', 'Persona design', 'Constraints'],
+        details: {
+          overview: "System prompts set persistent instructions that apply to all user messages. 'You are a helpful Python tutor' affects every response. System prompts define persona, expertise, constraints, and behavior. User messages are individual queries. Separation enables reusable assistant configurations and better instruction following.",
+          keyPoints: [
+            "System prompt = persistent behavior instructions. User prompt = individual query.",
+            "Set role/persona: 'You are an expert database architect' establishes expertise level.",
+            "Define constraints: 'Always provide code examples' or 'Keep responses under 100 words'.",
+            "Format guidelines: 'Output as JSON' or 'Use numbered lists' in system prompt.",
+            "Safety instructions: 'Never share harmful information' protects against misuse.",
+            "System prompts are harder to override than user prompts - better for security."
+          ],
+          example: "System: 'You are a Python tutor. Explain concepts simply with code examples. Never give complete solutions, always guide students.' User: 'How do I reverse a string?' Response: 'Let me guide you: strings in Python are sequences. Try slicing with [::-1]. Can you implement it?'",
+          codeSnippet: `# OpenAI Chat API format
+messages = [
+    {"role": "system", "content": "You are an expert Python developer. Provide concise, production-ready code with error handling."},
+    {"role": "user", "content": "Write a function to validate email addresses"}
+]
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=messages
+)
+
+# Anthropic Claude format
+prompt = """
+System: You are a helpful math tutor. Explain step-by-step. Use analogies.
       {
         id: 'advanced-techniques',
         title: 'Advanced Prompting Techniques',
