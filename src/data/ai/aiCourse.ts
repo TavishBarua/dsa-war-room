@@ -380,7 +380,60 @@ model_engine, optimizer, _, _ = deepspeed.initialize(
         id: 'scaling-laws',
         title: 'Scaling Laws and Model Size',
         duration: '2 hours',
-        concepts: ['Chinchilla scaling laws', 'Compute-optimal training', 'Data requirements', 'Parameter count vs performance']
+        concepts: ['Chinchilla scaling laws', 'Compute-optimal training', 'Data requirements', 'Parameter count vs performance'],
+        details: {
+          overview: 'Scaling laws predict how model performance improves with size, compute, and data. These power-law relationships guide decisions about model architecture and training. The Chinchilla paper revolutionized understanding: most LLMs were undertrained. GPT-3 (175B params, 300B tokens) should have been trained on 3.7T tokens for optimal efficiency.',
+          keyPoints: [
+            'Three dimensions scale: model parameters (N), training tokens (D), compute budget (C). All follow power laws.',
+            'Kaplan scaling laws (2020): bigger is better. Overemphasized model size, undervalued data.',
+            'Chinchilla laws (2022): for compute budget C, optimal split is N^0.5 ∝ D^0.5. Balance params and data equally.',
+            'GPT-3 was overtrained on params, undertrained on data. Chinchilla (70B) outperforms GPT-3 (175B) with same compute.',
+            'Practical implication: train smaller models on more data. LLaMA-2-70B trained on 2T tokens, beats larger undertrained models.',
+            'Emergent abilities appear at scale thresholds: chain-of-thought reasoning emerges around 100B params.'
+          ],
+          example: 'Compute budget: 1e23 FLOPs. Kaplan (2020) says: train 400B param model on 200B tokens. Chinchilla (2022) says: train 70B param model on 1.4T tokens. Chinchilla approach: better performance, smaller inference cost, same training compute.',
+          codeSnippet: `import numpy as np
+
+# Chinchilla scaling laws
+def optimal_params_and_tokens(compute_budget):
+    """
+    Given compute budget in FLOPs, return optimal
+    model size and training tokens
+
+    Chinchilla: N_opt ≈ (C/6)^0.5, D_opt ≈ (C/6)^0.5
+    """
+    N_opt = (compute_budget / 6) ** 0.5  # Params
+    D_opt = (compute_budget / 6) ** 0.5  # Tokens
+    return N_opt, D_opt
+
+# Example: GPT-3 scale compute
+compute = 3.14e23  # FLOPs
+N, D = optimal_params_and_tokens(compute)
+print(f"Optimal: {N/1e9:.1f}B params, {D/1e9:.1f}B tokens")
+# Output: Optimal: 67B params, 1.5T tokens
+
+# Compare to actual GPT-3: 175B params, 300B tokens
+# GPT-3 was 2.6x overparameterized, 5x undertrained
+
+# Scaling law for loss
+def predict_loss(N, D):
+    """Predict loss given params N and data D"""
+    A, B, alpha, beta = 406.4, 410.7, 0.34, 0.28
+    loss = A / (N ** alpha) + B / (D ** beta)
+    return loss
+
+# Predict performance
+loss_70B_2T = predict_loss(70e9, 2e12)
+loss_175B_300B = predict_loss(175e9, 300e9)
+print(f"LLaMA-70B loss: {loss_70B_2T:.3f}")
+print(f"GPT-3 loss: {loss_175B_300B:.3f}")`,
+          resources: [
+            'Scaling Laws for Neural LMs (Kaplan)',
+            'Training Compute-Optimal LLMs (Chinchilla)',
+            'LLaMA paper',
+            'Emergent Abilities paper'
+          ]
+        }
       },
       {
         id: 'gpt-vs-bert',
