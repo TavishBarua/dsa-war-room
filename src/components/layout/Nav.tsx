@@ -14,17 +14,23 @@ const SD_LINKS = [
   { href: '#sd-problems', label: 'Problems' },
 ];
 
+const AI_LINKS = [
+  { href: '#ai-concepts', label: 'AI Concepts' },
+];
+
 export default function Nav() {
   const { pathname } = useLocation();
   const isSD = pathname === '/system-design';
-  const links = isSD ? SD_LINKS : DSA_LINKS;
+  const isAI = pathname === '/ai';
+  const links = isAI ? AI_LINKS : isSD ? SD_LINKS : DSA_LINKS;
 
   return (
     <nav>
       <Link to="/" className="nav-logo">DSA WAR ROOM</Link>
       <div className="nav-mode-toggle">
-        <Link to="/" className={`nav-mode-btn${!isSD ? ' active' : ''}`}>DSA</Link>
+        <Link to="/" className={`nav-mode-btn${!isSD && !isAI ? ' active' : ''}`}>DSA</Link>
         <Link to="/system-design" className={`nav-mode-btn${isSD ? ' active' : ''}`}>SYS DESIGN</Link>
+        <Link to="/ai" className={`nav-mode-btn${isAI ? ' active' : ''}`}>AI</Link>
       </div>
       <ul className="nav-links">
         {links.map(l => (
